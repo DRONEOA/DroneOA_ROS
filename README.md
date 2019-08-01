@@ -3,8 +3,40 @@
 ## Introduction
 
 ### Hardware
+- OA07A Mid Range Development Platform
+    - Designed for indoor and outdoor test environment
+    - OBC: Jetson nano
+    - Depth Camera: D435i
+    - Laser Scanner: RPLidar A1
+    - VOI: t265
 
-### Package Component
+- OA07S Short Range Development Platform [WIP]
+    - Designed for indoor and outdoor test environment
+    - OBC: Jetson nano
+    - Depth Camera: SR305
+    - VOI: t265 [Optional]
+
+### Software Package Component
+Required ROS packages:
+- mavros
+
+Modules:
+- CNCInterface [WIP]
+    - Direct command and control interface communicate with mavros and give command to the flight controller unit via mavlink
+    - Supported Commands:
+- SensorInterface [WIP]
+    - Sensor data pre-processing
+    - Camera data pre-processing
+    - "Black Box" logging
+- AIInterface [WIP]
+    - Coming soon
+- OAController [WIP]
+    - Main controller
+    - Switch between OA modes
+    - Application level fail safety handling
+    - Mission queue
+- Utils [WIP]
+- Unittests
 
 ## How To [DEV ONLY]
 
