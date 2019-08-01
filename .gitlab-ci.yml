@@ -6,7 +6,6 @@ cache:
 
 variables:
   ROS_PACKAGES_TO_INSTALL: "mavros"
-  ROSINSTALL_CI_JOB_TOKEN: "true"
 
 before_script:
   - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
