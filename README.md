@@ -6,8 +6,10 @@
 
 ### Package Component
 
-## How To
+## How To [DEV ONLY]
 
-### Install
+### Use With SITL
+
+### Use With Real Vehicle
 
 ## Credit
