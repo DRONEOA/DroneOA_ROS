@@ -104,8 +104,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES droneoa_ros
+ INCLUDE_DIRS include
+ LIBRARIES droneoa_ros
 #  CATKIN_DEPENDS mavros roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -116,8 +116,7 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
-# include
+include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -141,7 +140,10 @@ include_directories(
 ## target back to the shorter version for ease of user use
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
-add_executable(droneoa_ros src/main.cpp)
+add_executable(droneoa_ros
+  src/main.cpp
+  src/CNCInterface.cpp
+)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
