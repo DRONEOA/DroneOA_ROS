@@ -3,14 +3,14 @@
 ## Introduction
 
 ### Hardware
-- OA07A Mid Range Development Platform
+- **OA07A** Mid Range Development Platform
     - Designed for indoor and outdoor test environment
     - OBC: Jetson nano
     - Depth Camera: D435i
     - Laser Scanner: RPLidar A1
     - VOI: t265
 
-- OA07S Short Range Development Platform [WIP]
+- **OA07S** Short Range Development Platform [WIP]
     - Designed for indoor and outdoor test environment
     - OBC: Jetson nano
     - Depth Camera: SR305
