@@ -81,3 +81,19 @@ bool CNCInterface::land(int fromAltitude) {
         return false;
     }
 }
+
+// Navigation
+bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float targetAltitude) {
+    ros::ServiceClient setHome_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/set_home");
+    mavros_msgs::CommandTOL srv_setHome;
+    srv_setHome.request.altitude = targetAltitude;
+    srv_setHome.request.latitude = targetLatitude;
+    srv_setHome.request.longitude = targetLongitude;
+    if(setHome_cl.call(srv_setHome)){
+        ROS_INFO("srv_setHome send ok %d", srv_setHome.response.success);
+        return true;
+    }else{
+        ROS_ERROR("Failed Land");
+        return false;
+    }
+}

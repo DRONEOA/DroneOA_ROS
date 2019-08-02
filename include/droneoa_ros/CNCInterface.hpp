@@ -21,6 +21,9 @@ public:
     bool takeoff(int targetAltitude);
     bool land(int fromAltitude);
 
+    // Navigation
+    bool setHome(float targetLatitude, float targetLongitude, float targetAltitude);
+
 private:
     ros::NodeHandle n;
 };
