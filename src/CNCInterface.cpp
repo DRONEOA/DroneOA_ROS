@@ -1,5 +1,6 @@
 #include <droneoa_ros/CNCInterface.hpp>
 #include <cstdlib>
+#include <iostream>
 
 #include <ros/ros.h>
 #include <mavros_msgs/CommandBool.h>
@@ -14,8 +15,9 @@ CNCInterface::~CNCInterface() {
 
 }
 
-void CNCInterface::init(ros::NodeHandle nh) {
+void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n = nh;
+    r_ = r;
 }
 
 // Mode Control
@@ -38,6 +40,9 @@ bool CNCInterface::armVehicle() {
     ros::ServiceClient arming_cl = n.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
     mavros_msgs::CommandBool srv;
     srv.request.value = true;
+
+    thread_watch_state_ = new boost::thread(boost::bind(&CNCInterface::watchStateThread, this));
+
     if(arming_cl.call(srv)){
         ROS_INFO("ARM send ok %d", srv.response.success);
         return true;
@@ -96,4 +101,72 @@ bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float ta
         ROS_ERROR("Failed Land");
         return false;
     }
+}
+
+// Mission
+bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
+    std::cout << "+pushWaypoints::Current Mode: " << getMode() << std::endl;
+
+    ros::ServiceClient pushWP_cl = n.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
+    mavros_msgs::WaypointPush wp_push_srv; // List of Waypoints
+    mavros_msgs::Waypoint wp;
+    wp.frame          = mavros_msgs::Waypoint::FRAME_GLOBAL_REL_ALT;
+    wp.command        = command;
+    wp.is_current     = isCurrent;
+    wp.autocontinue   = true;
+    wp.x_lat          = x_lat;
+    wp.y_long         = y_long;
+    wp.z_alt          = z_alt;
+    wp_push_srv.request.waypoints.push_back(wp);
+    // Send WPs to Vehicle
+    if (pushWP_cl.call(wp_push_srv)) {
+        ROS_INFO("Send waypoints ok: %d", wp_push_srv.response.success);
+        return true;
+    } else {
+        ROS_ERROR("Send waypoints FAILED.");
+        return false;
+    }
+}
+
+bool CNCInterface::clearWaypoint() {
+    ros::ServiceClient clearWP_cl = n.serviceClient<mavros_msgs::WaypointClear>("mavros/mission/clear");
+    mavros_msgs::WaypointClear wp_clear_srv;
+    if (clearWP_cl.call(wp_clear_srv)) {
+        ROS_INFO("Clear waypoints ok: %d", wp_clear_srv.response.success);
+        return true;
+    } else {
+        ROS_ERROR("Clear waypoints FAILED.");
+        return false;
+    }
+}
+
+// Callback
+void CNCInterface::state_callback(const mavros_msgs::State::ConstPtr& msg) {
+    std::cout << "+state_callback" << std::endl;
+    current_state = *msg;
+}
+
+// Threads
+void CNCInterface::watchStateThread() {
+  auto state_sub =
+        n.subscribe<mavros_msgs::State>("mavros/state", 1, boost::bind(&CNCInterface::state_callback, this, _1));
+
+  while (ros::ok())
+  {
+    ros::spinOnce();
+    r_.sleep();
+  }
+}
+
+// Status
+bool CNCInterface::isConnected() {
+    return current_state.connected;
+}
+
+bool CNCInterface::isArmed() {
+    return current_state.armed;
+}
+
+std::string CNCInterface::getMode() {
+    return current_state.mode;
 }
