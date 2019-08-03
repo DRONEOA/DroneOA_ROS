@@ -143,6 +143,8 @@ include_directories(include
 add_executable(droneoa_ros
   src/main.cpp
   src/CNCInterface.cpp
+  src/GPSPoint.cpp
+  src/Utils.cpp
 )
 
 ## Add cmake target dependencies of the executable

@@ -41,7 +41,9 @@ bool CNCInterface::armVehicle() {
     mavros_msgs::CommandBool srv;
     srv.request.value = true;
 
+    // TODO: Should we move those to constructor ?
     thread_watch_state_ = new boost::thread(boost::bind(&CNCInterface::watchStateThread, this));
+    thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
 
     if(arming_cl.call(srv)){
         ROS_INFO("ARM send ok %d", srv.response.success);
@@ -141,12 +143,17 @@ bool CNCInterface::clearWaypoint() {
 }
 
 // Callback
+/* State */
 void CNCInterface::state_callback(const mavros_msgs::State::ConstPtr& msg) {
-    std::cout << "+state_callback" << std::endl;
     current_state = *msg;
+}
+/* GPS Fix */
+void CNCInterface::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
+    current_gps_fix_ = *msg;
 }
 
 // Threads
+/* State */
 void CNCInterface::watchStateThread() {
   auto state_sub =
         n.subscribe<mavros_msgs::State>("mavros/state", 1, boost::bind(&CNCInterface::state_callback, this, _1));
@@ -157,8 +164,20 @@ void CNCInterface::watchStateThread() {
     r_.sleep();
   }
 }
+/* GPS Fix */
+void CNCInterface::watchGPSFixThread() {
+  auto gpsFix_sub =
+        n.subscribe<sensor_msgs::NavSatFix>("mavros/global_position/global", 1, boost::bind(&CNCInterface::gpsFix_callback, this, _1));
+
+  while (ros::ok())
+  {
+    ros::spinOnce();
+    r_.sleep();
+  }
+}
 
 // Status
+/* State */
 bool CNCInterface::isConnected() {
     return current_state.connected;
 }
@@ -167,6 +186,31 @@ bool CNCInterface::isArmed() {
     return current_state.armed;
 }
 
+bool CNCInterface::isGuided() {
+    return current_state.guided;
+}
+
 std::string CNCInterface::getMode() {
     return current_state.mode;
+}
+
+uint8_t CNCInterface::getSysStatus() {
+    return current_state.system_status;
+}
+
+/* GPS Fix */
+GPSPoint CNCInterface::getCurrentGPSPoint() {
+    return GPSPoint(current_gps_fix_.latitude, current_gps_fix_.longitude, current_gps_fix_.altitude);
+}
+
+// User Simple Functions
+bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
+    // TODO: check Guided mode
+    bool rel = false;
+    rel = clearWaypoint();
+    if (!rel) {
+        return rel;
+    }
+    rel = pushWaypoints(x_lat, y_long, z_alt);
+    return rel;
 }

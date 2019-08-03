@@ -12,6 +12,9 @@
 #include <mavros_msgs/WaypointClear.h>
 #include <mavros_msgs/CommandCode.h>
 #include <mavros_msgs/State.h>
+#include <sensor_msgs/NavSatFix.h>
+
+#include <droneoa_ros/GPSPoint.hpp>
 
 class CNCInterface {
 public:
@@ -38,20 +41,32 @@ public:
 
     // Callback
     void state_callback(const mavros_msgs::State::ConstPtr& msg);
+    void gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg);
 
     // Status
+    /* State */
     bool isConnected();
     bool isArmed();
+    bool isGuided();
     std::string getMode();
+    uint8_t getSysStatus();
+    /* GPS Fix */
+    GPSPoint getCurrentGPSPoint();
+
+    // User Simple Function
+    bool gotoGlobal(float x_lat, float y_long, float z_alt);
 
 private:
     ros::NodeHandle n;
     ros::Rate r_ = ros::Rate(10.0);
-    mavros_msgs::State current_state;
     std::vector<mavros_msgs::Waypoint> waypointVec;
 
+    mavros_msgs::State current_state;
+    sensor_msgs::NavSatFix current_gps_fix_;
     boost::thread* thread_watch_state_ = nullptr;
+    boost::thread* thread_watch_GPSFix_ = nullptr;
     void watchStateThread();
+    void watchGPSFixThread();
 };
 
 #endif

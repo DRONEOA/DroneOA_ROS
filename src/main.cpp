@@ -1,17 +1,11 @@
 #include <cstdlib>
+#include <iomanip>
 
 #include <ros/ros.h>
 
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/PDN.hpp>
-
-bool gotoGlobal(CNCInterface cnc, float x_lat, float y_long, float z_alt) {
-  // TODO: check Guided mode
-  bool rel = false;
-  rel = cnc.clearWaypoint();
-  rel = cnc.pushWaypoints(x_lat, y_long, z_alt);
-  return rel;
-}
+#include <droneoa_ros/Utils.hpp>
 
 int main(int argc, char **argv) {
     // Setup Refresh Rate
@@ -45,18 +39,30 @@ int main(int argc, char **argv) {
     ///////////////  DO STUFF  /////////////////
     ////////////////////////////////////////////
     sleep(10);
-    std::string line;
-    while (std::getline(std::cin, line)){
-        if (line == "q") {
+    std::string commandIn;
+    while (std::cin >> commandIn){
+        if (commandIn == "q") {
             break;
-        } else if (line == "a") {
-            gotoGlobal(cnc, 37.619595, -122.377170, 15);
-        } else if (line == "b") {
-            gotoGlobal(cnc, 37.620153, -122.375994, 15);
-        } else if (line == "r") {
+        } else if (commandIn == "w") {
+            GPSPoint tmpPoint = getLocationMeter(cnc.getCurrentGPSPoint(), 100, 0);
+            cnc.gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, 10);
+        } else if (commandIn == "s") {
+            GPSPoint tmpPoint = getLocationMeter(cnc.getCurrentGPSPoint(), -100, 0);
+            cnc.gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, 10);
+        } else if (commandIn == "a") {
+            GPSPoint tmpPoint = getLocationMeter(cnc.getCurrentGPSPoint(), 0, 100);
+            cnc.gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, 10);
+        } else if (commandIn == "d") {
+            GPSPoint tmpPoint = getLocationMeter(cnc.getCurrentGPSPoint(), 0, -100);
+            cnc.gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, 10);
+        } else if (commandIn == "r") {
             cnc.setMode(FLT_MODE_RTL);
-        } else if (line == "l") {
+        } else if (commandIn == "l") {
             cnc.land(10);
+        } else if (commandIn == "d") {
+            GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
+            std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " " << tmpGPSPoint.longitude_<< " " << std::endl;
+            std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
         }
     }
 
