@@ -1,10 +1,12 @@
 #include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/Utils.hpp>
 #include <cstdlib>
 #include <iostream>
 
 #include <ros/ros.h>
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/CommandTOL.h>
+#include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/SetMode.h>
 
 CNCInterface::CNCInterface() {
@@ -18,9 +20,13 @@ CNCInterface::~CNCInterface() {
 void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n = nh;
     r_ = r;
+    thread_watch_state_ = new boost::thread(boost::bind(&CNCInterface::watchStateThread, this));
+    thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
 }
 
-// Mode Control
+/*****************************************************
+ * Mode Control
+ */
 bool CNCInterface::setMode(std::string modeName) {
     ros::ServiceClient cl = n.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
     mavros_msgs::SetMode srv_setMode;
@@ -35,15 +41,13 @@ bool CNCInterface::setMode(std::string modeName) {
     }
 }
 
-// Safety
+/*****************************************************
+ * Safety
+ */
 bool CNCInterface::armVehicle() {
     ros::ServiceClient arming_cl = n.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
     mavros_msgs::CommandBool srv;
     srv.request.value = true;
-
-    // TODO: Should we move those to constructor ?
-    thread_watch_state_ = new boost::thread(boost::bind(&CNCInterface::watchStateThread, this));
-    thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
 
     if(arming_cl.call(srv)){
         ROS_INFO("ARM send ok %d", srv.response.success);
@@ -54,7 +58,9 @@ bool CNCInterface::armVehicle() {
     }
 }
 
-// Guided Flight Control
+/*****************************************************
+ * Guided Flight Control
+ */
 bool CNCInterface::takeoff(int targetAltitude) {
     ros::ServiceClient takeoff_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
     mavros_msgs::CommandTOL srv_takeoff;
@@ -65,6 +71,7 @@ bool CNCInterface::takeoff(int targetAltitude) {
     srv_takeoff.request.yaw = 0;
     if(takeoff_cl.call(srv_takeoff)){
         ROS_INFO("srv_takeoff send ok %d", srv_takeoff.response.success);
+        targetAltitude_ = targetAltitude;
         return true;
     }else{
         ROS_ERROR("Failed Takeoff");
@@ -89,7 +96,27 @@ bool CNCInterface::land(int fromAltitude) {
     }
 }
 
-// Navigation
+bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
+    ros::ServiceClient cmdLong_cl = n.serviceClient<mavros_msgs::CommandLong>("/mavros/cmd/command");
+    mavros_msgs::CommandLong srv_cmdLong;
+    srv_cmdLong.request.command = mavros_msgs::CommandCode::CONDITION_YAW;
+    srv_cmdLong.request.confirmation = 0;
+    srv_cmdLong.request.param1 = targetYaw; // Heading
+    srv_cmdLong.request.param2 = 0; // Speed in degree/s
+    srv_cmdLong.request.param3 = 1; // Direction -1 ccw, 1 cw
+    srv_cmdLong.request.param4 = isRelative;
+    if(cmdLong_cl.call(srv_cmdLong)){
+        ROS_INFO("srv_cmdLong send ok %d", srv_cmdLong.response.success);
+        return true;
+    }else{
+        ROS_ERROR("Failed set Yaw");
+        return false;
+    }
+}
+
+/*****************************************************
+ * Navigation
+ */
 bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float targetAltitude) {
     ros::ServiceClient setHome_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/set_home");
     mavros_msgs::CommandTOL srv_setHome;
@@ -105,7 +132,9 @@ bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float ta
     }
 }
 
-// Mission
+/*****************************************************
+ * Mission
+ */
 bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
     std::cout << "+pushWaypoints::Current Mode: " << getMode() << std::endl;
 
@@ -123,6 +152,7 @@ bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t
     // Send WPs to Vehicle
     if (pushWP_cl.call(wp_push_srv)) {
         ROS_INFO("Send waypoints ok: %d", wp_push_srv.response.success);
+        targetAltitude_ = z_alt;
         return true;
     } else {
         ROS_ERROR("Send waypoints FAILED.");
@@ -142,7 +172,9 @@ bool CNCInterface::clearWaypoint() {
     }
 }
 
-// Callback
+/*****************************************************
+ * Callback
+ */
 /* State */
 void CNCInterface::state_callback(const mavros_msgs::State::ConstPtr& msg) {
     current_state = *msg;
@@ -152,31 +184,33 @@ void CNCInterface::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
     current_gps_fix_ = *msg;
 }
 
-// Threads
+/*****************************************************
+ * Threads
+ */
 /* State */
 void CNCInterface::watchStateThread() {
-  auto state_sub =
+    auto state_sub =
         n.subscribe<mavros_msgs::State>("mavros/state", 1, boost::bind(&CNCInterface::state_callback, this, _1));
 
-  while (ros::ok())
-  {
-    ros::spinOnce();
-    r_.sleep();
-  }
+    while (ros::ok()) {
+        ros::spinOnce();
+        r_.sleep();
+    }
 }
 /* GPS Fix */
 void CNCInterface::watchGPSFixThread() {
-  auto gpsFix_sub =
+    auto gpsFix_sub =
         n.subscribe<sensor_msgs::NavSatFix>("mavros/global_position/global", 1, boost::bind(&CNCInterface::gpsFix_callback, this, _1));
 
-  while (ros::ok())
-  {
-    ros::spinOnce();
-    r_.sleep();
-  }
+    while (ros::ok()) {
+        ros::spinOnce();
+        r_.sleep();
+    }
 }
 
-// Status
+/*****************************************************
+ * Status
+ */
 /* State */
 bool CNCInterface::isConnected() {
     return current_state.connected;
@@ -203,7 +237,18 @@ GPSPoint CNCInterface::getCurrentGPSPoint() {
     return GPSPoint(current_gps_fix_.latitude, current_gps_fix_.longitude, current_gps_fix_.altitude);
 }
 
-// User Simple Functions
+/* Target */
+float CNCInterface::getTargetAltitude() {
+    return targetAltitude_;
+}
+
+GPSPoint CNCInterface::getTargetWaypoint() {
+    return recentWaypoint;
+}
+
+/*****************************************************
+ * User Simple Functions
+ */
 bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
     // TODO: check Guided mode
     bool rel = false;
@@ -212,5 +257,14 @@ bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
         return rel;
     }
     rel = pushWaypoints(x_lat, y_long, z_alt);
+    if (rel) {
+        recentWaypoint = GPSPoint(x_lat, y_long, z_alt);
+    }
     return rel;
+}
+
+bool CNCInterface::gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta) {
+    // TODO: check GPS available
+    GPSPoint tmpPoint = getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
+    return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);
 }

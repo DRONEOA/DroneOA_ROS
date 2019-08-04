@@ -44,30 +44,29 @@ int main(int argc, char **argv) {
         if (commandIn == "q") {
             break;
         } else if (commandIn == "w") {
-            GPSPoint tmpPoint = getLocationMeter(cnc.getCurrentGPSPoint(), 100, 0);
-            cnc.gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, 10);
+            cnc.gotoRelative(100,0,10);
         } else if (commandIn == "s") {
-            GPSPoint tmpPoint = getLocationMeter(cnc.getCurrentGPSPoint(), -100, 0);
-            cnc.gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, 10);
+            cnc.gotoRelative(-100,0,10);
         } else if (commandIn == "a") {
-            GPSPoint tmpPoint = getLocationMeter(cnc.getCurrentGPSPoint(), 0, 100);
-            cnc.gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, 10);
+            cnc.gotoRelative(0,-100,10);
         } else if (commandIn == "d") {
-            GPSPoint tmpPoint = getLocationMeter(cnc.getCurrentGPSPoint(), 0, -100);
-            cnc.gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, 10);
+            cnc.gotoRelative(0,100,10);
         } else if (commandIn == "r") {
             cnc.setMode(FLT_MODE_RTL);
         } else if (commandIn == "l") {
             cnc.land(10);
-        } else if (commandIn == "d") {
+        } else if (commandIn == "f") {
             GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
             std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " " << tmpGPSPoint.longitude_<< " " << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
+        } else if (commandIn == "y") {
+            cnc.setYaw(270);
+        } else if (commandIn == "y0") {
+            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         }
     }
 
-    while (n.ok())
-    {
+    while (n.ok()) {
       ros::spinOnce();
       r.sleep();
     }

@@ -12,6 +12,7 @@
 #include <mavros_msgs/WaypointClear.h>
 #include <mavros_msgs/CommandCode.h>
 #include <mavros_msgs/State.h>
+#include <mavros_msgs/Altitude.h>
 #include <sensor_msgs/NavSatFix.h>
 
 #include <droneoa_ros/GPSPoint.hpp>
@@ -31,6 +32,7 @@ public:
     // Guided Flight Control
     bool takeoff(int targetAltitude);
     bool land(int fromAltitude);
+    bool setYaw(float targetYaw, bool isRelative = false);
 
     // Navigation
     bool setHome(float targetLatitude, float targetLongitude, float targetAltitude);
@@ -52,14 +54,21 @@ public:
     uint8_t getSysStatus();
     /* GPS Fix */
     GPSPoint getCurrentGPSPoint();
+    /* Target */
+    float getTargetAltitude();
+    GPSPoint getTargetWaypoint();
 
     // User Simple Function
     bool gotoGlobal(float x_lat, float y_long, float z_alt);
+    bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false);
 
 private:
     ros::NodeHandle n;
     ros::Rate r_ = ros::Rate(10.0);
     std::vector<mavros_msgs::Waypoint> waypointVec;
+
+    float targetAltitude_ = 0;
+    GPSPoint recentWaypoint;
 
     mavros_msgs::State current_state;
     sensor_msgs::NavSatFix current_gps_fix_;
