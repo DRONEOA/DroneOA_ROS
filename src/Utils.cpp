@@ -1,9 +1,15 @@
+/* Copyright (C) DroneOA Group - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ */
+
 #include <droneoa_ros/Utils.hpp>
 #include <math.h>
 
 GPSPoint getLocationMeter(GPSPoint originLoc, float dNorth, float dEast) {
     // Reference: http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
-    float earth_radius = 6378137.0; // Radius of "spherical" earth
+    float earth_radius = 6378137.0;  // Radius of "spherical" earth
     // Coordinate offsets in radians
     float dLat = dNorth/earth_radius;
     float dLon = dEast/(earth_radius * cos(M_PI * originLoc.latitude_/180));

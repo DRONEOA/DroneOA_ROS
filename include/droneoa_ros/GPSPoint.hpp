@@ -1,8 +1,14 @@
-#ifndef GPS_POINT_
-#define GPS_POINT_
+/* Copyright (C) DroneOA Group - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ */
+
+#ifndef INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_
+#define INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_
 
 class GPSPoint {
-public:
+ public:
     GPSPoint();
     GPSPoint(float latitude, float longitude, float altitude);
     virtual ~GPSPoint() = default;
@@ -12,4 +18,4 @@ public:
     float altitude_;
 };
 
-#endif
+#endif  // INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_

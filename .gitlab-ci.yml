@@ -11,6 +11,12 @@ before_script:
   - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
   - source ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
+cpplint:
+  stage: cpplint
+  script:
+    - pip install cpplint --quiet
+    - cpplint --linelength=100 $(find aibench -name "*.hpp" -or -name "*.cpp")
+
 catkin_make:
   stage: build
   script:

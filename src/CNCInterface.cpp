@@ -1,7 +1,8 @@
-#include <droneoa_ros/CNCInterface.hpp>
-#include <droneoa_ros/Utils.hpp>
-#include <cstdlib>
-#include <iostream>
+/* Copyright (C) DroneOA Group - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ */
 
 #include <ros/ros.h>
 #include <mavros_msgs/CommandBool.h>
@@ -9,13 +10,15 @@
 #include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/SetMode.h>
 
-CNCInterface::CNCInterface() {
+#include <cstdlib>
+#include <iostream>
 
-}
+#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/Utils.hpp>
 
-CNCInterface::~CNCInterface() {
+CNCInterface::CNCInterface() {}
 
-}
+CNCInterface::~CNCInterface() {}
 
 void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n = nh;
@@ -32,10 +35,10 @@ bool CNCInterface::setMode(std::string modeName) {
     mavros_msgs::SetMode srv_setMode;
     srv_setMode.request.base_mode = 0;
     srv_setMode.request.custom_mode = modeName;
-    if(cl.call(srv_setMode)){
+    if (cl.call(srv_setMode)) {
         ROS_INFO("setmode send ok %d value:", srv_setMode.response.mode_sent);
         return true;
-    }else{
+    } else {
         ROS_ERROR("Failed SetMode");
         return false;
     }
@@ -49,10 +52,10 @@ bool CNCInterface::armVehicle() {
     mavros_msgs::CommandBool srv;
     srv.request.value = true;
 
-    if(arming_cl.call(srv)){
+    if (arming_cl.call(srv)) {
         ROS_INFO("ARM send ok %d", srv.response.success);
         return true;
-    }else{
+    } else {
         ROS_ERROR("Failed arming or disarming");
         return false;
     }
@@ -69,11 +72,11 @@ bool CNCInterface::takeoff(int targetAltitude) {
     srv_takeoff.request.longitude = 0;
     srv_takeoff.request.min_pitch = 0;
     srv_takeoff.request.yaw = 0;
-    if(takeoff_cl.call(srv_takeoff)){
+    if (takeoff_cl.call(srv_takeoff)) {
         ROS_INFO("srv_takeoff send ok %d", srv_takeoff.response.success);
         targetAltitude_ = targetAltitude;
         return true;
-    }else{
+    } else {
         ROS_ERROR("Failed Takeoff");
         return false;
     }
@@ -87,10 +90,10 @@ bool CNCInterface::land(int fromAltitude) {
     srv_land.request.longitude = 0;
     srv_land.request.min_pitch = 0;
     srv_land.request.yaw = 0;
-    if(land_cl.call(srv_land)){
+    if (land_cl.call(srv_land)) {
         ROS_INFO("srv_land send ok %d", srv_land.response.success);
         return true;
-    }else{
+    } else {
         ROS_ERROR("Failed Land");
         return false;
     }
@@ -101,14 +104,14 @@ bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
     mavros_msgs::CommandLong srv_cmdLong;
     srv_cmdLong.request.command = mavros_msgs::CommandCode::CONDITION_YAW;
     srv_cmdLong.request.confirmation = 0;
-    srv_cmdLong.request.param1 = targetYaw; // Heading
-    srv_cmdLong.request.param2 = 0; // Speed in degree/s
-    srv_cmdLong.request.param3 = 1; // Direction -1 ccw, 1 cw
+    srv_cmdLong.request.param1 = targetYaw;  // Heading
+    srv_cmdLong.request.param2 = 0;  // Speed in degree/s
+    srv_cmdLong.request.param3 = 1;  // Direction -1 ccw, 1 cw
     srv_cmdLong.request.param4 = isRelative;
-    if(cmdLong_cl.call(srv_cmdLong)){
+    if (cmdLong_cl.call(srv_cmdLong)) {
         ROS_INFO("srv_cmdLong send ok %d", srv_cmdLong.response.success);
         return true;
-    }else{
+    } else {
         ROS_ERROR("Failed set Yaw");
         return false;
     }
@@ -118,15 +121,16 @@ bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
  * Navigation
  */
 bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float targetAltitude) {
-    ros::ServiceClient setHome_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/set_home");
+    ros::ServiceClient setHome_cl =
+        n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/set_home");
     mavros_msgs::CommandTOL srv_setHome;
     srv_setHome.request.altitude = targetAltitude;
     srv_setHome.request.latitude = targetLatitude;
     srv_setHome.request.longitude = targetLongitude;
-    if(setHome_cl.call(srv_setHome)){
+    if (setHome_cl.call(srv_setHome)) {
         ROS_INFO("srv_setHome send ok %d", srv_setHome.response.success);
         return true;
-    }else{
+    } else {
         ROS_ERROR("Failed Land");
         return false;
     }
@@ -139,7 +143,7 @@ bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t
     std::cout << "+pushWaypoints::Current Mode: " << getMode() << std::endl;
 
     ros::ServiceClient pushWP_cl = n.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
-    mavros_msgs::WaypointPush wp_push_srv; // List of Waypoints
+    mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
     mavros_msgs::Waypoint wp;
     wp.frame          = mavros_msgs::Waypoint::FRAME_GLOBAL_REL_ALT;
     wp.command        = command;
@@ -200,7 +204,8 @@ void CNCInterface::watchStateThread() {
 /* GPS Fix */
 void CNCInterface::watchGPSFixThread() {
     auto gpsFix_sub =
-        n.subscribe<sensor_msgs::NavSatFix>("mavros/global_position/global", 1, boost::bind(&CNCInterface::gpsFix_callback, this, _1));
+        n.subscribe<sensor_msgs::NavSatFix>("mavros/global_position/global", 1,
+            boost::bind(&CNCInterface::gpsFix_callback, this, _1));
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -250,7 +255,7 @@ GPSPoint CNCInterface::getTargetWaypoint() {
  * User Simple Functions
  */
 bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
-    // TODO: check Guided mode
+    // @TODO: check Guided mode
     bool rel = false;
     rel = clearWaypoint();
     if (!rel) {
@@ -264,7 +269,7 @@ bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
 }
 
 bool CNCInterface::gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta) {
-    // TODO: check GPS available
+    // @TODO: check GPS available
     GPSPoint tmpPoint = getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
     return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);
 }

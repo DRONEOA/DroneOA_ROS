@@ -1,7 +1,7 @@
+#include <ros/ros.h>
+
 #include <cstdlib>
 #include <iomanip>
-
-#include <ros/ros.h>
 
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/PDN.hpp>
@@ -40,24 +40,25 @@ int main(int argc, char **argv) {
     ////////////////////////////////////////////
     sleep(10);
     std::string commandIn;
-    while (std::cin >> commandIn){
+    while (std::cin >> commandIn) {
         if (commandIn == "q") {
             break;
         } else if (commandIn == "w") {
-            cnc.gotoRelative(100,0,10);
+            cnc.gotoRelative(100, 0, 10);
         } else if (commandIn == "s") {
-            cnc.gotoRelative(-100,0,10);
+            cnc.gotoRelative(-100, 0, 10);
         } else if (commandIn == "a") {
-            cnc.gotoRelative(0,-100,10);
+            cnc.gotoRelative(0, -100, 10);
         } else if (commandIn == "d") {
-            cnc.gotoRelative(0,100,10);
+            cnc.gotoRelative(0, 100, 10);
         } else if (commandIn == "r") {
             cnc.setMode(FLT_MODE_RTL);
         } else if (commandIn == "l") {
             cnc.land(10);
         } else if (commandIn == "f") {
             GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
-            std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " " << tmpGPSPoint.longitude_<< " " << std::endl;
+            std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " "
+                << tmpGPSPoint.longitude_<< " " << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
         } else if (commandIn == "y") {
             cnc.setYaw(270);
