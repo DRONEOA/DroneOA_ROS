@@ -1,3 +1,7 @@
+stages:
+  - cpplint
+  - build
+
 image: ros:melodic-ros-core
 
 cache:
