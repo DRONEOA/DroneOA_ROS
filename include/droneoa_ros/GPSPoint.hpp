@@ -4,8 +4,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_
-#define INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_  // NOLINT
 
 class GPSPoint {
  public:
