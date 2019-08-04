@@ -19,7 +19,7 @@ cpplint:
   stage: cpplint
   script:
     - pip install cpplint --quiet
-    - cpplint --linelength=100 $(find aibench -name "*.hpp" -or -name "*.cpp")
+    - cpplint --linelength=120 ./src/droneoa_ros/src/*.cpp ./src/droneoa_ros/include/droneoa_ros/*.hpp
 
 catkin_make:
   stage: build
