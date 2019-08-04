@@ -177,7 +177,7 @@ bool CNCInterface::clearWaypoint() {
  */
 /* State */
 void CNCInterface::state_callback(const mavros_msgs::State::ConstPtr& msg) {
-    current_state = *msg;
+    current_state_ = *msg;
 }
 /* GPS Fix */
 void CNCInterface::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
@@ -213,23 +213,23 @@ void CNCInterface::watchGPSFixThread() {
  */
 /* State */
 bool CNCInterface::isConnected() {
-    return current_state.connected;
+    return current_state_.connected;
 }
 
 bool CNCInterface::isArmed() {
-    return current_state.armed;
+    return current_state_.armed;
 }
 
 bool CNCInterface::isGuided() {
-    return current_state.guided;
+    return current_state_.guided;
 }
 
 std::string CNCInterface::getMode() {
-    return current_state.mode;
+    return current_state_.mode;
 }
 
 uint8_t CNCInterface::getSysStatus() {
-    return current_state.system_status;
+    return current_state_.system_status;
 }
 
 /* GPS Fix */
@@ -243,7 +243,7 @@ float CNCInterface::getTargetAltitude() {
 }
 
 GPSPoint CNCInterface::getTargetWaypoint() {
-    return recentWaypoint;
+    return recentWaypoint_;
 }
 
 /*****************************************************
@@ -258,7 +258,7 @@ bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
     }
     rel = pushWaypoints(x_lat, y_long, z_alt);
     if (rel) {
-        recentWaypoint = GPSPoint(x_lat, y_long, z_alt);
+        recentWaypoint_ = GPSPoint(x_lat, y_long, z_alt);
     }
     return rel;
 }

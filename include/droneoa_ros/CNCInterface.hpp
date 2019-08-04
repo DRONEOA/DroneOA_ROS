@@ -65,12 +65,11 @@ public:
 private:
     ros::NodeHandle n;
     ros::Rate r_ = ros::Rate(10.0);
-    std::vector<mavros_msgs::Waypoint> waypointVec;
 
     float targetAltitude_ = 0;
-    GPSPoint recentWaypoint;
+    GPSPoint recentWaypoint_;
 
-    mavros_msgs::State current_state;
+    mavros_msgs::State current_state_;
     sensor_msgs::NavSatFix current_gps_fix_;
     boost::thread* thread_watch_state_ = nullptr;
     boost::thread* thread_watch_GPSFix_ = nullptr;
