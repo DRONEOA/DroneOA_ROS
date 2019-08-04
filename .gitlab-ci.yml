@@ -20,7 +20,7 @@ cpplint:
   script:
     - pip install cpplint --quiet
     - cd ./src/droneoa_ros
-    - cpplint --linelength=120 ./src/droneoa_ros/src/*.cpp ./src/droneoa_ros/include/droneoa_ros/*.hpp
+    - cpplint --linelength=120 ./src/*.cpp ./include/droneoa_ros/*.hpp
     - cd ..
     - cd ..
 
