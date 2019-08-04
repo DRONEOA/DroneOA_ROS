@@ -24,6 +24,12 @@ Modules:
 - CNCInterface [WIP]
     - Direct command and control interface communicate with mavros and give command to the flight controller unit via mavlink
     - Supported Commands:
+        - SetMode
+        - Takeoff
+        - Landing
+        - Waypoint Guided
+        - Yaw Control
+        - Watcher [WIP]
 - SensorInterface [WIP]
     - Sensor data pre-processing
     - Camera data pre-processing
