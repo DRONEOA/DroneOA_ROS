@@ -13,4 +13,4 @@ GPSPoint getLocationMeter(GPSPoint originLoc, float dNorth, float dEast);
 float getDistanceMeter(GPSPoint point1, GPSPoint point2);
 float getBearing(GPSPoint point1, GPSPoint point2);
 
-#endif  // INCLUDE_DRONEOA_ROS_UTILS_HPP_
+#endif  // NOLINT

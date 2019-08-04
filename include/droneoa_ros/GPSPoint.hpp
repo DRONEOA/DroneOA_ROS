@@ -18,4 +18,4 @@ class GPSPoint {
     float altitude_;
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_
+#endif  // NOLINT

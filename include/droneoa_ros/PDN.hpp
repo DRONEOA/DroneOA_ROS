@@ -23,4 +23,4 @@ const char* FLT_MODE_BRAKE = "BRAKE";
 const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
-#endif  // INCLUDE_DRONEOA_ROS_PDN_HPP_
+#endif  // NOLINT

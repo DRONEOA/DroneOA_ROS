@@ -84,4 +84,4 @@ class CNCInterface {
     void watchGPSFixThread();
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_CNCINTERFACE_HPP_
+#endif  // NOLINT
