@@ -25,6 +25,7 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     r_ = r;
     thread_watch_state_ = new boost::thread(boost::bind(&CNCInterface::watchStateThread, this));
     thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
+    thread_watch_Altitude_ = new boost::thread(boost::bind(&CNCInterface::watchAltitudeThread, this));
 }
 
 /*****************************************************
@@ -140,8 +141,6 @@ bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float ta
  * Mission
  */
 bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
-    std::cout << "+pushWaypoints::Current Mode: " << getMode() << std::endl;
-
     ros::ServiceClient pushWP_cl = n.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
     mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
     mavros_msgs::Waypoint wp;
@@ -187,6 +186,10 @@ void CNCInterface::state_callback(const mavros_msgs::State::ConstPtr& msg) {
 void CNCInterface::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
     current_gps_fix_ = *msg;
 }
+/* Altitude */
+void CNCInterface::altitude_callback(const std_msgs::Float64ConstPtr& msg) {
+    current_relative_altitude_ = *msg;
+}
 
 /*****************************************************
  * Threads
@@ -206,6 +209,18 @@ void CNCInterface::watchGPSFixThread() {
     auto gpsFix_sub =
         n.subscribe<sensor_msgs::NavSatFix>("mavros/global_position/global", 1,
             boost::bind(&CNCInterface::gpsFix_callback, this, _1));
+
+    while (ros::ok()) {
+        ros::spinOnce();
+        r_.sleep();
+    }
+}
+/* Altitude */
+void CNCInterface::watchAltitudeThread() {
+    auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
+    auto relative_pos_sub =
+        node->subscribe<std_msgs::Float64>("mavros/global_position/rel_alt", 1,
+                boost::bind(&CNCInterface::altitude_callback, this, _1));
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -249,6 +264,11 @@ float CNCInterface::getTargetAltitude() {
 
 GPSPoint CNCInterface::getTargetWaypoint() {
     return recentWaypoint_;
+}
+
+/* Altitude */
+float CNCInterface::getRelativeAltitude() {
+    return current_relative_altitude_.data;
 }
 
 /*****************************************************

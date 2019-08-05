@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
             GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
             std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " "
                 << tmpGPSPoint.longitude_<< " " << std::endl;
+            std::cout << "[DISPLAY] altitude: " << cnc.getRelativeAltitude() << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
         } else if (commandIn.front() == 'y') {
             if (commandIn.size() == 1) {
