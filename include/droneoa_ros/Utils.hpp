@@ -7,10 +7,12 @@
 #ifndef INCLUDE_DRONEOA_ROS_UTILS_HPP_  // NOLINT
 #define INCLUDE_DRONEOA_ROS_UTILS_HPP_  // NOLINT
 
+#include <utility>
 #include <droneoa_ros/GPSPoint.hpp>
 
 GPSPoint getLocationMeter(GPSPoint originLoc, float dNorth, float dEast);
 float getDistanceMeter(GPSPoint point1, GPSPoint point2);
 float getBearing(GPSPoint point1, GPSPoint point2);
+std::pair<float, float> getNorthEastDistanceFromHeading(float heading, float distance);
 
 #endif  // NOLINT

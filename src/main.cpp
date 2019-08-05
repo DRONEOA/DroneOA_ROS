@@ -54,8 +54,12 @@ int main(int argc, char **argv) {
             std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " "
                 << tmpGPSPoint.longitude_<< " " << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
-        } else if (commandIn == "y") {
-            cnc.setYaw(270);
+        } else if (commandIn.front() == 'y') {
+            if (commandIn.size() == 1) {
+                commandIn = "y0";
+            }
+            cnc.gotoHeading(std::stoi(commandIn.substr(1)), 1000, 10);
+            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (commandIn == "y0") {
             cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         }

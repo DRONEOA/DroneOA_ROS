@@ -68,6 +68,7 @@ class CNCInterface {
     // User Simple Function
     bool gotoGlobal(float x_lat, float y_long, float z_alt);
     bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false);
+    bool gotoHeading(float heading, float distance, float z_alt);
 
  private:
     ros::NodeHandle n;

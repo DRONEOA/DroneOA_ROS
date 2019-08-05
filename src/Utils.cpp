@@ -36,3 +36,9 @@ float getBearing(GPSPoint point1, GPSPoint point2) {
     }
     return bearing;
 }
+
+std::pair<float, float> getNorthEastDistanceFromHeading(float heading, float distance) {
+    float dNorth = distance * cos(heading * M_PI / 180.0f);
+    float dEast = distance * sin(heading * M_PI / 180.0f);
+    return std::pair<float, float>(dNorth, dEast);
+}

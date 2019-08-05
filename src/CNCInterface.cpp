@@ -273,3 +273,8 @@ bool CNCInterface::gotoRelative(float x_lat, float y_long, float z_alt = 10, boo
     GPSPoint tmpPoint = getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
     return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);
 }
+
+bool CNCInterface::gotoHeading(float heading, float distance, float z_alt) {
+    std::pair<float, float> tempRelative = getNorthEastDistanceFromHeading(heading, distance);
+    return gotoRelative(tempRelative.first, tempRelative.second, z_alt);
+}
