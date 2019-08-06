@@ -1,6 +1,7 @@
 stages:
   - cpplint
   - build
+  - unittest
 
 image: ros:melodic-ros-core
 
@@ -35,7 +36,7 @@ catkin tools:
     - catkin build --summarize --no-status --force-color
 
 Unittest:
-  stage: test
+  stage: unittest
   script:
     - catkin_make
     - source ./devel/setup.sh
