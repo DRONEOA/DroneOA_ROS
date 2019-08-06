@@ -33,3 +33,9 @@ catkin tools:
   stage: build
   script:
     - catkin build --summarize --no-status --force-color
+
+Unittest:
+  stage: test
+  script:
+    - source ./devel/setup.sh
+    - rosrun droneoa_ros droneoa_ros_utiltest
