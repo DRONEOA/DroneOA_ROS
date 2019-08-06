@@ -20,7 +20,7 @@ cpplint:
   script:
     - pip install cpplint --quiet
     - cd ./src/droneoa_ros
-    - cpplint --linelength=120 ./src/*.cpp ./include/droneoa_ros/*.hpp
+    - cpplint --linelength=120 ./test/*.cpp ./src/*.cpp ./include/droneoa_ros/*.hpp
     - cd ..
     - cd ..
 
@@ -37,5 +37,6 @@ catkin tools:
 Unittest:
   stage: test
   script:
+    - catkin_make
     - source ./devel/setup.sh
     - rosrun droneoa_ros droneoa_ros_utiltest

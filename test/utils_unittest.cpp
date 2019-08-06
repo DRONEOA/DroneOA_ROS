@@ -1,3 +1,9 @@
+/* Copyright (C) DroneOA Group - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ */
+
 #include <gtest/gtest.h>
 #include "../include/droneoa_ros/Utils.hpp"
 
@@ -99,7 +105,7 @@ TEST(UtilTestSuite, testNEHeading07) {
 }
 
 // Run all the tests that were declared with TEST()
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
