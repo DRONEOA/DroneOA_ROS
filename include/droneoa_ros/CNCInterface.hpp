@@ -16,6 +16,7 @@
 #include <mavros_msgs/Altitude.h>
 #include <mavros_msgs/HomePosition.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/BatteryState.h>
 #include <std_msgs/Float64.h>
 
 #include <string>
@@ -57,6 +58,7 @@ class CNCInterface {
     void gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg);
     void homePos_callback(const mavros_msgs::HomePositionConstPtr& msg);
     void altitude_callback(const std_msgs::Float64ConstPtr& msg);
+    void battery_callback(const sensor_msgs::BatteryStateConstPtr& msg);
 
     // Status
     /* State */
@@ -72,6 +74,8 @@ class CNCInterface {
     GPSPoint getTargetWaypoint();
     /* Altitude */
     float getRelativeAltitude();
+    /* Battery */
+    float getBatteryVoltage();
 
     // User Simple Function
     bool gotoGlobal(float x_lat, float y_long, float z_alt);
@@ -89,6 +93,7 @@ class CNCInterface {
     mavros_msgs::State current_state_;
     mavros_msgs::HomePosition current_home_pos_;
     sensor_msgs::NavSatFix current_gps_fix_;
+    sensor_msgs::BatteryState current_battery_;
     std_msgs::Float64 current_relative_altitude_;
 
     // Threads
