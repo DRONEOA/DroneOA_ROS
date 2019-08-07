@@ -85,7 +85,7 @@ class CNCInterface {
     float targetAltitude_ = 0;
     GPSPoint recentWaypoint_;
 
-    bool isHomeSet_ = false;  // Note: this value will NOT but updated after becomeing true
+    bool isHomeSet_ = false;  // Note: this value will NOT be updated after becomeing true
     mavros_msgs::State current_state_;
     mavros_msgs::HomePosition current_home_pos_;
     sensor_msgs::NavSatFix current_gps_fix_;
