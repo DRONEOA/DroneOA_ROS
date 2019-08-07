@@ -57,6 +57,7 @@ int main(int argc, char **argv) {
                 << tmpGPSPoint.longitude_<< " " << std::endl;
             std::cout << "[DISPLAY] altitude: " << cnc.getRelativeAltitude() << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
+            std::cout << "[DISPLAY] voltage: " << cnc.getBatteryVoltage() << std::endl;
         } else if (commandIn.front() == 'y') {
             if (commandIn.size() == 1) {
                 commandIn = "y0";

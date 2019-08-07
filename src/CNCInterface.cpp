@@ -245,6 +245,10 @@ void CNCInterface::homePos_callback(const mavros_msgs::HomePositionConstPtr& msg
 void CNCInterface::altitude_callback(const std_msgs::Float64ConstPtr& msg) {
     current_relative_altitude_ = *msg;
 }
+/* Battery */
+void CNCInterface::battery_callback(const sensor_msgs::BatteryStateConstPtr& msg) {
+    current_battery_ = *msg;
+}
 
 /*****************************************************
  * Threads
@@ -253,6 +257,9 @@ void CNCInterface::altitude_callback(const std_msgs::Float64ConstPtr& msg) {
 void CNCInterface::watchStateThread() {
     auto state_sub =
         n.subscribe<mavros_msgs::State>("mavros/state", 1, boost::bind(&CNCInterface::state_callback, this, _1));
+    auto battery_state_sub =
+        n.subscribe<sensor_msgs::BatteryState>("mavros/battery", 1,
+        boost::bind(&CNCInterface::battery_callback, this, _1));
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -336,6 +343,11 @@ GPSPoint CNCInterface::getTargetWaypoint() {
 /* Altitude */
 float CNCInterface::getRelativeAltitude() {
     return current_relative_altitude_.data;
+}
+
+/* Battery */
+float CNCInterface::getBatteryVoltage() {
+    return current_battery_.voltage;
 }
 
 /*****************************************************
