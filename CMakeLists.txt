@@ -121,9 +121,11 @@ include_directories(include
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/droneoa_ros.cpp
-# )
+add_library(droneoa_ros_lib
+  src/CNCInterface.cpp
+  src/GPSPoint.cpp
+  src/Utils.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -142,9 +144,6 @@ include_directories(include
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 add_executable(droneoa_ros
   src/main.cpp
-  src/CNCInterface.cpp
-  src/GPSPoint.cpp
-  src/Utils.cpp
 )
 
 ## Add cmake target dependencies of the executable
@@ -154,6 +153,7 @@ add_executable(droneoa_ros
 ## Specify libraries to link a library or executable target against
 target_link_libraries(droneoa_ros
   ${catkin_LIBRARIES}
+  droneoa_ros_lib
 )
 
 #############

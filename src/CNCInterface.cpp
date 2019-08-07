@@ -9,6 +9,7 @@
 #include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/SetMode.h>
+#include <sensor_msgs/NavSatStatus.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -16,9 +17,15 @@
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/Utils.hpp>
 
-CNCInterface::CNCInterface() {}
+CNCInterface::CNCInterface() {
+    watchHomePosThread();
+}
 
-CNCInterface::~CNCInterface() {}
+CNCInterface::~CNCInterface() {
+    delete thread_watch_Altitude_;
+    delete thread_watch_GPSFix_;
+    delete thread_watch_state_;
+}
 
 void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n = nh;
@@ -31,6 +38,9 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
 /*****************************************************
  * Mode Control
  */
+// Set Flight Mode
+// - Input: name of flight mode (please use PDN names)
+// - Return: true is operation is successful. false otherwise.
 bool CNCInterface::setMode(std::string modeName) {
     ros::ServiceClient cl = n.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
     mavros_msgs::SetMode srv_setMode;
@@ -38,6 +48,7 @@ bool CNCInterface::setMode(std::string modeName) {
     srv_setMode.request.custom_mode = modeName;
     if (cl.call(srv_setMode)) {
         ROS_INFO("setmode send ok %d value:", srv_setMode.response.mode_sent);
+        sleep(1);
         return true;
     } else {
         ROS_ERROR("Failed SetMode");
@@ -48,10 +59,17 @@ bool CNCInterface::setMode(std::string modeName) {
 /*****************************************************
  * Safety
  */
+// Arm the vehicle (include motor)
+// - Return: false if arm failed, vehicle not ready. Otherwise true
 bool CNCInterface::armVehicle() {
     ros::ServiceClient arming_cl = n.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
     mavros_msgs::CommandBool srv;
     srv.request.value = true;
+
+    if (!isReady(getMode())) {
+        ROS_ERROR("NOT READY TO ARM UNDER MODE: %s", getMode().c_str());
+        return false;
+    }
 
     if (arming_cl.call(srv)) {
         ROS_INFO("ARM send ok %d", srv.response.success);
@@ -60,6 +78,38 @@ bool CNCInterface::armVehicle() {
         ROS_ERROR("Failed arming or disarming");
         return false;
     }
+}
+
+// Check whether the vehicle is ready for to arm under certain mode
+// - Input: mode name (Only Allow: GUIDED, STABLIZED, ALT_HOLD)
+// - Return: true if ready to arm. Otherwise false
+bool CNCInterface::isReady(std::string modeName) {
+    if (!isConnected()) {
+        ROS_ERROR("VEHICLE NOT CONNECTED !!!");
+        return false;
+    }
+    if (modeName == FLT_MODE_GUIDED) {
+        if (!isHomeSet_) {
+            ROS_ERROR("No 3D Fix !!!");
+            return false;
+        }
+        if (getMode() == FLT_MODE_GUIDED) {
+            ROS_INFO("Ready To Arm GUIDED :)");
+            return true;
+        }
+    } else if (modeName == FLT_MODE_STABILIZE) {
+        if (getMode() == FLT_MODE_STABILIZE) {
+            ROS_INFO("Ready To Arm STABILIZE :)");
+            return true;
+        }
+    } else if (modeName == FLT_MODE_ALT_HOLD) {
+        if (getMode() == FLT_MODE_ALT_HOLD) {
+            ROS_INFO("Ready To Arm STABILIZE :)");
+            return true;
+        }
+    }
+    ROS_ERROR("NOT READY TO ARM !!!");
+    return false;
 }
 
 /*****************************************************
@@ -186,6 +236,11 @@ void CNCInterface::state_callback(const mavros_msgs::State::ConstPtr& msg) {
 void CNCInterface::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
     current_gps_fix_ = *msg;
 }
+/* Home Position */
+void CNCInterface::homePos_callback(const mavros_msgs::HomePositionConstPtr& msg) {
+    isHomeSet_ = true;
+    current_home_pos_ = *msg;
+}
 /* Altitude */
 void CNCInterface::altitude_callback(const std_msgs::Float64ConstPtr& msg) {
     current_relative_altitude_ = *msg;
@@ -211,6 +266,18 @@ void CNCInterface::watchGPSFixThread() {
             boost::bind(&CNCInterface::gpsFix_callback, this, _1));
 
     while (ros::ok()) {
+        ros::spinOnce();
+        r_.sleep();
+    }
+}
+/* Home Position */
+void CNCInterface::watchHomePosThread() {
+    auto home_sub =
+        n.subscribe<mavros_msgs::HomePosition>("mavros/home_position/home", 1,
+            boost::bind(&CNCInterface::homePos_callback, this, _1));
+
+    ROS_WARN("Waiting For 3D Fix ...");
+    while (ros::ok() && !isHomeSet_) {
         ros::spinOnce();
         r_.sleep();
     }
