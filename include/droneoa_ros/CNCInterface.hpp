@@ -14,6 +14,7 @@
 #include <mavros_msgs/CommandCode.h>
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/Altitude.h>
+#include <mavros_msgs/HomePosition.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <std_msgs/Float64.h>
 
@@ -23,6 +24,7 @@
 #include <boost/thread/thread.hpp>
 
 #include <droneoa_ros/GPSPoint.hpp>
+#include <droneoa_ros/PDN.hpp>
 
 class CNCInterface {
  public:
@@ -35,6 +37,7 @@ class CNCInterface {
 
     // Safety
     bool armVehicle();
+    bool isReady(std::string modeName);
 
     // Guided Flight Control
     bool takeoff(int targetAltitude);
@@ -52,6 +55,7 @@ class CNCInterface {
     // Callback
     void state_callback(const mavros_msgs::State::ConstPtr& msg);
     void gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg);
+    void homePos_callback(const mavros_msgs::HomePositionConstPtr& msg);
     void altitude_callback(const std_msgs::Float64ConstPtr& msg);
 
     // Status
@@ -81,7 +85,9 @@ class CNCInterface {
     float targetAltitude_ = 0;
     GPSPoint recentWaypoint_;
 
+    bool isHomeSet_ = false;  // Note: this value will NOT but updated after becomeing true
     mavros_msgs::State current_state_;
+    mavros_msgs::HomePosition current_home_pos_;
     sensor_msgs::NavSatFix current_gps_fix_;
     std_msgs::Float64 current_relative_altitude_;
 
@@ -91,6 +97,7 @@ class CNCInterface {
     boost::thread* thread_watch_Altitude_ = nullptr;
     void watchStateThread();
     void watchGPSFixThread();
+    void watchHomePosThread();
     void watchAltitudeThread();
 };
 

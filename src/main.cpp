@@ -10,7 +10,6 @@
 #include <iomanip>
 
 #include <droneoa_ros/CNCInterface.hpp>
-#include <droneoa_ros/PDN.hpp>
 #include <droneoa_ros/Utils.hpp>
 
 int main(int argc, char **argv) {
@@ -25,10 +24,6 @@ int main(int argc, char **argv) {
     // Interface Instance
     CNCInterface cnc;
     cnc.init(n, r);
-    cnc.setMode(FLT_MODE_GUIDED);
-    cnc.armVehicle();
-    cnc.takeoff(10);
-    sleep(10);
 
     std::string commandIn;
     while (std::cin >> commandIn) {
@@ -38,6 +33,10 @@ int main(int argc, char **argv) {
             cnc.setMode(FLT_MODE_GUIDED);
             cnc.armVehicle();
         } else if (commandIn == "takeoff") {
+            if (!cnc.isArmed()) {
+                ROS_ERROR("VEHICLE NOT ARMED !!!");
+                continue;
+            }
             cnc.takeoff(10);
             sleep(10);
         } else if (commandIn == "w") {
