@@ -64,6 +64,11 @@ int main(int argc, char **argv) {
             }
             cnc.gotoHeading(std::stoi(commandIn.substr(1)), 1000, 10);
             cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+        } else if (commandIn.front() == 'v') {
+            if (commandIn.size() == 1) {
+                commandIn = "v-1";
+            }
+            cnc.setMaxSpeed(1, std::stoi(commandIn.substr(1)), 0);
         } else {
             std::cout << "+ COMMAND HELP LIST" << std::endl;
             std::cout << "- q         - quit" << std::endl;
@@ -77,6 +82,7 @@ int main(int argc, char **argv) {
             std::cout << "- arm       - arm motor" << std::endl;
             std::cout << "- info      - print information" << std::endl;
             std::cout << "- y[number] - fly heading" << std::endl;
+            std::cout << "- v[number] - set max speed" << std::endl;
         }
     }
 

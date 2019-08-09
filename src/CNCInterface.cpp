@@ -115,7 +115,10 @@ bool CNCInterface::isReady(std::string modeName) {
 /*****************************************************
  * Guided Flight Control
  */
-bool CNCInterface::takeoff(int targetAltitude) {
+// Takeoff Command
+// - Input: float targetAltitude
+// - Return: client send response
+bool CNCInterface::takeoff(float targetAltitude) {
     ros::ServiceClient takeoff_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
     mavros_msgs::CommandTOL srv_takeoff;
     srv_takeoff.request.altitude = targetAltitude;
@@ -133,6 +136,9 @@ bool CNCInterface::takeoff(int targetAltitude) {
     }
 }
 
+// Landing Command
+// - Input: float fromAltitude (To be removed)
+// - Return: client send response
 bool CNCInterface::land(int fromAltitude) {
     ros::ServiceClient land_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/land");
     mavros_msgs::CommandTOL srv_land;
@@ -150,6 +156,9 @@ bool CNCInterface::land(int fromAltitude) {
     }
 }
 
+// Set Yaw Command
+// - Input: float targetYaw, bool isRelative (default false)
+// - Return: client send response
 bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
     ros::ServiceClient cmdLong_cl = n.serviceClient<mavros_msgs::CommandLong>("/mavros/cmd/command");
     mavros_msgs::CommandLong srv_cmdLong;
@@ -160,7 +169,7 @@ bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
     srv_cmdLong.request.param3 = 1;  // Direction -1 ccw, 1 cw
     srv_cmdLong.request.param4 = isRelative;
     if (cmdLong_cl.call(srv_cmdLong)) {
-        ROS_INFO("srv_cmdLong send ok %d", srv_cmdLong.response.success);
+        ROS_INFO("setYaw send ok %d", srv_cmdLong.response.success);
         return true;
     } else {
         ROS_ERROR("Failed set Yaw");
@@ -168,9 +177,32 @@ bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
     }
 }
 
+// Set Maximum Speed Command
+// - Input:
+// --- float speedType: (0=Airspeed, 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
+// --- float speed: (-1 indicates no change m/s)
+// --- float isRelative: (0: absolute, 1: relative)
+// - Return: client send response
+bool CNCInterface::setMaxSpeed(float speedType, float speed, float isRelative) {
+    mavros_msgs::CommandLong srv;
+    srv.request.command = mavros_msgs::CommandCode::DO_CHANGE_SPEED;
+    srv.request.param1 = speedType;
+    srv.request.param2 = speed;
+    srv.request.param3 = -1;
+    srv.request.param4 = isRelative;
+    srv.request.param5 = 0;
+    srv.request.param6 = 0;
+    srv.request.param7 = 0;
+
+    return generalLongCommand(srv);
+}
+
 /*****************************************************
  * Navigation
  */
+// Replace Home Position [Global] [USE WITH CAUTION]
+// - Input: 3D Global Coordinate
+// - Return: client send response
 bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float targetAltitude) {
     ros::ServiceClient setHome_cl =
         n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/set_home");
@@ -190,6 +222,11 @@ bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float ta
 /*****************************************************
  * Mission
  */
+// Push New Waypoint List
+// - Input: 3D Global Coordinate
+// --- uint8_t isCurrent (2 = isCurrent Guided)
+// --- uint16_t command (default NAV_WAYPOINT)
+// - Return: client send response
 bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
     ros::ServiceClient pushWP_cl = n.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
     mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
@@ -213,6 +250,8 @@ bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t
     }
 }
 
+// Clear Waypoint List
+// - Return: client send response
 bool CNCInterface::clearWaypoint() {
     ros::ServiceClient clearWP_cl = n.serviceClient<mavros_msgs::WaypointClear>("mavros/mission/clear");
     mavros_msgs::WaypointClear wp_clear_srv;
@@ -353,6 +392,7 @@ float CNCInterface::getBatteryVoltage() {
 /*****************************************************
  * User Simple Functions
  */
+// Goto Global Waypoint
 bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
     // @TODO: check Guided mode
     bool rel = false;
@@ -367,13 +407,30 @@ bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
     return rel;
 }
 
+// Goto Relative Waypoint (North+, East+)
 bool CNCInterface::gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta) {
     // @TODO: check GPS available
     GPSPoint tmpPoint = getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
     return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);
 }
 
+// Goto Target Head
 bool CNCInterface::gotoHeading(float heading, float distance, float z_alt) {
     std::pair<float, float> tempRelative = getNorthEastDistanceFromHeading(heading, distance);
     return gotoRelative(tempRelative.first, tempRelative.second, z_alt);
+}
+
+/*****************************************************
+ * Private CNC Functions
+ */
+bool CNCInterface::generalLongCommand(mavros_msgs::CommandLong commandMessage) {
+    ros::ServiceClient cmdLong_cl = n.serviceClient<mavros_msgs::CommandLong>("/mavros/cmd/command");
+    mavros_msgs::CommandLong srv_cmdLong = commandMessage;
+    if (cmdLong_cl.call(srv_cmdLong)) {
+        ROS_INFO("srv_cmdLong send ok %d", srv_cmdLong.response.success);
+        return true;
+    } else {
+        ROS_ERROR("Failed set Yaw");
+        return false;
+    }
 }

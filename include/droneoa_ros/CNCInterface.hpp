@@ -15,6 +15,7 @@
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/Altitude.h>
 #include <mavros_msgs/HomePosition.h>
+#include <mavros_msgs/CommandLong.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/BatteryState.h>
 #include <std_msgs/Float64.h>
@@ -41,9 +42,10 @@ class CNCInterface {
     bool isReady(std::string modeName);
 
     // Guided Flight Control
-    bool takeoff(int targetAltitude);
+    bool takeoff(float targetAltitude);
     bool land(int fromAltitude);
     bool setYaw(float targetYaw, bool isRelative = false);
+    bool setMaxSpeed(float speedType, float speed, float isRelative);
 
     // Navigation
     bool setHome(float targetLatitude, float targetLongitude, float targetAltitude);
@@ -104,6 +106,9 @@ class CNCInterface {
     void watchGPSFixThread();
     void watchHomePosThread();
     void watchAltitudeThread();
+
+    // Private CNC
+    bool generalLongCommand(mavros_msgs::CommandLong commandMessage);
 };
 
 #endif  // NOLINT
