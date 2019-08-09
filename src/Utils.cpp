@@ -42,3 +42,7 @@ std::pair<float, float> getNorthEastDistanceFromHeading(float heading, float dis
     float dEast = distance * sin(heading * M_PI / 180.0f);
     return std::pair<float, float>(dNorth, dEast);
 }
+
+float toRadFromDeg(float deg) {
+    return static_cast<float>(deg / 180.0f * M_PI);
+}

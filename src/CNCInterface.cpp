@@ -66,10 +66,10 @@ bool CNCInterface::armVehicle() {
     mavros_msgs::CommandBool srv;
     srv.request.value = true;
 
-    if (!isReady(getMode())) {
-        ROS_ERROR("NOT READY TO ARM UNDER MODE: %s", getMode().c_str());
-        return false;
-    }
+    // if (!isReady(getMode())) {
+    //     ROS_ERROR("NOT READY TO ARM UNDER MODE: %s", getMode().c_str());
+    //     return false;
+    // }
 
     if (arming_cl.call(srv)) {
         ROS_INFO("ARM send ok %d", srv.response.success);

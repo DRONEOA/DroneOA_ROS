@@ -122,6 +122,7 @@ include_directories(include
 
 ## Declare a C++ library
 add_library(droneoa_ros_lib
+  src/CNCInterfacePX4.cpp
   src/CNCInterface.cpp
   src/GPSPoint.cpp
   src/Utils.cpp

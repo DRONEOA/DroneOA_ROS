@@ -1,0 +1,3 @@
+<launch>
+<node pkg="droneoa_ros" name="droneoa_ros" output="screen" type="node"/>
+</launch>

@@ -22,4 +22,7 @@ float getBearing(GPSPoint point1, GPSPoint point2);
 // Get target dNorth, dEast with heading and distance
 std::pair<float, float> getNorthEastDistanceFromHeading(float heading, float distance);
 
+// Get rad from degree
+float toRadFromDeg(float deg);
+
 #endif  // NOLINT
