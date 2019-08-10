@@ -121,3 +121,21 @@ Follow this official guide:
 ### Install Realsense ROS:
 **Note:** Rmember to install all dependencies in official *.travis.yml* file
 [Install realsense-ros](https://github.com/IntelRealSense/realsense-ros/blob/development/README.md)
+
+### Launch Camera:
+Single camera:
+```shell
+roslaunch realsense2_camera rs_camera.launch
+```
+T265 Camera:
+```shell
+roslaunch realsense2_camera rs_t265.launch
+```
+Multiple camera:
+```shell
+roslaunch realsense2_camera rs_multiple_devices.launch serial_no_camera1:=<serial number of the first camera> serial_no_camera2:=<serial number of the second camera>
+```
+Check serial port:
+```shell
+rs-enumerate-devices | grep Serial
+```

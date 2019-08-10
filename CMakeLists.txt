@@ -121,10 +121,14 @@ include_directories(include
 )
 
 ## Declare a C++ library
-add_library(droneoa_ros_lib
+add_library(droneoa_ros_libcnc
   src/CNCInterface.cpp
   src/GPSPoint.cpp
   src/Utils.cpp
+)
+
+add_library(droneoa_ros_librsc
+  src/RSCInterface.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -153,7 +157,8 @@ add_executable(droneoa_ros
 ## Specify libraries to link a library or executable target against
 target_link_libraries(droneoa_ros
   ${catkin_LIBRARIES}
-  droneoa_ros_lib
+  droneoa_ros_libcnc
+  droneoa_ros_librsc
 )
 
 #############

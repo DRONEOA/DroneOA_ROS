@@ -10,6 +10,7 @@
 #include <iomanip>
 
 #include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/Utils.hpp>
 
 int main(int argc, char **argv) {
@@ -23,7 +24,9 @@ int main(int argc, char **argv) {
 
     // Interface Instance
     CNCInterface cnc;
+    RSCINterface rsc;
     cnc.init(n, r);
+    rsc.init(n, r);
 
     std::string commandIn;
     while (std::cin >> commandIn) {
