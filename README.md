@@ -1,5 +1,7 @@
 # ROS Package For Drone Obstacle Avoidance Project
 
+[![pipeline status](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/badges/master/pipeline.svg)](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/commits/master)
+
 ## Introduction
 
 ### Hardware
