@@ -8,9 +8,10 @@
 #define INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT
 
 #include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
-#include <sensor_msgs/Image.h>
 
 class RSCINterface {
  public:
@@ -32,4 +33,4 @@ class RSCINterface {
     void watchDepthImgThread();
 };
 
-#endif
+#endif  // NOLINT

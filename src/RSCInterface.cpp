@@ -1,3 +1,9 @@
+/* Copyright (C) DroneOA Group - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ */
+
 #include <droneoa_ros/RSCInterface.hpp>
 
 RSCINterface::RSCINterface() {}
