@@ -41,16 +41,19 @@ cpplint:
     - cpplint --linelength=120 ./test/*.cpp ./src/*.cpp ./include/droneoa_ros/*.hpp
     - cd ..
     - cd ..
+  retry: 3
 
 catkin_make:
   stage: build
   script:
     - catkin_make
+  retry: 3
 
 catkin tools:
   stage: build
   script:
     - catkin build --summarize --no-status --force-color
+  retry: 3
 
 Unittest:
   stage: unittest
@@ -58,3 +61,4 @@ Unittest:
     - catkin_make
     - source ./devel/setup.sh
     - rosrun droneoa_ros droneoa_ros_utiltest
+  retry: 3
