@@ -108,6 +108,11 @@ Catkin Tools:
 sudo apt-get install python-catkin-tools
 ```
 
+Install opencv tools
+```shell
+sudo apt-get install ros-melodic-perception
+```
+
 ### Setup Workspace
 Follow this local wiki page:
 [Setup For SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)

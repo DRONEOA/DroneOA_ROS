@@ -26,6 +26,7 @@ before_script:
   - apt-get install ros-melodic-diagnostic-updater -y
   - apt-get install ros-melodic-ddynamic-reconfigure -y
   - apt-get install ros-melodic-nodelet -y
+  - apt-get install ros-melodic-perception -y
   - cd src
   - git clone https://github.com/IntelRealSense/realsense-ros.git
   - cd realsense-ros/

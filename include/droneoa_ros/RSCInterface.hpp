@@ -19,8 +19,13 @@ class RSCINterface {
     virtual ~RSCINterface();
     void init(ros::NodeHandle nh, ros::Rate r);
 
+    // Getter
+
     // Callback
     void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);
+
+    // Debug Print
+    void printImgInfo();
 
  private:
     ros::NodeHandle n;
