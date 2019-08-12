@@ -113,6 +113,8 @@ Install opencv tools
 sudo apt-get install ros-melodic-perception
 ```
 
+Checkout [.gitlab-ci.yml](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/blob/master/.gitlab-ci.yml) if still missing dependencies
+
 ### Setup Workspace
 Follow this local wiki page:
 [Setup For SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
