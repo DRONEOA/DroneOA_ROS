@@ -8,10 +8,19 @@ project(droneoa_ros)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  nodelet
   mavros
   roscpp
   rospy
   std_msgs
+  sensor_msgs
+  cv_bridge
+)
+
+find_package(OpenCV REQUIRED COMPONENTS
+  core
+  highgui
+  imgproc
 )
 
 ## System dependencies are found with CMake's conventions
@@ -104,9 +113,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
- LIBRARIES droneoa_ros
-#  CATKIN_DEPENDS mavros roscpp rospy std_msgs
+  INCLUDE_DIRS include
+  LIBRARIES droneoa_ros
+  CATKIN_DEPENDS nodelet mavros roscpp rospy std_msgs sensor_msgs cv_bridge
 #  DEPENDS system_lib
 )
 
@@ -121,10 +130,14 @@ include_directories(include
 )
 
 ## Declare a C++ library
-add_library(droneoa_ros_lib
+add_library(droneoa_ros_libcnc
   src/CNCInterface.cpp
   src/GPSPoint.cpp
   src/Utils.cpp
+)
+
+add_library(droneoa_ros_librsc
+  src/RSCInterface.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -152,8 +165,10 @@ add_executable(droneoa_ros
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(droneoa_ros
+  droneoa_ros_libcnc
+  droneoa_ros_librsc
   ${catkin_LIBRARIES}
-  droneoa_ros_lib
+  ${OpenCV_LIBRARIES}
 )
 
 #############

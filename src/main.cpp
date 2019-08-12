@@ -10,6 +10,7 @@
 #include <iomanip>
 
 #include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/Utils.hpp>
 
 int main(int argc, char **argv) {
@@ -23,7 +24,9 @@ int main(int argc, char **argv) {
 
     // Interface Instance
     CNCInterface cnc;
+    RSCInterface rsc;
     cnc.init(n, r);
+    rsc.init(n, r);
 
     std::string commandIn;
     while (std::cin >> commandIn) {
@@ -58,6 +61,7 @@ int main(int argc, char **argv) {
             std::cout << "[DISPLAY] altitude: " << cnc.getRelativeAltitude() << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
             std::cout << "[DISPLAY] voltage: " << cnc.getBatteryVoltage() << std::endl;
+            rsc.printImgInfo();
         } else if (commandIn.front() == 'y') {
             if (commandIn.size() == 1) {
                 commandIn = "y0";
