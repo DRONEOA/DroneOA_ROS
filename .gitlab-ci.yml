@@ -16,7 +16,7 @@ before_script:
   - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
   - source ros_gitlab_ci/gitlab-ci.bash >/dev/null
   - echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
-  - apt-key adv --keyserver keys.gnupg.net:80 --recv-key 6F3EFCDE
+  - apt-key add ./src/droneoa_ros/scripts/realsenseKey
   - apt-get update
   - apt-get install librealsense2-dkms --allow-unauthenticated -y
   - apt-get install librealsense2-dev --allow-unauthenticated -y
