@@ -8,7 +8,7 @@
 - **OA07A** Mid Range Development Platform
     - Designed for indoor and outdoor test environment
     - OBC: Jetson nano
-    - Depth Camera: D435i
+    - Depth Camera: D435i / D435
     - Laser Scanner: RPLidar A1
     - VOI: t265
 
@@ -19,8 +19,10 @@
     - VOI: t265 [Optional]
 
 ### Software Package Component
-Required ROS packages:
+Required ROS packages / Library:
 - mavros
+- realsense ros
+- opencv
 
 Modules:
 - CNCInterface [WIP]
@@ -29,12 +31,13 @@ Modules:
         - SetMode
         - Takeoff
         - Landing
-        - Waypoint Guided
+        - Waypoint Goto (relative / global)
+        - Yaw Goto
         - Yaw Control
-        - Watcher [WIP]
+        - Watcher (Altitude, Position, Battery, State)
 - SensorInterface [WIP]
-    - Sensor data pre-processing
-    - Camera data pre-processing
+    - Sensor data pre-processing (LSInterface)
+    - Camera data pre-processing (RSCInterface)
     - "Black Box" logging
 - AIInterface [WIP]
     - Coming soon
