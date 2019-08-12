@@ -144,3 +144,6 @@ Check serial port:
 ```shell
 rs-enumerate-devices | grep Serial
 ```
+
+**Note:** If you have issue with D435i camera, please use a older version firmware:
+[Firmware Page](https://dev.intelrealsense.com/docs/firmware-releases)

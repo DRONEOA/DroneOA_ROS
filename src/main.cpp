@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
 
     // Interface Instance
     CNCInterface cnc;
-    RSCINterface rsc;
+    RSCInterface rsc;
     cnc.init(n, r);
     rsc.init(n, r);
 
@@ -61,6 +61,7 @@ int main(int argc, char **argv) {
             std::cout << "[DISPLAY] altitude: " << cnc.getRelativeAltitude() << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
             std::cout << "[DISPLAY] voltage: " << cnc.getBatteryVoltage() << std::endl;
+            rsc.printImgInfo();
         } else if (commandIn.front() == 'y') {
             if (commandIn.size() == 1) {
                 commandIn = "y0";
