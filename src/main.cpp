@@ -61,6 +61,9 @@ int main(int argc, char **argv) {
             std::cout << "[DISPLAY] altitude: " << cnc.getRelativeAltitude() << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
             std::cout << "[DISPLAY] voltage: " << cnc.getBatteryVoltage() << std::endl;
+            std::cout << "[DISPLAY] orientation: " << cnc.getIMUData().orientation.x << ", "
+                                                   << cnc.getIMUData().orientation.y << ", "
+                                                   << cnc.getIMUData().orientation.z << std::endl;
             rsc.printImgInfo();
         } else if (commandIn.front() == 'y') {
             if (commandIn.size() == 1) {
