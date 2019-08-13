@@ -6,6 +6,8 @@
 
 #include <droneoa_ros/Utils.hpp>
 #include <math.h>
+#include <fstream>
+#include <sstream>
 
 GPSPoint getLocationMeter(GPSPoint originLoc, float dNorth, float dEast) {
     // Reference: http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
@@ -41,4 +43,30 @@ std::pair<float, float> getNorthEastDistanceFromHeading(float heading, float dis
     float dNorth = distance * cos(heading * M_PI / 180.0f);
     float dEast = distance * sin(heading * M_PI / 180.0f);
     return std::pair<float, float>(dNorth, dEast);
+}
+
+float radToDeg(float rad) {
+    float degAngle = rad * 180.0 / M_PI;
+    return degAngle;
+}
+
+std::vector<float> getFloatDataFromConfig(std::string path, std::string keyName) {
+    std::ifstream infile(path);
+    std::string line;
+    std::vector<float> result;
+    while (std::getline(infile, line)) {
+        if (line.empty()) {
+            continue;
+        }
+        std::istringstream iss(line);
+        std::string s;
+        iss >> s;
+        if (s == keyName) {
+            for (; iss >> s; ) {
+                result.push_back(std::stof(s));
+            }
+            break;
+        }
+    }
+    return result;
 }

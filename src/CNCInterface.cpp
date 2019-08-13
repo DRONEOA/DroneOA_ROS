@@ -10,6 +10,7 @@
 #include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/SetMode.h>
 #include <sensor_msgs/NavSatStatus.h>
+#include <tf/tf.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -33,6 +34,7 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     thread_watch_state_ = new boost::thread(boost::bind(&CNCInterface::watchStateThread, this));
     thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
     thread_watch_Altitude_ = new boost::thread(boost::bind(&CNCInterface::watchAltitudeThread, this));
+    thread_watch_IMU_ = new boost::thread(boost::bind(&CNCInterface::watchIMUThread, this));
 }
 
 /*****************************************************
@@ -137,12 +139,12 @@ bool CNCInterface::takeoff(float targetAltitude) {
 }
 
 // Landing Command
-// - Input: float fromAltitude (To be removed)
+// - Input: float minAboutAltitude
 // - Return: client send response
-bool CNCInterface::land(int fromAltitude) {
+bool CNCInterface::land(int minAboutAltitude) {
     ros::ServiceClient land_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/land");
     mavros_msgs::CommandTOL srv_land;
-    srv_land.request.altitude = fromAltitude;
+    srv_land.request.altitude = minAboutAltitude;
     srv_land.request.latitude = 0;
     srv_land.request.longitude = 0;
     srv_land.request.min_pitch = 0;
@@ -288,6 +290,13 @@ void CNCInterface::altitude_callback(const std_msgs::Float64ConstPtr& msg) {
 void CNCInterface::battery_callback(const sensor_msgs::BatteryStateConstPtr& msg) {
     current_battery_ = *msg;
 }
+/* IMU */
+void CNCInterface::IMU_callback(const sensor_msgs::ImuConstPtr& msg) {
+    current_IMU_Data_ = *msg;
+}
+void CNCInterface::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
+    current_mag_ = *msg;
+}
 
 /*****************************************************
  * Threads
@@ -334,6 +343,21 @@ void CNCInterface::watchAltitudeThread() {
     auto relative_pos_sub =
         node->subscribe<std_msgs::Float64>("mavros/global_position/rel_alt", 1,
                 boost::bind(&CNCInterface::altitude_callback, this, _1));
+
+    while (ros::ok()) {
+        ros::spinOnce();
+        r_.sleep();
+    }
+}
+/* IMU */
+void CNCInterface::watchIMUThread() {
+    auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
+    auto IMU_data_sub =
+        node->subscribe<sensor_msgs::Imu>("mavros/imu/data", 1,
+                boost::bind(&CNCInterface::IMU_callback, this, _1));
+    // auto Mag_data_sub =
+    //     node->subscribe<sensor_msgs::MagneticField>("mavros/imu/mag", 1,
+    //             boost::bind(&CNCInterface::Mag_callback, this, _1));
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -387,6 +411,24 @@ float CNCInterface::getRelativeAltitude() {
 /* Battery */
 float CNCInterface::getBatteryVoltage() {
     return current_battery_.voltage;
+}
+
+/* IMU */
+sensor_msgs::Imu CNCInterface::getIMUData() {
+    return current_IMU_Data_;
+}
+
+geometry_msgs::Vector3 CNCInterface::getIMURawAttitude() {
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(current_IMU_Data_.orientation, q);
+    tf::Matrix3x3 m(q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+    geometry_msgs::Vector3 result;
+    result.x = roll;
+    result.y = pitch;
+    result.z = yaw;
+    return result;
 }
 
 /*****************************************************

@@ -18,6 +18,8 @@
 #include <mavros_msgs/CommandLong.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/BatteryState.h>
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 #include <std_msgs/Float64.h>
 
 #include <string>
@@ -43,7 +45,7 @@ class CNCInterface {
 
     // Guided Flight Control
     bool takeoff(float targetAltitude);
-    bool land(int fromAltitude);
+    bool land(int minAboutAltitude);
     bool setYaw(float targetYaw, bool isRelative = false);
     bool setMaxSpeed(float speedType, float speed, float isRelative);
 
@@ -61,6 +63,8 @@ class CNCInterface {
     void homePos_callback(const mavros_msgs::HomePositionConstPtr& msg);
     void altitude_callback(const std_msgs::Float64ConstPtr& msg);
     void battery_callback(const sensor_msgs::BatteryStateConstPtr& msg);
+    void IMU_callback(const sensor_msgs::ImuConstPtr& msg);
+    void Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg);
 
     // Status
     /* State */
@@ -78,6 +82,9 @@ class CNCInterface {
     float getRelativeAltitude();
     /* Battery */
     float getBatteryVoltage();
+    /* IMU */
+    sensor_msgs::Imu getIMUData();
+    geometry_msgs::Vector3 getIMURawAttitude();
 
     // User Simple Function
     bool gotoGlobal(float x_lat, float y_long, float z_alt);
@@ -96,19 +103,26 @@ class CNCInterface {
     mavros_msgs::HomePosition current_home_pos_;
     sensor_msgs::NavSatFix current_gps_fix_;
     sensor_msgs::BatteryState current_battery_;
+    sensor_msgs::MagneticField current_mag_;
     std_msgs::Float64 current_relative_altitude_;
+    sensor_msgs::Imu current_IMU_Data_;
 
     // Threads
     boost::thread* thread_watch_state_ = nullptr;
     boost::thread* thread_watch_GPSFix_ = nullptr;
     boost::thread* thread_watch_Altitude_ = nullptr;
+    boost::thread* thread_watch_IMU_ = nullptr;
     void watchStateThread();
     void watchGPSFixThread();
     void watchHomePosThread();
     void watchAltitudeThread();
+    void watchIMUThread();
 
     // Private CNC
     bool generalLongCommand(mavros_msgs::CommandLong commandMessage);
+
+    // Config
+    std::vector<float> RPYOffsets;
 };
 
 #endif  // NOLINT
