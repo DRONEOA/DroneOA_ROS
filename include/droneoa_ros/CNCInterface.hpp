@@ -16,6 +16,7 @@
 #include <mavros_msgs/Altitude.h>
 #include <mavros_msgs/HomePosition.h>
 #include <mavros_msgs/CommandLong.h>
+#include <mavros_msgs/VFR_HUD.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/BatteryState.h>
 #include <sensor_msgs/Imu.h>
@@ -65,6 +66,7 @@ class CNCInterface {
     void battery_callback(const sensor_msgs::BatteryStateConstPtr& msg);
     void IMU_callback(const sensor_msgs::ImuConstPtr& msg);
     void Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg);
+    void HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg);
 
     // Status
     /* State */
@@ -85,6 +87,7 @@ class CNCInterface {
     /* IMU */
     sensor_msgs::Imu getIMUData();
     geometry_msgs::Vector3 getIMURawAttitude();
+    mavros_msgs::VFR_HUD getHUDData();
 
     // User Simple Function
     bool gotoGlobal(float x_lat, float y_long, float z_alt);
@@ -101,6 +104,7 @@ class CNCInterface {
     bool isHomeSet_ = false;  // Note: this value will NOT be updated after becomeing true
     mavros_msgs::State current_state_;
     mavros_msgs::HomePosition current_home_pos_;
+    mavros_msgs::VFR_HUD current_hud_data_;
     sensor_msgs::NavSatFix current_gps_fix_;
     sensor_msgs::BatteryState current_battery_;
     sensor_msgs::MagneticField current_mag_;

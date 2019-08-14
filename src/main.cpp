@@ -64,6 +64,12 @@ int main(int argc, char **argv) {
             std::cout << "[DISPLAY] orientation: " << cnc.getIMUData().orientation.x << ", "
                                                    << cnc.getIMUData().orientation.y << ", "
                                                    << cnc.getIMUData().orientation.z << std::endl;
+            std::cout << "[HUD] heading: " << cnc.getHUDData().heading << std::endl;
+            std::cout << "[HUD] airspeed: " << cnc.getHUDData().airspeed << std::endl;
+            std::cout << "[HUD] groundspeed: " << cnc.getHUDData().groundspeed << std::endl;
+            std::cout << "[HUD] altitude: " << cnc.getHUDData().altitude << std::endl;
+            std::cout << "[HUD] climb: " << cnc.getHUDData().climb << std::endl;
+            std::cout << "[HUD] throttle: " << cnc.getHUDData().throttle << std::endl;
             rsc.printImgInfo();
         } else if (commandIn.front() == 'y') {
             if (commandIn.size() == 1) {

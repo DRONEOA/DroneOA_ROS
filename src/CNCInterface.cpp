@@ -298,6 +298,10 @@ void CNCInterface::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
     current_mag_ = *msg;
 }
 
+void CNCInterface::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
+    current_hud_data_ = *msg;
+}
+
 /*****************************************************
  * Threads
  */
@@ -355,6 +359,9 @@ void CNCInterface::watchIMUThread() {
     auto IMU_data_sub =
         node->subscribe<sensor_msgs::Imu>("mavros/imu/data", 1,
                 boost::bind(&CNCInterface::IMU_callback, this, _1));
+    auto HUD_data_sub =
+        node->subscribe<mavros_msgs::VFR_HUD>("mavros/vfr_hud", 1,
+                boost::bind(&CNCInterface::HUD_callback, this, _1));
     // auto Mag_data_sub =
     //     node->subscribe<sensor_msgs::MagneticField>("mavros/imu/mag", 1,
     //             boost::bind(&CNCInterface::Mag_callback, this, _1));
@@ -429,6 +436,10 @@ geometry_msgs::Vector3 CNCInterface::getIMURawAttitude() {
     result.y = pitch;
     result.z = yaw;
     return result;
+}
+
+mavros_msgs::VFR_HUD CNCInterface::getHUDData() {
+    return current_hud_data_;
 }
 
 /*****************************************************
