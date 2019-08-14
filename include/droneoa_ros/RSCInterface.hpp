@@ -20,7 +20,7 @@ class RSCInterface {
     virtual ~RSCInterface();
     void init(ros::NodeHandle nh, ros::Rate r);
 
-    // Getter
+    cv::Mat depthImgForDesiredDistanceRange(float min, float max);
 
     // Callback
     void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);

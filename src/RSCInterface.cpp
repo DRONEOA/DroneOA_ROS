@@ -94,7 +94,7 @@ void RSCInterface::drawDebugOverlay() {
         ROS_WARN("Empty Image Ignored");
         return;
     }
-    float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // NOte: row, col order
+    float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255 = getBetterImageDebug(depthFrame_);
@@ -118,4 +118,13 @@ void RSCInterface::mouseCallback(int event, int x, int y, int flags, void* userd
         debugMousePos.x = x;
         debugMousePos.y = y;
     }
+}
+
+/**
+ * Depth Image for Desired Distance Range
+ * Xiao Zhou
+ */
+
+cv::Mat RSCInterface::depthImgForDesiredDistanceRange(float min, float max) {
+    return cv::Mat();
 }
