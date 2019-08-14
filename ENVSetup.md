@@ -147,6 +147,8 @@ Check serial port:
 ```shell
 rs-enumerate-devices | grep Serial
 ```
+**Note:** If you have issue with D435i camera, please use a older version firmware:
+[Firmware Page](https://dev.intelrealsense.com/docs/firmware-releases)
 
 ## Part 4. Start SITL Development
 ### Use With SITL
@@ -157,6 +159,3 @@ rs-enumerate-devices | grep Serial
 - [Set Up Jetson OBC](http://tuotuogzs.ddns.net/droneoa/jetson-nano-obc-setup)
 - [How To Run On Real Vehicle](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Run-With-Real-Vehicle)
 
-
-**Note:** If you have issue with D435i camera, please use a older version firmware:
-[Firmware Page](https://dev.intelrealsense.com/docs/firmware-releases)
