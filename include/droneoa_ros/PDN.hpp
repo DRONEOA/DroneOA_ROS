@@ -36,4 +36,10 @@ static const char* FLT_MODE_BRAKE = "BRAKE";
 static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
+// Vehicle Data
+static const int VEHICLE_BOUNDBOX_WIDTH = 1200;  // mm
+static const int VEHICLE_BOUNDBOX_LENGTH = 1200;  // mm
+static const int VEHICLE_BOUNDBOX_HEIGHT = 1000;  // mm
+static const int VEHICLE_MAX_SPEED_HORIZONTAL = 4;  // m/s
+
 #endif  // NOLINT

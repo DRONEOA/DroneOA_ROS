@@ -25,12 +25,15 @@ OAController::OAController() {
 
 OAController::~OAController() {}
 
+// Init OA Controller
+// - Input: CNC Interface Instance
 void OAController::init(CNCInterface cnc) {
     cnc_ = cnc;
     currState_ = sysState::SYS_IDLE;
     // @todo init algorithm instances
 }
 
+// Tick Event, Automatically switch states and run handlers
 void OAController::tick() {
     if (isTerminated) {
         return;
