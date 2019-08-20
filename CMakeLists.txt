@@ -140,6 +140,11 @@ add_library(droneoa_ros_librsc
   src/RSCInterface.cpp
 )
 
+add_library(droneoa_ros_liboa
+  src/OAController.cpp
+  src/OAUtils/BaseAlg.cpp
+)
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -167,6 +172,7 @@ add_executable(droneoa_ros
 target_link_libraries(droneoa_ros
   droneoa_ros_libcnc
   droneoa_ros_librsc
+  droneoa_ros_liboa
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )
