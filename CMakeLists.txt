@@ -140,6 +140,10 @@ add_library(droneoa_ros_librsc
   src/RSCInterface.cpp
 )
 
+add_library(droneoa_ros_liblidar
+  src/LidarInterface.cpp
+)
+
 add_library(droneoa_ros_liboa
   src/OAController.cpp
   src/OAUtils/BaseAlg.cpp
@@ -173,6 +177,7 @@ target_link_libraries(droneoa_ros
   droneoa_ros_libcnc
   droneoa_ros_librsc
   droneoa_ros_liboa
+  droneoa_ros_liblidar
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
 )

@@ -29,6 +29,7 @@ before_script:
   - apt-get install ros-melodic-perception -y
   - cd src
   - git clone https://github.com/IntelRealSense/realsense-ros.git
+  - git clone https://github.com/YDLIDAR/ydlidar_ros.git
   - cd realsense-ros/
   - git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
   - cd ..
