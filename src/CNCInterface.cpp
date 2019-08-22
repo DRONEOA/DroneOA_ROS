@@ -48,6 +48,7 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
     thread_watch_Altitude_ = new boost::thread(boost::bind(&CNCInterface::watchAltitudeThread, this));
     thread_watch_IMU_ = new boost::thread(boost::bind(&CNCInterface::watchIMUThread, this));
+    ROS_INFO("[CNC] init");
 }
 
 /*****************************************************
@@ -134,6 +135,7 @@ bool CNCInterface::isReady(std::string modeName) {
 // - Input: float targetAltitude
 // - Return: client send response
 bool CNCInterface::takeoff(float targetAltitude) {
+    targetAltitude = validSpeedCMD(targetAltitude);
     ros::ServiceClient takeoff_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
     mavros_msgs::CommandTOL srv_takeoff;
     srv_takeoff.request.altitude = targetAltitude;
@@ -199,6 +201,7 @@ bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
 // --- float isRelative: (0: absolute, 1: relative)
 // - Return: client send response
 bool CNCInterface::setMaxSpeed(float speedType, float speed, float isRelative) {
+    speed = validSpeedCMD(speed);
     mavros_msgs::CommandLong srv;
     srv.request.command = mavros_msgs::CommandCode::DO_CHANGE_SPEED;
     srv.request.param1 = speedType;
@@ -243,6 +246,7 @@ bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float ta
 // --- uint16_t command (default NAV_WAYPOINT)
 // - Return: client send response
 bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
+    z_alt = validSpeedCMD(z_alt);
     ros::ServiceClient pushWP_cl = n.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
     mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
     mavros_msgs::Waypoint wp;

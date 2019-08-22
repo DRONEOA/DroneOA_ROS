@@ -39,7 +39,9 @@ int main(int argc, char **argv) {
     CNCInterface cnc;
     RSCInterface rsc;
     cnc.init(n, r);
-    rsc.init(n, r);
+    if (ENABLE_RSC) {
+        rsc.init(n, r);
+    }
 
     std::string commandIn;
     while (std::cin >> commandIn) {
@@ -83,7 +85,9 @@ int main(int argc, char **argv) {
             std::cout << "[HUD] altitude: " << cnc.getHUDData().altitude << std::endl;
             std::cout << "[HUD] climb: " << cnc.getHUDData().climb << std::endl;
             std::cout << "[HUD] throttle: " << cnc.getHUDData().throttle << std::endl;
-            rsc.printImgInfo();
+            if (ENABLE_RSC) {
+                rsc.printImgInfo();
+            }
         } else if (commandIn.front() == 'y') {
             if (commandIn.size() == 1) {
                 commandIn = "y0";

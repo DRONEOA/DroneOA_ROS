@@ -18,10 +18,12 @@
  * All Reference Attached
  */
 
-#include <droneoa_ros/Utils.hpp>
 #include <math.h>
+#include <ros/ros.h>
 #include <fstream>
 #include <sstream>
+#include <droneoa_ros/Utils.hpp>
+#include <droneoa_ros/PDN.hpp>
 
 GPSPoint getLocationMeter(GPSPoint originLoc, float dNorth, float dEast) {
     // Reference: http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
@@ -83,4 +85,20 @@ std::vector<float> getFloatDataFromConfig(std::string path, std::string keyName)
         }
     }
     return result;
+}
+
+float validAltitudeCMD(float targetAltitude) {
+    if (targetAltitude > VEHICLE_MAX_ALTITUDE_RELATIVE) {
+        ROS_WARN("target altitude exceed max allowed altitude !");
+        return VEHICLE_MAX_ALTITUDE_RELATIVE;
+    }
+    return targetAltitude;
+}
+
+float validSpeedCMD(float targetSpeed) {
+    if (targetSpeed > VEHICLE_MAX_SPEED_HORIZONTAL) {
+        ROS_WARN("target speed exceed max allowed speed !");
+        return VEHICLE_MAX_SPEED_HORIZONTAL;
+    }
+    return targetSpeed;
 }

@@ -40,6 +40,13 @@ static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 static const int VEHICLE_BOUNDBOX_WIDTH = 1200;  // mm
 static const int VEHICLE_BOUNDBOX_LENGTH = 1200;  // mm
 static const int VEHICLE_BOUNDBOX_HEIGHT = 1000;  // mm
-static const int VEHICLE_MAX_SPEED_HORIZONTAL = 4;  // m/s
+static const int VEHICLE_MAX_SPEED_HORIZONTAL = 12;  // m/s
+static const float VEHICLE_MAX_ALTITUDE_RELATIVE = 10;  // m
+
+// Module Enable
+static const bool ENABLE_RSC = true;
+static const bool ENABLE_LIDAR = true;
+static const bool ENABLE_AI = true;
+static const bool ENABLE_NGN = true;
 
 #endif  // NOLINT

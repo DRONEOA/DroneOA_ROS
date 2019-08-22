@@ -31,6 +31,7 @@ void OAController::init(CNCInterface cnc) {
     cnc_ = cnc;
     currState_ = sysState::SYS_IDLE;
     // @todo init algorithm instances
+    ROS_INFO("[OACONTROLLER] init");
 }
 
 // Tick Event, Automatically switch states and run handlers

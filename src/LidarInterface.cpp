@@ -29,6 +29,7 @@ void LidarInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n_ = nh;
     r_ = r;
     thread_watch_lidar_ = new boost::thread(boost::bind(&LidarInterface::watchLidarThread, this));
+    ROS_INFO("[LIDAR] init");
 }
 
 /* Callback */
