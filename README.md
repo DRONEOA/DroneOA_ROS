@@ -9,13 +9,14 @@
     - Designed for indoor and outdoor test environment
     - OBC: Jetson nano
     - Depth Camera: D435i / D435
-    - Laser Scanner: RPLidar A1
+    - Laser Scanner: RPLidar A1 / YDLidar X2L
     - VOI: t265
 
 - **OA07S** Short Range Low-Cost Development Platform [WIP]
     - Designed for indoor and outdoor test environment
     - OBC: Jetson nano
     - Depth Camera: SR305
+    - Laser Scanner: YDLidar X2L
     - VOI: t265 [Optional]
 
 ### Software Package Component
@@ -36,7 +37,7 @@ Modules:
         - Yaw Control
         - Watcher (Altitude, Position, Battery, State, Velocity, Orientation)
 - SensorInterface [WIP]
-    - Sensor data pre-processing (LSInterface)
+    - Lidar data pre-processing (LidarInterface)
     - Camera data pre-processing (RSCInterface)
     - "Black Box" logging
 - AIInterface [WIP]
