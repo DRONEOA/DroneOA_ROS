@@ -24,6 +24,7 @@
 
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/RSCInterface.hpp>
+#include <droneoa_ros/LidarInterface.hpp>
 #include <droneoa_ros/Utils.hpp>
 
 int main(int argc, char **argv) {
@@ -38,8 +39,14 @@ int main(int argc, char **argv) {
     // Interface Instance
     CNCInterface cnc;
     RSCInterface rsc;
+    LidarInterface lidar;
     cnc.init(n, r);
-    rsc.init(n, r);
+    if (ENABLE_RSC) {
+        rsc.init(n, r);
+    }
+    if (ENABLE_LIDAR) {
+        lidar.init(n, r);
+    }
 
     std::string commandIn;
     while (std::cin >> commandIn) {
@@ -83,7 +90,12 @@ int main(int argc, char **argv) {
             std::cout << "[HUD] altitude: " << cnc.getHUDData().altitude << std::endl;
             std::cout << "[HUD] climb: " << cnc.getHUDData().climb << std::endl;
             std::cout << "[HUD] throttle: " << cnc.getHUDData().throttle << std::endl;
-            rsc.printImgInfo();
+            if (ENABLE_RSC) {
+                rsc.printImgInfo();
+            }
+            if (ENABLE_LIDAR) {
+                lidar.printLidarInfo();
+            }
         } else if (commandIn.front() == 'y') {
             if (commandIn.size() == 1) {
                 commandIn = "y0";

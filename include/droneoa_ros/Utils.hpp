@@ -45,4 +45,10 @@ float radToDeg(float rad);
 // Format: <key> <data1> <data2> ...
 std::vector<float> getFloatDataFromConfig(std::string path, std::string keyName);
 
+// Chack target altitude, if exceed max allowed, set to max
+float validAltitudeCMD(float targetAltitude);
+
+// Chack target speed, if exceed max allowed, set to max
+float validSpeedCMD(float targetSpeed);
+
 #endif  // NOLINT

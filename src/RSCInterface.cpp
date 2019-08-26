@@ -41,6 +41,7 @@ void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     cv::startWindowThread();  // DEBUG
     cv::setMouseCallback(OPENCV_WINDOW, RSCInterface::mouseCallback, NULL);  // DEBUG
     thread_watch_depth_img_ = new boost::thread(boost::bind(&RSCInterface::watchDepthImgThread, this));
+    ROS_INFO("[RSC] init");
 }
 
 /* Callback */
