@@ -44,6 +44,9 @@ class LidarInterface {
     std::vector<float> getScannerDataVec();
     float getIncreament();
 
+    // Debug
+    void printLidarInfo();
+
  private:
     ros::NodeHandle n_;
     ros::Rate r_ = ros::Rate(10.0);

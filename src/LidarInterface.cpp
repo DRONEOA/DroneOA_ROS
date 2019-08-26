@@ -73,3 +73,11 @@ std::vector<float> LidarInterface::getScannerDataVec() {
 float LidarInterface::getIncreament() {
     return scannerData_.angle_increment;
 }
+
+/* Debug */
+void LidarInterface::printLidarInfo() {
+    ROS_INFO("[LIDAR] MaxRange: %f, MinRange: %f",
+        getMaxRange(), getMinRnage());
+    ROS_INFO("[LIDAR] MaxAngle: %f, MinAngle: %f, Increment: %f",
+        getMaxAngle(), getMinAngle(), getIncreament());
+}

@@ -37,7 +37,7 @@ Modules:
         - Yaw Control
         - Watcher (Altitude, Position, Battery, State, Velocity, Orientation)
 - SensorInterface [WIP]
-    - Sensor data pre-processing (LSInterface)
+    - Lidar data pre-processing (LidarInterface)
     - Camera data pre-processing (RSCInterface)
     - "Black Box" logging
 - AIInterface [WIP]
