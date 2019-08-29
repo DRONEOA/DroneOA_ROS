@@ -121,6 +121,7 @@ int main(int argc, char **argv) {
             std::cout << "- info      - print information" << std::endl;
             std::cout << "- y[number] - fly heading" << std::endl;
             std::cout << "- v[number] - set max speed" << std::endl;
+            std::cout << "- r[number]-[number] - set range" << std::endl;
         }
     }
 
