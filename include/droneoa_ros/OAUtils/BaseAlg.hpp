@@ -17,16 +17,26 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <droneoa_ros/GPSPoint.hpp>
+#ifndef INCLUDE_DRONEOA_ROS_BASEALG_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_BASEALG_HPP_  // NOLINT
 
-GPSPoint::GPSPoint() {
-    latitude_ = 0;
-    longitude_ = 0;
-    altitude_ = 0;
-}
+#include <droneoa_ros/CNCInterface.hpp>
 
-GPSPoint::GPSPoint(float latitude, float longitude, float altitude) {
-    latitude_ = latitude;
-    longitude_ = longitude;
-    altitude_ = altitude;
-}
+class BaseAlg {
+ public:
+    BaseAlg();
+    virtual ~BaseAlg();
+
+    virtual void init(CNCInterface cnc);
+    virtual void collect();  // Collect required sensor data
+    virtual bool plan();  // Return false when get around is impossible
+
+    virtual float getRelativeTurn();
+    virtual float getNewSpeed();
+    virtual GPSPoint getNextWaypointRelative();
+    virtual GPSPoint getNextWaypointGlobal();
+ private:
+    CNCInterface cnc_;
+};
+
+#endif  // NOLINT

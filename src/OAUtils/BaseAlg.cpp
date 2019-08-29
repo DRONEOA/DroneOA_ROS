@@ -17,16 +17,34 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <droneoa_ros/GPSPoint.hpp>
+#include <droneoa_ros/OAUtils/BaseAlg.hpp>
 
-GPSPoint::GPSPoint() {
-    latitude_ = 0;
-    longitude_ = 0;
-    altitude_ = 0;
+void BaseAlg::init(CNCInterface cnc) {
+    cnc_ = cnc;
 }
 
-GPSPoint::GPSPoint(float latitude, float longitude, float altitude) {
-    latitude_ = latitude;
-    longitude_ = longitude;
-    altitude_ = altitude;
+BaseAlg::BaseAlg() {}
+
+BaseAlg::~BaseAlg() {}
+
+void BaseAlg::collect() {}
+
+bool BaseAlg::plan() {
+    return true;
+}
+
+float BaseAlg::getRelativeTurn() {
+    return 0;
+}
+
+float BaseAlg::getNewSpeed() {
+    return 0;
+}
+
+GPSPoint BaseAlg::getNextWaypointRelative() {
+    return GPSPoint();
+}
+
+GPSPoint BaseAlg::getNextWaypointGlobal() {
+    return GPSPoint();
 }

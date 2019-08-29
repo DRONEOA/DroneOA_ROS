@@ -1,6 +1,19 @@
-/* Copyright (C) DroneOA Group - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
+/* Copyright (C) 2019 DroneOA Group - All Rights Reserved
+ * This file is part of DroneOA_ROS.
+ *
+ * DroneOA_ROS is free software: you can redistribute it and/or 
+ * modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation.
+ *
+ * DroneOA_ROS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with DroneOA_ROS. 
+ * If not, see <https://www.gnu.org/licenses/>.
+ *
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
@@ -35,6 +48,7 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
     thread_watch_Altitude_ = new boost::thread(boost::bind(&CNCInterface::watchAltitudeThread, this));
     thread_watch_IMU_ = new boost::thread(boost::bind(&CNCInterface::watchIMUThread, this));
+    ROS_INFO("[CNC] init");
 }
 
 /*****************************************************
@@ -121,6 +135,7 @@ bool CNCInterface::isReady(std::string modeName) {
 // - Input: float targetAltitude
 // - Return: client send response
 bool CNCInterface::takeoff(float targetAltitude) {
+    targetAltitude = validSpeedCMD(targetAltitude);
     ros::ServiceClient takeoff_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
     mavros_msgs::CommandTOL srv_takeoff;
     srv_takeoff.request.altitude = targetAltitude;
@@ -186,6 +201,7 @@ bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
 // --- float isRelative: (0: absolute, 1: relative)
 // - Return: client send response
 bool CNCInterface::setMaxSpeed(float speedType, float speed, float isRelative) {
+    speed = validSpeedCMD(speed);
     mavros_msgs::CommandLong srv;
     srv.request.command = mavros_msgs::CommandCode::DO_CHANGE_SPEED;
     srv.request.param1 = speedType;
@@ -230,6 +246,7 @@ bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float ta
 // --- uint16_t command (default NAV_WAYPOINT)
 // - Return: client send response
 bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
+    z_alt = validSpeedCMD(z_alt);
     ros::ServiceClient pushWP_cl = n.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
     mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
     mavros_msgs::Waypoint wp;
@@ -298,6 +315,10 @@ void CNCInterface::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
     current_mag_ = *msg;
 }
 
+void CNCInterface::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
+    current_hud_data_ = *msg;
+}
+
 /*****************************************************
  * Threads
  */
@@ -355,6 +376,9 @@ void CNCInterface::watchIMUThread() {
     auto IMU_data_sub =
         node->subscribe<sensor_msgs::Imu>("mavros/imu/data", 1,
                 boost::bind(&CNCInterface::IMU_callback, this, _1));
+    auto HUD_data_sub =
+        node->subscribe<mavros_msgs::VFR_HUD>("mavros/vfr_hud", 1,
+                boost::bind(&CNCInterface::HUD_callback, this, _1));
     // auto Mag_data_sub =
     //     node->subscribe<sensor_msgs::MagneticField>("mavros/imu/mag", 1,
     //             boost::bind(&CNCInterface::Mag_callback, this, _1));
@@ -429,6 +453,10 @@ geometry_msgs::Vector3 CNCInterface::getIMURawAttitude() {
     result.y = pitch;
     result.z = yaw;
     return result;
+}
+
+mavros_msgs::VFR_HUD CNCInterface::getHUDData() {
+    return current_hud_data_;
 }
 
 /*****************************************************

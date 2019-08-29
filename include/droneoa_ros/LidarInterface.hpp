@@ -17,46 +17,46 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_  // NOLINT
 
 #include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-#include <opencv2/core/core.hpp>
+#include <sensor_msgs/LaserScan.h>
 
+#include <vector>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
-class RSCInterface {
+class LidarInterface {
  public:
-    RSCInterface();
-    virtual ~RSCInterface();
+    LidarInterface();
+    virtual ~LidarInterface();
     void init(ros::NodeHandle nh, ros::Rate r);
 
-    cv::Mat depthImgForDesiredDistanceRange(float min, float max);
-
     // Callback
-    void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);
+    void lidar_callback(const sensor_msgs::LaserScanConstPtr& msg);
 
-    // Debug Print
-    void printImgInfo();
-    static void mouseCallback(int event, int x, int y, int flags, void* userdata);
+    // Accesser
+    float getMaxAngle();
+    float getMinAngle();
+    float getMaxRange();
+    float getMinRnage();
+    std::vector<float> getScannerDataVec();
+    float getIncreament();
+
+    // Debug
+    void printLidarInfo();
 
  private:
-    ros::NodeHandle n;
+    ros::NodeHandle n_;
     ros::Rate r_ = ros::Rate(10.0);
 
     // Data
-    sensor_msgs::Image depthImage_;
-    cv::Mat depthFrame_;
+    sensor_msgs::LaserScan scannerData_;
 
     // Threads
-    boost::thread* thread_watch_depth_img_ = nullptr;
-    void watchDepthImgThread();
-
-    // Debug
-    void drawDebugOverlay();
-    static cv::Point debugMousePos;
+    boost::thread* thread_watch_lidar_ = nullptr;
+    void watchLidarThread();
 };
 
 #endif  // NOLINT
