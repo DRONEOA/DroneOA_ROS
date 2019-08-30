@@ -142,9 +142,8 @@ void RSCInterface::mouseCallback(int event, int x, int y, int flags, void* userd
     }
 }
 
-/**
- * Depth Image for Desired Distance Range
- * Xiao Zhou
+/*****************************************************
+ * Range Filter
  */
 
 cv::Mat RSCInterface::depthImgForDesiredDistanceRange(float min, float max, cv::Mat input) {
