@@ -114,7 +114,7 @@ void RSCInterface::drawDebugOverlay() {
 
     cv::Mat debugImage255;
     if (rangeSwitch) {
-        cv::Mat rangedDebugImage = depthImgForDesiredDistanceRange(400, 600, depthFrame_);
+        cv::Mat rangedDebugImage = depthImgForDesiredDistanceRange(rangeMin, rangeMax, depthFrame_);
         debugImage255 = getBetterImageDebug(rangedDebugImage);
     } else {
         debugImage255 = getBetterImageDebug(depthFrame_);
@@ -156,4 +156,13 @@ cv::Mat RSCInterface::depthImgForDesiredDistanceRange(float min, float max, cv::
         }
     }
     return adjMap;
+}
+
+void RSCInterface::setRangeSwitch(bool status) {
+    rangeSwitch = status;
+}
+
+void RSCInterface::setRange(float min, float max) {
+    rangeMin = min;
+    rangeMax = max;
 }
