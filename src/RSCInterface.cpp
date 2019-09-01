@@ -108,10 +108,18 @@ void RSCInterface::drawDebugOverlay() {
         ROS_WARN("Empty Image Ignored");
         return;
     }
-    float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // NOte: row, col order
+
+    float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
-    cv::Mat debugImage255 = getBetterImageDebug(depthFrame_);
+    cv::Mat debugImage255;
+    if (rangeSwitch) {
+        cv::Mat rangedDebugImage = depthImgForDesiredDistanceRange(rangeMin, rangeMax, depthFrame_);
+        debugImage255 = getBetterImageDebug(rangedDebugImage);
+    } else {
+        debugImage255 = getBetterImageDebug(depthFrame_);
+    }
+
     drawText(debugImage255, cv::Point(20, 20), "Debug Overlay:", 0.5, 1);
     drawText(debugImage255, cv::Point(20, 40), centerDistStr, 0.5, 1);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y - 7),
@@ -132,4 +140,29 @@ void RSCInterface::mouseCallback(int event, int x, int y, int flags, void* userd
         debugMousePos.x = x;
         debugMousePos.y = y;
     }
+}
+
+/*****************************************************
+ * Range Filter
+ */
+
+cv::Mat RSCInterface::depthImgForDesiredDistanceRange(float min, float max, cv::Mat input) {
+    cv::Mat adjMap = input.clone();
+    for (int y=0; y < adjMap.rows; y++) {
+        for (int x=0; x < adjMap.cols; x++) {
+            if (adjMap.at<float>(cv::Point(x, y)) < min || adjMap.at<float>(cv::Point(x, y)) > max) {
+                adjMap.at<float>(cv::Point(x, y)) = 0;
+            }
+        }
+    }
+    return adjMap;
+}
+
+void RSCInterface::setRangeSwitch(bool status) {
+    rangeSwitch = status;
+}
+
+void RSCInterface::setRange(float min, float max) {
+    rangeMin = min;
+    rangeMax = max;
 }

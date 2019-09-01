@@ -107,6 +107,17 @@ int main(int argc, char **argv) {
                 commandIn = "v-1";
             }
             cnc.setMaxSpeed(1, std::stoi(commandIn.substr(1)), 0);
+        } else if (commandIn.front() == 'r') {
+            commandIn = commandIn.substr(1);
+            if (commandIn.front() == 'c') {
+                rsc.setRangeSwitch(false);
+            } else {
+                size_t mid = commandIn.find('-');
+                int min = std::stoi(commandIn.substr(0, mid), 0);
+                int max = std::stoi(commandIn.substr(mid+1), 0);
+                rsc.setRange(min, max);
+                rsc.setRangeSwitch(true);
+            }
         } else {
             std::cout << "+ COMMAND HELP LIST" << std::endl;
             std::cout << "- q         - quit" << std::endl;
@@ -121,6 +132,8 @@ int main(int argc, char **argv) {
             std::cout << "- info      - print information" << std::endl;
             std::cout << "- y[number] - fly heading" << std::endl;
             std::cout << "- v[number] - set max speed" << std::endl;
+            std::cout << "- r[min]-[max] - set range" << std::endl;
+            std::cout << "- rc - cancel range" << std::endl;
         }
     }
 
