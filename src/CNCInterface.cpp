@@ -135,7 +135,7 @@ bool CNCInterface::isReady(std::string modeName) {
 // - Input: float targetAltitude
 // - Return: client send response
 bool CNCInterface::takeoff(float targetAltitude) {
-    targetAltitude = validSpeedCMD(targetAltitude);
+    targetAltitude = validAltitudeCMD(targetAltitude);
     ros::ServiceClient takeoff_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
     mavros_msgs::CommandTOL srv_takeoff;
     srv_takeoff.request.altitude = targetAltitude;
