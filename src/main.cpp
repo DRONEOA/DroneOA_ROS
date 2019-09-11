@@ -21,11 +21,26 @@
 
 #include <cstdlib>
 #include <iomanip>
+#include <sstream>
 
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/LidarInterface.hpp>
 #include <droneoa_ros/Utils.hpp>
+
+float getFloatCmdArg(std::stringstream& ss) {
+    float result = 0.0;
+    if (!ss.eof()) {
+        std::string tmp;
+        ss >> tmp;
+        try {
+            result = std::stof(tmp);
+        } catch (...) {
+            result = 0.0;
+        }
+    }
+    return result;
+}
 
 int main(int argc, char **argv) {
     // Setup Refresh Rate
@@ -48,36 +63,65 @@ int main(int argc, char **argv) {
         lidar.init(n, r);
     }
 
+    // Command Paser
+    // Only For Testing
+    // @todo Do we need a command line based direct control interface and a command queue in final product ?
     std::string commandIn;
-    while (std::cin >> commandIn) {
-        if (commandIn == "q") {
+    while (std::getline(std::cin, commandIn)) {
+        std::stringstream ss;
+        ss << commandIn;
+        std::string cmdType;
+        ss >> cmdType;
+
+        if (cmdType == "quit") {
             break;
-        } else if (commandIn == "arm") {
+        } else if (cmdType == "arm") {
             cnc.setMode(FLT_MODE_GUIDED);
             cnc.armVehicle();
-        } else if (commandIn == "takeoff") {
+        } else if (cmdType == "takeoff") {
             if (!cnc.isArmed()) {
-                ROS_ERROR("VEHICLE NOT ARMED !!!");
+                std::cerr << "VEHICLE NOT ARMED !!!" << std::endl;
                 continue;
             }
-            cnc.takeoff(10);
+            cnc.takeoff(getFloatCmdArg(ss));
             sleep(10);
-        } else if (commandIn == "w") {
-            cnc.gotoRelative(100, 0, 10);
-        } else if (commandIn == "s") {
-            cnc.gotoRelative(-100, 0, 10);
-        } else if (commandIn == "a") {
-            cnc.gotoRelative(0, -100, 10);
-        } else if (commandIn == "d") {
-            cnc.gotoRelative(0, 100, 10);
-        } else if (commandIn == "rtl") {
+        } else if (cmdType == "w") {
+            float dist = getFloatCmdArg(ss);
+            float alt = getFloatCmdArg(ss);
+            if (alt == 0.0) {
+                alt = cnc.getTargetAltitude();
+            }
+            cnc.gotoRelative(dist, 0, alt);
+        } else if (cmdType == "s") {
+            float dist = getFloatCmdArg(ss);
+            float alt = getFloatCmdArg(ss);
+            if (alt == 0.0) {
+                alt = cnc.getTargetAltitude();
+            }
+            cnc.gotoRelative(-dist, 0, alt);
+        } else if (cmdType == "a") {
+            float dist = getFloatCmdArg(ss);
+            float alt = getFloatCmdArg(ss);
+            if (alt == 0.0) {
+                alt = cnc.getTargetAltitude();
+            }
+            cnc.gotoRelative(0, -dist, alt);
+        } else if (cmdType == "d") {
+            float dist = getFloatCmdArg(ss);
+            float alt = getFloatCmdArg(ss);
+            if (alt == 0.0) {
+                alt = cnc.getTargetAltitude();
+            }
+            cnc.gotoRelative(0, dist, alt);
+        } else if (cmdType == "rtl") {
             cnc.setMode(FLT_MODE_RTL);
-        } else if (commandIn == "land") {
-            cnc.land(10);
-        } else if (commandIn == "info") {
+        } else if (cmdType == "land") {
+            cnc.land(1);
+        } else if (cmdType == "info") {
             GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
+            std::cout << ">>>>>>>>>> INFO START <<<<<<<<<<" << std::endl;
             std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " "
-                << tmpGPSPoint.longitude_<< " " << std::endl;
+                                           << tmpGPSPoint.longitude_<< " " << std::endl;
             std::cout << "[DISPLAY] altitude: " << cnc.getRelativeAltitude() << std::endl;
             std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
             std::cout << "[DISPLAY] voltage: " << cnc.getBatteryVoltage() << std::endl;
@@ -96,18 +140,28 @@ int main(int argc, char **argv) {
             if (ENABLE_LIDAR) {
                 lidar.printLidarInfo();
             }
-        } else if (commandIn.front() == 'y') {
-            if (commandIn.size() == 1) {
-                commandIn = "y0";
+            std::cout << ">>>>>>>>>> INFO END  <<<<<<<<<<" << std::endl;
+        } else if (cmdType == "yaw") {
+            float yawAngle = getFloatCmdArg(ss);
+            float dist = getFloatCmdArg(ss);
+            if (dist == 0.0) {
+                dist = 1000;
             }
-            cnc.gotoHeading(std::stoi(commandIn.substr(1)), 1000, 10);
+            float alt = getFloatCmdArg(ss);
+            if (alt == 0.0) {
+                alt = cnc.getTargetAltitude();
+            }
+            cnc.gotoHeading(yawAngle, dist, alt);
             cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-        } else if (commandIn.front() == 'v') {
-            if (commandIn.size() == 1) {
-                commandIn = "v-1";
+        } else if (cmdType == "velocity") {
+            float vel = getFloatCmdArg(ss);
+            if (vel == 0.0) {
+                std::cerr << "Invalid Speed Setting" << std::endl;
+                continue;
             }
-            cnc.setMaxSpeed(1, std::stoi(commandIn.substr(1)), 0);
+            cnc.setMaxSpeed(1, vel, 0);
         } else if (commandIn.front() == 'r') {
+            // @todo refactor this command to: rsc range [max] [min]
             commandIn = commandIn.substr(1);
             if (commandIn.front() == 'c') {
                 rsc.setRangeSwitch(false);
@@ -119,21 +173,24 @@ int main(int argc, char **argv) {
                 rsc.setRangeSwitch(true);
             }
         } else {
+            std::cout << ">>>>>>>>>> HELP START <<<<<<<<<<" << std::endl;
             std::cout << "+ COMMAND HELP LIST" << std::endl;
-            std::cout << "- q         - quit" << std::endl;
-            std::cout << "- w         - move north" << std::endl;
-            std::cout << "- s         - move south" << std::endl;
-            std::cout << "- a         - move west" << std::endl;
-            std::cout << "- d         - move east" << std::endl;
-            std::cout << "- rtl       - return to home" << std::endl;
-            std::cout << "- land      - land" << std::endl;
-            std::cout << "- takeoff   - takeoff" << std::endl;
-            std::cout << "- arm       - arm motor" << std::endl;
-            std::cout << "- info      - print information" << std::endl;
-            std::cout << "- y[number] - fly heading" << std::endl;
-            std::cout << "- v[number] - set max speed" << std::endl;
-            std::cout << "- r[min]-[max] - set range" << std::endl;
-            std::cout << "- rc - cancel range" << std::endl;
+            std::cout << "+ Argument [] is required, <> is optional" << std::endl;
+            std::cout << "- quit                       - quit" << std::endl;
+            std::cout << "- w [dist] <alt>             - move north" << std::endl;
+            std::cout << "- s [dist] <alt>             - move south" << std::endl;
+            std::cout << "- a [dist] <alt>             - move west" << std::endl;
+            std::cout << "- d [dist] <alt>             - move east" << std::endl;
+            std::cout << "- rtl                        - return to home" << std::endl;
+            std::cout << "- land                       - land" << std::endl;
+            std::cout << "- takeoff [alt]              - takeoff to altitude" << std::endl;
+            std::cout << "- arm                        - arm motor" << std::endl;
+            std::cout << "- info                       - print information" << std::endl;
+            std::cout << "- yaw [heading] <dist> <alt> - fly heading" << std::endl;
+            std::cout << "- velocity [speed]           - set max speed" << std::endl;
+            std::cout << "- r[min]-[max]               - set range" << std::endl;
+            std::cout << "- rc                         - cancel range" << std::endl;
+            std::cout << ">>>>>>>>>> HELP END  <<<<<<<<<<" << std::endl;
         }
     }
 
