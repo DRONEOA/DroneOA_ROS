@@ -116,10 +116,6 @@ sudo apt-get install ros-melodic-perception
 
 Checkout [.gitlab-ci.yml](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/blob/master/.gitlab-ci.yml) if still missing dependencies
 
-### Setup Workspace
-Follow this local wiki page:
-[Setup For SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
-
 ## Part 3. Setup Realsense
 
 ### Install Realsense SDK2.0
@@ -151,6 +147,11 @@ rs-enumerate-devices | grep Serial
 [Firmware Page](https://dev.intelrealsense.com/docs/firmware-releases)
 
 ## Part 4. Start SITL Development
+
+### Setup Workspace
+Follow this local wiki page:
+[Setup For SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
+
 ### Use With SITL
 - [How To Run With SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
 - [SITL With Gazebo](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
