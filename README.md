@@ -5,19 +5,8 @@
 ## Introduction
 
 ### Hardware
-- **OA07A** Mid Range Development Platform
-    - Designed for indoor and outdoor test environment
-    - OBC: Jetson nano
-    - Depth Camera: D435i / D435
-    - Laser Scanner: RPLidar A1 / YDLidar X2L
-    - VOI: t265
-
-- **OA07S** Short Range Low-Cost Development Platform [WIP]
-    - Designed for indoor and outdoor test environment
-    - OBC: Jetson nano
-    - Depth Camera: SR305
-    - Laser Scanner: YDLidar X2L
-    - VOI: t265 [Optional]
+- [OA450](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Test-Vehicle-OA450)
+- OA650
 
 ### Software Package Component
 Required ROS packages / Library:
@@ -39,13 +28,15 @@ Modules:
 - SensorInterface [WIP]
     - Lidar data pre-processing (LidarInterface)
     - Camera data pre-processing (RSCInterface)
+        - Distance Filtering
+        - Flight Path Filtering
     - "Black Box" logging
 - AIInterface [WIP]
     - Coming soon
-- OAController [WIP]
+- OAController [Stage 1](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Stage-1-Collision-Avoidance-Flow)
     - Main controller
     - Switch between OA modes
-    - Application level fail safety handling
+    - Application level fail safety handling [Stage 1 Fail Safety](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Stage-1-Fail-Safety-Graph)
     - Mission queue
 - Utils [WIP]
 - Unittests
