@@ -23,12 +23,17 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/visualization/pcl_visualizer.h>
 #include <opencv2/core/core.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
 #define ENABLE_POINTCLOUD
+#define PCL_DEBUG_VIEWER
+#define IMG_DEBUG_POPUP
 
 class RSCInterface {
  public:
@@ -56,6 +61,7 @@ class RSCInterface {
     // Data
     sensor_msgs::Image depthImage_;
     sensor_msgs::PointCloud2 pointCloud_;
+    pcl::PointCloud<pcl::PointXYZRGB> pcl_pointCloud_;
     cv::Mat depthFrame_;
     float rangeMin;
     float rangeMax;
@@ -69,6 +75,11 @@ class RSCInterface {
     // Debug
     void drawDebugOverlay();
     static cv::Point debugMousePos;
+#ifdef PCL_DEBUG_VIEWER
+    pcl::visualization::PCLVisualizer viewer;
+    void updatePointCloudViewerThread();
+    boost::thread* thread_pointcloud_viewer_ = nullptr;
+#endif
 };
 
 #endif  // NOLINT
