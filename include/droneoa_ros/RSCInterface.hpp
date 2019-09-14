@@ -22,10 +22,13 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <opencv2/core/core.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
+
+#define ENABLE_POINTCLOUD
 
 class RSCInterface {
  public:
@@ -39,6 +42,7 @@ class RSCInterface {
 
     // Callback
     void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);
+    void pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg);
 
     // Debug Print
     void printImgInfo();
@@ -51,13 +55,16 @@ class RSCInterface {
 
     // Data
     sensor_msgs::Image depthImage_;
+    sensor_msgs::PointCloud2 pointCloud_;
     cv::Mat depthFrame_;
     float rangeMin;
     float rangeMax;
 
     // Threads
     boost::thread* thread_watch_depth_img_ = nullptr;
+    boost::thread* thread_watch_pointcloud_ = nullptr;
     void watchDepthImgThread();
+    void watchPointCloudThread();
 
     // Debug
     void drawDebugOverlay();

@@ -32,7 +32,12 @@ RSCInterface::RSCInterface() {
 
 RSCInterface::~RSCInterface() {
     cv::destroyWindow(OPENCV_WINDOW);
-    delete thread_watch_depth_img_;
+    if (thread_watch_depth_img_) {
+        delete thread_watch_depth_img_;
+    }
+    if (thread_watch_pointcloud_) {
+        delete thread_watch_pointcloud_;
+    }
 }
 
 void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
@@ -41,6 +46,9 @@ void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     cv::startWindowThread();  // DEBUG
     cv::setMouseCallback(OPENCV_WINDOW, RSCInterface::mouseCallback, NULL);  // DEBUG
     thread_watch_depth_img_ = new boost::thread(boost::bind(&RSCInterface::watchDepthImgThread, this));
+#ifdef ENABLE_POINTCLOUD
+    thread_watch_pointcloud_ = new boost::thread(boost::bind(&RSCInterface::watchPointCloudThread, this));
+#endif
     ROS_INFO("[RSC] init");
 }
 
@@ -60,6 +68,11 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
     drawDebugOverlay();
 }
 
+void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
+    pointCloud_ = *msg;
+    // @todo maybe convert to pointcloud will be helpful
+}
+
 /* Threads */
 void RSCInterface::watchDepthImgThread() {
     auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
@@ -73,10 +86,25 @@ void RSCInterface::watchDepthImgThread() {
     }
 }
 
+void RSCInterface::watchPointCloudThread() {
+    auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
+    auto relative_pos_sub =
+        node->subscribe<sensor_msgs::PointCloud2>("/camera/depth/color/points", 1,
+                boost::bind(&RSCInterface::pointcloud_callback, this, _1));
+
+    while (ros::ok()) {
+        ros::spinOnce();
+        r_.sleep();
+    }
+}
+
 /* Debug */
 void RSCInterface::printImgInfo() {
     ROS_INFO("[IMG] height: %d width: %d", depthImage_.height, depthImage_.width);
     ROS_INFO("[IMG] encoding: %s", depthImage_.encoding.c_str());
+#ifdef ENABLE_POINTCLOUD
+    ROS_INFO("[Pointcloud] frameID: %s", pointCloud_.header.frame_id.c_str());
+#endif
 }
 
 void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1, int thickness = 1) {
