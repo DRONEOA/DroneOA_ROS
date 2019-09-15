@@ -23,6 +23,8 @@ find_package(OpenCV REQUIRED COMPONENTS
   imgproc
 )
 
+find_package( PCL REQUIRED )
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -127,6 +129,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(include
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -180,6 +183,7 @@ target_link_libraries(droneoa_ros
   droneoa_ros_liblidar
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
+  ${PCL_LIBRARIES}
 )
 
 #############
