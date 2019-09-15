@@ -19,6 +19,8 @@
 
 #include <droneoa_ros/RSCInterface.hpp>
 #include <cv_bridge/cv_bridge.h>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -32,15 +34,28 @@ RSCInterface::RSCInterface() {
 
 RSCInterface::~RSCInterface() {
     cv::destroyWindow(OPENCV_WINDOW);
-    delete thread_watch_depth_img_;
+    if (thread_watch_depth_img_) {
+        delete thread_watch_depth_img_;
+    }
+    if (thread_watch_pointcloud_) {
+        delete thread_watch_pointcloud_;
+    }
 }
 
 void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n = nh;
     r_ = r;
+#ifdef IMG_DEBUG_POPUP
     cv::startWindowThread();  // DEBUG
     cv::setMouseCallback(OPENCV_WINDOW, RSCInterface::mouseCallback, NULL);  // DEBUG
+#endif
     thread_watch_depth_img_ = new boost::thread(boost::bind(&RSCInterface::watchDepthImgThread, this));
+#ifdef ENABLE_POINTCLOUD
+    thread_watch_pointcloud_ = new boost::thread(boost::bind(&RSCInterface::watchPointCloudThread, this));
+#endif
+#ifdef PCL_DEBUG_VIEWER
+    viewer.setBackgroundColor(0, 0, 0);
+#endif
     ROS_INFO("[RSC] init");
 }
 
@@ -57,7 +72,17 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
     }
 
     depthFrame_ = cv_ptr->image;
+#ifdef IMG_DEBUG_POPUP
     drawDebugOverlay();
+#endif
+}
+
+void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
+    pointCloud_ = *msg;
+    // @todo maybe convert to pointcloud will be helpful
+    pcl::PCLPointCloud2 pcl_pc2;
+    pcl_conversions::toPCL(pointCloud_, pcl_pc2);
+    pcl::fromPCLPointCloud2(pcl_pc2, pcl_pointCloud_);
 }
 
 /* Threads */
@@ -73,10 +98,51 @@ void RSCInterface::watchDepthImgThread() {
     }
 }
 
+void RSCInterface::watchPointCloudThread() {
+    auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
+    auto relative_pos_sub =
+        node->subscribe<sensor_msgs::PointCloud2>("/camera/depth/color/points", 1,
+                boost::bind(&RSCInterface::pointcloud_callback, this, _1));
+
+    while (ros::ok()) {
+#ifdef PCL_DEBUG_VIEWER
+        if (!thread_pointcloud_viewer_) {
+            thread_pointcloud_viewer_ =
+                new boost::thread(boost::bind(&RSCInterface::updatePointCloudViewerThread, this));
+        }
+#endif
+        ros::spinOnce();
+        r_.sleep();
+    }
+}
+
+#ifdef PCL_DEBUG_VIEWER
+void RSCInterface::updatePointCloudViewerThread() {
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(&pcl_pointCloud_);
+    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
+    // PCL Viewer
+    while (!viewer.wasStopped()) {
+        viewer.removeAllPointClouds();
+        viewer.addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "sample cloud");
+
+        viewer.spinOnce(100);
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+    }
+}
+#endif
+
 /* Debug */
 void RSCInterface::printImgInfo() {
     ROS_INFO("[IMG] height: %d width: %d", depthImage_.height, depthImage_.width);
     ROS_INFO("[IMG] encoding: %s", depthImage_.encoding.c_str());
+#ifdef ENABLE_POINTCLOUD
+    ROS_INFO("[Pointcloud] frameID: %s", pointCloud_.header.frame_id.c_str());
+    ROS_INFO("[Pointcloud] field size: %zd", pointCloud_.fields.size());
+    for (unsigned int i = 0; i < pointCloud_.fields.size(); ++i) {
+        ROS_INFO("      field: %s", pointCloud_.fields[i].name.c_str());
+    }
+    ROS_INFO("[Pointcloud] pcl data size: %zd", pcl_pointCloud_.size());
+#endif
 }
 
 void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1, int thickness = 1) {

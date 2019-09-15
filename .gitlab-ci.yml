@@ -27,6 +27,8 @@ before_script:
   - apt-get install ros-melodic-ddynamic-reconfigure -y
   - apt-get install ros-melodic-nodelet -y
   - apt-get install ros-melodic-perception -y
+  - apt-get install ros-melodic-pcl-ros -y
+  - apt-get install ros-melodic-pcl-conversions -y
   - cd src
   - git clone https://github.com/IntelRealSense/realsense-ros.git
   - git clone http://tuotuogzs.ddns.net/droneoa/ydlidar-x2l-local.git
