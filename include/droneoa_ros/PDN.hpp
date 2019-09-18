@@ -51,5 +51,7 @@ static const bool ENABLE_NGN = true;
 
 // Lidar Setting
 static const float LIDAR_ORIENTATION_CW = 180;
+static const float LIDAR_FILTER_LOW = 0.1;  // in m
+static const float LIDAR_FILTER_HIGH = 10;  // in m
 
 #endif  // NOLINT

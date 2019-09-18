@@ -30,7 +30,7 @@
 #include <boost/thread/thread.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#define DEBUG_LIDAR_POPUP
+// #define DEBUG_LIDAR_POPUP
 
 typedef std::vector<float> degreeSector;
 
@@ -50,7 +50,7 @@ class LidarInterface {
     float getMinRnage();
     std::map<float, degreeSector> getScannerDataMap();
     float getIncreament();
-    std::pair<int, float> getClosestSectorData();
+    std::pair<float, float> getClosestSectorData();
 
     // Debug
     void printLidarInfo();
