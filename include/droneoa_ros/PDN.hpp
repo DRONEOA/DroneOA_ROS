@@ -49,4 +49,7 @@ static const bool ENABLE_LIDAR = true;
 static const bool ENABLE_AI = true;
 static const bool ENABLE_NGN = true;
 
+// Lidar Setting
+static const float LIDAR_ORIENTATION_CW = 180;
+
 #endif  // NOLINT
