@@ -23,9 +23,16 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 
+#include <map>
 #include <vector>
+#include <utility>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+#define DEBUG_LIDAR_POPUP
+
+typedef std::vector<float> degreeSector;
 
 class LidarInterface {
  public:
@@ -41,22 +48,29 @@ class LidarInterface {
     float getMinAngle();
     float getMaxRange();
     float getMinRnage();
-    std::vector<float> getScannerDataVec();
+    std::map<float, degreeSector> getScannerDataMap();
     float getIncreament();
+    std::pair<float, float> getClosestSectorData();
 
     // Debug
     void printLidarInfo();
+    void drawLidarData();
 
  private:
     ros::NodeHandle n_;
     ros::Rate r_ = ros::Rate(10.0);
 
     // Data
-    sensor_msgs::LaserScan scannerData_;
+    sensor_msgs::LaserScan scannerData_;  // Raw data
+    std::map<float, degreeSector> scannerDataMap_;  // Degree - Range map
 
     // Threads
     boost::thread* thread_watch_lidar_ = nullptr;
     void watchLidarThread();
+
+    // Processor
+    void generateDataMap();
+    void generateDegreeSector();
 };
 
 #endif  // NOLINT

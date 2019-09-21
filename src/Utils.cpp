@@ -61,6 +61,7 @@ std::pair<float, float> getNorthEastDistanceFromHeading(float heading, float dis
     return std::pair<float, float>(dNorth, dEast);
 }
 
+// #define RAD2DEG(x) ((x)*180./M_PI)
 float radToDeg(float rad) {
     float degAngle = rad * 180.0 / M_PI;
     return degAngle;
