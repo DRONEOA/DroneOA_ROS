@@ -30,6 +30,7 @@ cv::Point RSCInterface::debugMousePos = cv::Point(0, 0);
 
 RSCInterface::RSCInterface() {
     cv::namedWindow(OPENCV_WINDOW);
+    viewer = new pcl::visualization::CloudViewer("Simple Cloud Viewer");
 }
 
 RSCInterface::~RSCInterface() {
@@ -40,6 +41,7 @@ RSCInterface::~RSCInterface() {
     if (thread_watch_pointcloud_) {
         delete thread_watch_pointcloud_;
     }
+    delete viewer;
 }
 
 void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
@@ -54,7 +56,7 @@ void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     thread_watch_pointcloud_ = new boost::thread(boost::bind(&RSCInterface::watchPointCloudThread, this));
 #endif
 #ifdef PCL_DEBUG_VIEWER
-    viewer.setBackgroundColor(0, 0, 0);
+    // viewer.setBackgroundColor(0, 0, 0);
 #endif
     ROS_INFO("[RSC] init");
 }
@@ -121,11 +123,12 @@ void RSCInterface::updatePointCloudViewerThread() {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(&pcl_pointCloud_);
     pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
     // PCL Viewer
-    while (!viewer.wasStopped()) {
-        viewer.removeAllPointClouds();
-        viewer.addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "sample cloud");
+    while (!viewer->wasStopped()) {
+        // viewer.removeAllPointClouds();
+        // viewer.addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "sample cloud");
 
-        viewer.spinOnce(100);
+        // viewer.spinOnce(100);
+        viewer->showCloud(cloud);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
     }
 }
