@@ -25,14 +25,14 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/visualization/cloud_viewer.h>
 #include <opencv2/core/core.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
 #define ENABLE_POINTCLOUD
-// #define PCL_DEBUG_VIEWER
+#define PCL_DEBUG_VIEWER
 #define IMG_DEBUG_POPUP
 
 class RSCInterface {
@@ -76,7 +76,7 @@ class RSCInterface {
     void drawDebugOverlay();
     static cv::Point debugMousePos;
 #ifdef PCL_DEBUG_VIEWER
-    pcl::visualization::PCLVisualizer viewer;
+    pcl::visualization::CloudViewer *viewer;
     void updatePointCloudViewerThread();
     boost::thread* thread_pointcloud_viewer_ = nullptr;
 #endif
