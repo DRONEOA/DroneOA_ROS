@@ -30,7 +30,9 @@ cv::Point RSCInterface::debugMousePos = cv::Point(0, 0);
 
 RSCInterface::RSCInterface() {
     cv::namedWindow(OPENCV_WINDOW);
+#ifdef PCL_DEBUG_VIEWER
     viewer = new pcl::visualization::CloudViewer("Simple Cloud Viewer");
+#endif
 }
 
 RSCInterface::~RSCInterface() {
@@ -41,7 +43,9 @@ RSCInterface::~RSCInterface() {
     if (thread_watch_pointcloud_) {
         delete thread_watch_pointcloud_;
     }
-    delete viewer;
+    if (viewer) {
+        delete viewer;
+    }
 }
 
 void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
@@ -54,9 +58,6 @@ void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     thread_watch_depth_img_ = new boost::thread(boost::bind(&RSCInterface::watchDepthImgThread, this));
 #ifdef ENABLE_POINTCLOUD
     thread_watch_pointcloud_ = new boost::thread(boost::bind(&RSCInterface::watchPointCloudThread, this));
-#endif
-#ifdef PCL_DEBUG_VIEWER
-    // viewer.setBackgroundColor(0, 0, 0);
 #endif
     ROS_INFO("[RSC] init");
 }
@@ -81,7 +82,7 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
 
 void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
     pointCloud_ = *msg;
-    // @todo maybe convert to pointcloud will be helpful
+    // Convert to pointcloud
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(pointCloud_, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, pcl_pointCloud_);
@@ -124,10 +125,6 @@ void RSCInterface::updatePointCloudViewerThread() {
     pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
     // PCL Viewer
     while (!viewer->wasStopped()) {
-        // viewer.removeAllPointClouds();
-        // viewer.addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "sample cloud");
-
-        // viewer.spinOnce(100);
         viewer->showCloud(cloud);
         boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
     }
