@@ -31,7 +31,7 @@ cv::Point RSCInterface::debugMousePos = cv::Point(0, 0);
 RSCInterface::RSCInterface() {
     cv::namedWindow(OPENCV_WINDOW);
 #ifdef PCL_DEBUG_VIEWER
-    viewer = new pcl::visualization::CloudViewer("Simple Cloud Viewer");
+    viewer = new pcl::visualization::CloudViewer("Depth Cloud Viewer");
 #endif
 }
 
