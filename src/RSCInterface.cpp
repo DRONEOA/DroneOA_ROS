@@ -21,6 +21,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/extract_indices.h>
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -80,12 +81,35 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
 #endif
 }
 
+template<typename T>
+bool inRange(T min, T max, T target) {
+    return (target >= min && target <= max);
+}
+
 void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
     pointCloud_ = *msg;
     // Convert to pointcloud
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(pointCloud_, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, pcl_pointCloud_);
+
+
+    pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
+    pcl::ExtractIndices<pcl::PointXYZRGB> extract;
+    // pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloutPtr = new pcl::PointCloud<pcl::PointXYZRGB>(pcl_pointCloud_);
+    // for(auto it = pcl_pointCloud_.points.begin(); it!=pcl_pointCloud_.points.end(); ++it)
+    for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
+        pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
+        // if(!inRange<float>(-100, 100, it->x*1000) || !inRange<float>(-100, 100, it->y*1000))
+        if ( !inRange<float>(-100, 100, pt.x*1000) || !inRange<float>(-100, 100, pt.y*1000) ) {
+            // it->z = 0;
+            inliers->indices.push_back(i);
+        }
+    }
+    extract.setInputCloud(pcl_pointCloud_.makeShared());  // BAD
+    extract.setIndices(inliers);
+    extract.setNegative(true);
+    extract.filter(pcl_pointCloud_);
 }
 
 /* Threads */
@@ -176,6 +200,15 @@ void RSCInterface::drawDebugOverlay() {
     }
 
     float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
+    // std::string centerDistCloudStr = "N/A";
+    // for(auto it = pcl_pointCloud_.points.begin(); it!=pcl_pointCloud_.points.end(); ++it)
+    // {
+    //     /*if((int)it->x==debugMousePos.x && (int)it->y==debugMousePos.y)
+    //     {
+    //         centerDistCloudStr = std::to_string(it->z);
+    //     }*/
+    //         std::cout<<it->x<<" "<<it->y<<" "<<it->z<<std::endl;
+    // }
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255;
@@ -188,6 +221,7 @@ void RSCInterface::drawDebugOverlay() {
 
     drawText(debugImage255, cv::Point(20, 20), "Debug Overlay:", 0.5, 1);
     drawText(debugImage255, cv::Point(20, 40), centerDistStr, 0.5, 1);
+    // drawText(debugImage255, cv::Point(20, 60), centerDistCloudStr, 0.5, 1);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y - 7),
             cv::Point(debugMousePos.x + 7, debugMousePos.y + 7), cv::Scalar(0xffff), 2);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y + 7),
