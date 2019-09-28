@@ -149,8 +149,44 @@ rs-enumerate-devices | grep Serial
 ## Part 4. Start SITL Development
 
 ### Setup Workspace
-Follow this local wiki page:
-[Setup For SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
+First, create a catkin workspace OR use existing catkin workspace (If you have realsense-ros setup).
+
+**ONLY** do this if you don't have a catkin workspace, otherwise use the existing one
+```shell
+mkdir -p ardupilot_ws/src
+cd ardupilot_ws
+catkin init
+cd src
+```
+**Note:** if you have issue "catkin not found":
+```shell
+cd ~
+echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+```
+
+**ONLY** do this if you don't them already
+```shell
+git clone https://github.com/IntelRealSense/realsense-ros.git
+git clone http://tuotuogzs.ddns.net/droneoa/ydlidar-x2l-local.git
+git clone http://tuotuogzs.ddns.net/droneoa/droneoa_ros.git
+```
+
+Build the node with catkin_make:
+```shell
+cd ..
+catkin_make
+cd src
+```
+**Note:** use this command if you use vscode ros plugin
+```shell
+catkin_make -DCMAKE_EXPORT_COMPILE_COMMANDS=Yes
+```
+source you ``setup.bash``
+```shell
+source <WORKSPACE_PATH>/devel/setup.bash
+```
+You can also add this to the end of ``~/.bashrc``
 
 ### Use With SITL
 - [How To Run With SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
