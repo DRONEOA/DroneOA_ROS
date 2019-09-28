@@ -50,12 +50,11 @@ Modules:
 
 ### Use With SITL
 - [Launch File README](launch/README.md)
-- [How To Run With SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
 - [SITL With Gazebo *NEW](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
 
 ### Use With Real Vehicle
 - [Set Up Jetson OBC](http://tuotuogzs.ddns.net/droneoa/jetson-nano-obc-setup)
-- [How To Run On Real Vehicle](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Run-With-Real-Vehicle)
+- [Launch File README](launch/README.md)
 
 ## Credit
 DroneOA Group 2019

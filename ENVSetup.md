@@ -189,10 +189,10 @@ source <WORKSPACE_PATH>/devel/setup.bash
 You can also add this to the end of ``~/.bashrc``
 
 ### Use With SITL
-- [How To Run With SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
+- [Launch File README](launch/README.md)
 - [SITL With Gazebo](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
 
 ### Use With Real Vehicle
 - [Set Up Jetson OBC](http://tuotuogzs.ddns.net/droneoa/jetson-nano-obc-setup)
-- [How To Run On Real Vehicle](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Run-With-Real-Vehicle)
+- [Launch File README](launch/README.md)
 
