@@ -48,11 +48,11 @@ Modules:
 ### Environment Setup
 - [Setup Development Environment](ENVSetup.md)
 
-### Use With SITL
+### Launch With SITL
 - [Launch File README](launch/README.md)
 - [SITL With Gazebo *NEW](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
 
-### Use With Real Vehicle
+### Launch With Real Vehicle
 - [Set Up Jetson OBC](http://tuotuogzs.ddns.net/droneoa/jetson-nano-obc-setup)
 - [Launch File README](launch/README.md)
 
