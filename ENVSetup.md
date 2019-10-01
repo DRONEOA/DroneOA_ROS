@@ -170,6 +170,7 @@ source ~/.bashrc
 git clone https://github.com/IntelRealSense/realsense-ros.git
 git clone http://tuotuogzs.ddns.net/droneoa/ydlidar-x2l-local.git
 git clone http://tuotuogzs.ddns.net/droneoa/droneoa_ros.git
+git clone https://github.com/hoangthien94/vision_to_mavros.git
 ```
 
 Build the node with catkin_make:
