@@ -36,6 +36,11 @@ static const char* FLT_MODE_BRAKE = "BRAKE";
 static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
+enum CMD_QUEUE_TYPES {
+    CMD_CHMOD,  // param: mod name
+    CMD_SET_MAX_VELOCITY  // param: float speed
+};
+
 // Vehicle Data
 static const int VEHICLE_BOUNDBOX_WIDTH = 1200;  // mm
 static const int VEHICLE_BOUNDBOX_LENGTH = 1200;  // mm

@@ -17,14 +17,26 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
+#ifndef INCLUDE_DRONEOA_ROS_COLLISIONAVOIDANCE_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_COLLISIONAVOIDANCE_HPP_  // NOLINT
+
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
+#include <droneoa_ros/LidarInterface.hpp>
+#include <droneoa_ros/RSCInterface.hpp>
 
-void BaseAlg::init(CNCInterface *cnc) {
-    cnc_ = cnc;
-}
+// #define DEBUG_ALG_COLLISION
 
-BaseAlg::BaseAlg(CNCInterface *cnc) {
-    init(cnc);
-}
+class CollisionAvoidanceAlg : public BaseAlg {
+    LidarInterface *lidar_;
+    RSCInterface *rsc_;
+ public:
+    CollisionAvoidanceAlg(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc);
+    ~CollisionAvoidanceAlg() override;
+    void init(LidarInterface *lidar, RSCInterface *rsc);  // For restart
+    bool collect() override;  // Collect required sensor data
+    bool plan() override;  // Return false when get around is impossible
 
-BaseAlg::~BaseAlg() {}
+    std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> getCommandQueue() override;
+};
+
+#endif

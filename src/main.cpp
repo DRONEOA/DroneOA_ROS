@@ -26,6 +26,7 @@
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/LidarInterface.hpp>
+#include <droneoa_ros/OAController.hpp>
 #include <droneoa_ros/Utils.hpp>
 
 float getFloatCmdArg(std::stringstream& ss) {
@@ -63,6 +64,9 @@ int main(int argc, char **argv) {
         lidar.init(n, r);
     }
 
+    // Create OA Controller
+    OAController oac(&cnc, &lidar, &rsc, ros::Rate(1));
+
     // Command Paser
     // Only For Testing
     // @todo Do we need a command line based direct control interface and a command queue in final product ?
@@ -74,6 +78,7 @@ int main(int argc, char **argv) {
         ss >> cmdType;
 
         if (cmdType == "quit") {
+            oac.masterSwitch(false);
             break;
         } else if (cmdType == "arm") {
             cnc.setMode(FLT_MODE_GUIDED);
@@ -85,6 +90,9 @@ int main(int argc, char **argv) {
             }
             cnc.takeoff(getFloatCmdArg(ss));
             sleep(10);
+        } else if (cmdType == "oac") {
+            float switchPosition = getFloatCmdArg(ss);
+            switchPosition == 0 ? oac.masterSwitch(false) : oac.masterSwitch(true);
         } else if (cmdType == "w") {
             float dist = getFloatCmdArg(ss);
             float alt = getFloatCmdArg(ss);
@@ -177,6 +185,7 @@ int main(int argc, char **argv) {
             std::cout << "+ COMMAND HELP LIST" << std::endl;
             std::cout << "+ Argument [] is required, <> is optional" << std::endl;
             std::cout << "- quit                       - quit" << std::endl;
+            std::cout << "- oac [0/1]                  - switch oac on/off" << std::endl;
             std::cout << "- w [dist] <alt>             - move north" << std::endl;
             std::cout << "- s [dist] <alt>             - move south" << std::endl;
             std::cout << "- a [dist] <alt>             - move west" << std::endl;
