@@ -18,51 +18,92 @@
  */
 
 #include <droneoa_ros/OAController.hpp>
+#include <string>
 
-OAController::OAController() {
-    // @todo create algorithm instances
+OAController::OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, ros::Rate r) {
+    init(cnc, lidar, rsc);
+    r_ = r;
+
+    thread_oac_master_ = new boost::thread(boost::bind(&OAController::masterThread, this));
 }
 
-OAController::~OAController() {}
+OAController::~OAController() {
+    for (const auto& elem : algorithmInstances_) {
+        if (elem.second) {
+            delete elem.second;
+        }
+    }
+    if (thread_oac_master_) {
+        delete thread_oac_master_;
+        ROS_WARN("[OAC] MASTER THREAD ENDED");
+    }
+}
 
-// Init OA Controller
-// - Input: CNC Interface Instance
-void OAController::init(CNCInterface cnc) {
+// Init OA Controller (for restart)
+// - Input: CNCInterface *, LidarInterface *, RSCInterface *
+void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc) {
     cnc_ = cnc;
-    currState_ = sysState::SYS_IDLE;
-    // @todo init algorithm instances
+    lidar_ = lidar;
+    rsc_ = rsc;
+    currState_ = SYS_State::SYS_IDLE;
+    // create algorithm instances
+    algorithmInstances_[SYS_Algs::ALG_COLLISION] = new CollisionAvoidanceAlg(cnc_, lidar_, rsc_);
     ROS_INFO("[OACONTROLLER] init");
+}
+
+// Switch on/off the tick event
+void OAController::masterSwitch(bool isOn) {
+    isOn_ = isOn;
+    if (isOn_) {
+        ROS_WARN("[OAC] MASTER RESUMED");
+        return;
+    }
+    ROS_WARN("[OAC] MASTER PAUSED");
 }
 
 // Tick Event, Automatically switch states and run handlers
 void OAController::tick() {
     if (isTerminated) {
+        ROS_WARN("[OAC] Terminated");
         return;
     }
+
     switch (currState_) {
-        case sysState::SYS_IDLE:
-            ROS_DEBUG("[TICK] SYS_IDLE");
+        case SYS_State::SYS_IDLE:
+        #ifdef DEBUG_OAC
+            ROS_INFO("[TICK] SYS_IDLE");
+        #endif
             evaluate();
             break;
-        case sysState::SYS_EVALUATED:
-            ROS_DEBUG("[TICK] SYS_EVALUATED");
+        case SYS_State::SYS_EVALUATED:
+        #ifdef DEBUG_OAC
+            ROS_INFO("[TICK] SYS_EVALUATED");
+        #endif
             plan();
             break;
-        case sysState::SYS_PLANNED:
-            ROS_DEBUG("[TICK] SYS_PLANNED");
+        case SYS_State::SYS_PLANNED:
+        #ifdef DEBUG_OAC
+            ROS_INFO("[TICK] SYS_PLANNED");
+        #endif
             execute();
             break;
-        case sysState::SYS_ABORT:
-            ROS_DEBUG("[TICK] SYS_ABORT");
+        case SYS_State::SYS_ABORT:
+        #ifdef DEBUG_OAC
+            ROS_INFO("[TICK] SYS_ABORT");
+        #endif
             abort();
             break;
-        case sysState::SYS_EXEC:
-            ROS_DEBUG("[TICK] SYS_EXEC");
-            currState_ = sysState::SYS_IDLE;
+        case SYS_State::SYS_EXEC:
+        #ifdef DEBUG_OAC
+            ROS_INFO("[TICK] SYS_EXEC");
+        #endif
+            currState_ = SYS_State::SYS_IDLE;
             break;
-        case sysState::SYS_SAFE:
-            ROS_DEBUG("[TICK] SYS_SAFE");
-            currState_ = sysState::SYS_IDLE;
+        case SYS_State::SYS_SAFE:
+        #ifdef DEBUG_OAC
+            ROS_INFO("[TICK] SYS_SAFE");
+        #endif
+            currState_ = SYS_State::SYS_IDLE;
             break;
         default:
             // @todo error state
@@ -71,67 +112,93 @@ void OAController::tick() {
     }
 }
 
+void OAController::masterThread() {
+    ROS_WARN("[OAC] MASTER THREAD START");
+
+    while (ros::ok()) {
+        if (isOn_) {
+            tick();
+        }
+        ros::spinOnce();
+        r_.sleep();
+    }
+}
+
 bool OAController::evaluate() {
     // Entry state: SYS_IDLE
-    // @todo run collector for each selected algorithm
-    for (sysSelectedAlgs tmp : selectedAlgorithm_) {
-        algorithmInstances_[tmp].collect();
-        // @todo handle false return
-    }
-
+    selectedAlgorithm_.clear();
     selectedAlgorithm_ = selectAlgorithm();
 
+    for (SYS_Algs tmp : selectedAlgorithm_) {
+        algorithmInstances_[tmp]->collect();
+        // @todo handle false return - remove from selected
+    }
+
     if (selectedAlgorithm_.size() == 0) {
-        currState_ = sysState::SYS_IDLE;
+        currState_ = SYS_State::SYS_IDLE;
+        // @todo ERROR LOG
         return false;
     }
 
-    currState_ = sysState::SYS_EVALUATED;
+    currState_ = SYS_State::SYS_EVALUATED;
     return true;
 }
 
 bool OAController::plan() {
     // Entry state: SYS_EVALUATED
     // @todo run planner for each selected algorithm
-    for (sysSelectedAlgs tmp : selectedAlgorithm_) {
-        algorithmInstances_[tmp].plan();
-        // @todo handle false return
+    algCMDmap_.clear();
+    for (SYS_Algs tmp : selectedAlgorithm_) {
+        algorithmInstances_[tmp]->plan();
+        algCMDmap_[tmp] = (algorithmInstances_[tmp])->getCommandQueue();
+    #ifdef DEBUG_OAC
+        ROS_INFO("[OAC] PLAN NODE: %d", tmp);
+        for (auto cmdline : algCMDmap_[tmp]) {
+            ROS_INFO("            CMD: %d with %s", cmdline.first, cmdline.second.c_str());
+        }
+    #endif
+        // @todo handle false return - remove from selected
         // @todo determine if is safe to keep current path
     }
 
-    currState_ = sysState::SYS_PLANNED;
+    if (selectedAlgorithm_.size() == 0) {
+        currState_ = SYS_State::SYS_IDLE;
+        // @todo ERROR LOG
+        return false;
+    }
+
+    currState_ = SYS_State::SYS_PLANNED;
     return true;
 }
 
 bool OAController::execute() {
     // Entry state: SYS_PLANNED
-    selectedDetermineFun_ = selectDetermineFunction();
     switch (selectedDetermineFun_) {
-        case sysSelectedDetermineFun::DET_STAGE1:
-            // @todo handler
+        case SYS_SelectedDetermineFun::DET_STAGE1:
+            // @todo handler & parser
             break;
-        case sysSelectedDetermineFun::DET_STAGE2:
-            // @todo handler
+        case SYS_SelectedDetermineFun::DET_STAGE2:
+            // @todo handler & parser
             break;
-        case sysSelectedDetermineFun::DET_STAGE3:
-            // @todo handler
+        case SYS_SelectedDetermineFun::DET_STAGE3:
+            // @todo handler & parser
             break;
         default:
             break;
     }
 
-    currState_ = sysState::SYS_EXEC;
+    currState_ = SYS_State::SYS_EXEC;
     return true;
 }
 
 bool OAController::abort() {
-    if (cnc_.getMode() == FLT_MODE_BRAKE) {
+    if (cnc_->getMode() == FLT_MODE_BRAKE) {
         // @todo determine whether to exit abort state and resume OA loop
-        // currState_ = sysState::SYS_IDLE;
+        // currState_ = SYS_State::SYS_IDLE;
         isTerminated = true;
         return true;
     }
-    if (cnc_.setMode(FLT_MODE_BRAKE)) {
+    if (cnc_->setMode(FLT_MODE_BRAKE)) {
         ROS_INFO("[ABORT] set BRAKE mode");
         isTerminated = true;
         return true;
@@ -142,16 +209,14 @@ bool OAController::abort() {
     }
 }
 
-std::vector<sysSelectedAlgs> OAController::selectAlgorithm() {
-    // @todo
-    std::vector<sysSelectedAlgs> result;
-    // result.push_back(sysSelectedAlgs::ALG_AI_COLLISION);
-    // result.push_back(sysSelectedAlgs::ALG_LIDAR_COLLISION);
-    // result.push_back(sysSelectedAlgs::ALG_VISUAL_COLLISION);
+std::vector<SYS_Algs> OAController::selectAlgorithm() {
+    // @todo select algorthm according to environment and config
+    std::vector<SYS_Algs> result;
+    result.push_back(SYS_Algs::ALG_COLLISION);
     return result;
 }
 
-sysSelectedDetermineFun OAController::selectDetermineFunction() {
-    // @todo
-    return sysSelectedDetermineFun::DET_STAGE1;
+SYS_SelectedDetermineFun OAController::selectDetermineFunction() {
+    // @todo select determine function according to config
+    return SYS_SelectedDetermineFun::DET_STAGE1;
 }
