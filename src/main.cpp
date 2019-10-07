@@ -174,13 +174,13 @@ int main(int argc, char **argv) {
                     size_t mid = commandIn.find(' ');
                     int max = std::stoi(commandIn.substr(0, mid), 0);
                     int min = std::stoi(commandIn.substr(mid+1), 0);
-                    if(max < min) {
+                    if (max < min) {
                         throw 1;
                     }
                     rsc.setRange(min, max);
                     rsc.setRangeSwitch(true);
                 } catch (...) {
-                    std::cout<<"Invalid range command! Check help for reference."<<std::endl;
+                    std::cout << "Invalid range command! Check help for reference." << std::endl;
                 }
             }
         } else {
