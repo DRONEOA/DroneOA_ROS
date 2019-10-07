@@ -22,6 +22,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/filters/conditional_removal.h>
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -200,15 +201,7 @@ void RSCInterface::drawDebugOverlay() {
     }
 
     float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
-    // std::string centerDistCloudStr = "N/A";
-    // for(auto it = pcl_pointCloud_.points.begin(); it!=pcl_pointCloud_.points.end(); ++it)
-    // {
-    //     /*if((int)it->x==debugMousePos.x && (int)it->y==debugMousePos.y)
-    //     {
-    //         centerDistCloudStr = std::to_string(it->z);
-    //     }*/
-    //         std::cout<<it->x<<" "<<it->y<<" "<<it->z<<std::endl;
-    // }
+    std::string centerDistCloudStr = "Point size: " + std::to_string(pcl_pointCloud_.size());
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255;
@@ -221,7 +214,7 @@ void RSCInterface::drawDebugOverlay() {
 
     drawText(debugImage255, cv::Point(20, 20), "Debug Overlay:", 0.5, 1);
     drawText(debugImage255, cv::Point(20, 40), centerDistStr, 0.5, 1);
-    // drawText(debugImage255, cv::Point(20, 60), centerDistCloudStr, 0.5, 1);
+    drawText(debugImage255, cv::Point(20, 60), centerDistCloudStr, 0.5, 1);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y - 7),
             cv::Point(debugMousePos.x + 7, debugMousePos.y + 7), cv::Scalar(0xffff), 2);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y + 7),
