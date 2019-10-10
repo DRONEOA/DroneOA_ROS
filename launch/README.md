@@ -46,6 +46,10 @@ Modify ``rs_camera_t265_d435.launch`` file with correct serial number:
 sim_vehicle.py -v ArduCopter --console --map
 ```
 ### Launch Dependency Nodes
+Enter lauch file folder:
+```shell
+cd <workspace>/src/droneoa_ros/launch
+```
 If use t265 tracking camera for nav data:
 ```shell
 roslaunch step1SITL_t265.launch
@@ -55,6 +59,11 @@ else:
 roslaunch step1SITL.launch
 ```
 ### Launch Main Nodes
+Enter lauch file folder:
+```shell
+cd <workspace>/src/droneoa_ros/launch
+```
+Launch the node in separate terminal to allow dedicated console input:
 ```shell
 roslaunch step2.launch
 ```
