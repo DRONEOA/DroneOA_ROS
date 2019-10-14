@@ -27,6 +27,8 @@ Modules:
         - Watcher (Altitude, Position, Battery, State, Velocity, Orientation)
 - SensorInterface [WIP]
     - Lidar data pre-processing (LidarInterface)
+        - Generating degree sector
+        - Simple data filtering
     - Camera data pre-processing (RSCInterface)
         - Distance Filtering
         - Flight Path Filtering
@@ -43,14 +45,16 @@ Modules:
 
 ## How To [DEV ONLY]
 
-### Use With SITL
-- [Setup Ardupilot Development Environment](http://tuotuogzs.ddns.net/shibohan/arducopter/wikis/Environment-Setup)
-- [How To Run With SITL](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Launch%20In%20SITL)
+### Environment Setup
+- [Setup Development Environment](ENVSetup.md)
+
+### Launch With SITL
+- [Launch File README](launch/README.md)
 - [SITL With Gazebo *NEW](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
 
-### Use With Real Vehicle
+### Launch With Real Vehicle
 - [Set Up Jetson OBC](http://tuotuogzs.ddns.net/droneoa/jetson-nano-obc-setup)
-- [How To Run On Real Vehicle](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Run-With-Real-Vehicle)
+- [Launch File README](launch/README.md)
 
 ## Credit
 DroneOA Group 2019
