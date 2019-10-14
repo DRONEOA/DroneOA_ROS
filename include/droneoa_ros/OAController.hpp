@@ -29,7 +29,7 @@
 #include <droneoa_ros/LidarInterface.hpp>
 #include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
-#include <droneoa_ros/OAUtils/CollisionAvoidanceAlg.hpp>
+#include <droneoa_ros/OAUtils/CAAlgLidar.hpp>
 
 enum SYS_State {
     SYS_IDLE,
@@ -43,18 +43,22 @@ enum SYS_State {
 enum SYS_Algs {
     ALG_BUG,
     ALG_VFF,
-    ALG_COLLISION
+    ALG_COLLISION_LIDAR,
+    ALG_COLLISION_DEPTH,
+    ALG_COLLISION_AI
 };
 
 enum SYS_SelectedDetermineFun {
     DET_STAGE1,
     DET_STAGE2,
-    DET_STAGE3
+    DET_STAGE3,
+    DET_INVALID
 };
 
 typedef std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CommandQueue;
+typedef std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DataQueue;
 
-// #define DEBUG_OAC
+#define DEBUG_OAC
 
 class OAController {
  public:
@@ -91,6 +95,7 @@ class OAController {
     std::vector<SYS_Algs> selectedAlgorithm_;
     SYS_SelectedDetermineFun selectedDetermineFun_;
     std::map<SYS_Algs, CommandQueue> algCMDmap_;
+    std::map<SYS_Algs, DataQueue> algDATAmap_;
 };
 
 #endif  // NOLINT

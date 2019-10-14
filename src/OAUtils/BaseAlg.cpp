@@ -28,3 +28,11 @@ BaseAlg::BaseAlg(CNCInterface *cnc) {
 }
 
 BaseAlg::~BaseAlg() {}
+
+std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> BaseAlg::getCommandQueue() {
+    return CMDQueue_;
+}
+
+std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> BaseAlg::getDataQueue() {
+    return DATAQueue_;
+}

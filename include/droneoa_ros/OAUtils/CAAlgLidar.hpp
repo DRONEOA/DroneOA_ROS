@@ -22,21 +22,19 @@
 
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
 #include <droneoa_ros/LidarInterface.hpp>
-#include <droneoa_ros/RSCInterface.hpp>
 
-// #define DEBUG_ALG_COLLISION
+#define DEBUG_ALG_COLLISION
 
-class CollisionAvoidanceAlg : public BaseAlg {
+class CAAlgLidar : public BaseAlg {
     LidarInterface *lidar_;
-    RSCInterface *rsc_;
+    float lidarThreshold_;
+    float lidarPossibility_;
  public:
-    CollisionAvoidanceAlg(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc);
-    ~CollisionAvoidanceAlg() override;
-    void init(LidarInterface *lidar, RSCInterface *rsc);  // For restart
+    CAAlgLidar(CNCInterface *cnc, LidarInterface *lidar);
+    ~CAAlgLidar() override;
+    void init(LidarInterface *lidar);  // For restart
     bool collect() override;  // Collect required sensor data
     bool plan() override;  // Return false when get around is impossible
-
-    std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> getCommandQueue() override;
 };
 
 #endif
