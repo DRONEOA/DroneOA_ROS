@@ -32,10 +32,12 @@ class BaseAlg {
     virtual bool collect() = 0;  // Collect required sensor data
     virtual bool plan() = 0;  // Return false when get around is impossible
 
-    virtual std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> getCommandQueue() = 0;
+    virtual std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> getCommandQueue();
+    virtual std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> getDataQueue();
  protected:
     CNCInterface *cnc_;
     std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CMDQueue_;
+    std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DATAQueue_;
 };
 
 #endif  // NOLINT

@@ -149,7 +149,7 @@ add_library(droneoa_ros_liblidar
 
 add_library(droneoa_ros_liboa
   src/OAUtils/BaseAlg.cpp
-  src/OAUtils/CollisionAvoidanceAlg.cpp
+  src/OAUtils/CAAlgLidar.cpp
   src/OAController.cpp
 )
 

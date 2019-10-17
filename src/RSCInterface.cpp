@@ -43,9 +43,11 @@ RSCInterface::~RSCInterface() {
     if (thread_watch_pointcloud_) {
         delete thread_watch_pointcloud_;
     }
+#ifdef PCL_DEBUG_VIEWER
     if (viewer) {
         delete viewer;
     }
+#endif
 }
 
 void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
