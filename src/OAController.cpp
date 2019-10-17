@@ -47,7 +47,7 @@ void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *
     rsc_ = rsc;
     currState_ = SYS_State::SYS_IDLE;
     // create algorithm instances
-    algorithmInstances_[SYS_Algs::ALG_COLLISION] = new CollisionAvoidanceAlg(cnc_, lidar_, rsc_);
+    algorithmInstances_[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(cnc_, lidar_);
     ROS_INFO("[OACONTROLLER] init");
 }
 
@@ -126,7 +126,6 @@ void OAController::masterThread() {
 
 bool OAController::evaluate() {
     // Entry state: SYS_IDLE
-    selectedAlgorithm_.clear();
     selectedAlgorithm_ = selectAlgorithm();
 
     for (SYS_Algs tmp : selectedAlgorithm_) {
@@ -148,13 +147,18 @@ bool OAController::plan() {
     // Entry state: SYS_EVALUATED
     // @todo run planner for each selected algorithm
     algCMDmap_.clear();
+    algDATAmap_.clear();
     for (SYS_Algs tmp : selectedAlgorithm_) {
         algorithmInstances_[tmp]->plan();
         algCMDmap_[tmp] = (algorithmInstances_[tmp])->getCommandQueue();
+        algDATAmap_[tmp] = (algorithmInstances_[tmp])->getDataQueue();
     #ifdef DEBUG_OAC
         ROS_INFO("[OAC] PLAN NODE: %d", tmp);
         for (auto cmdline : algCMDmap_[tmp]) {
             ROS_INFO("            CMD: %d with %s", cmdline.first, cmdline.second.c_str());
+        }
+        for (auto dataline : algDATAmap_[tmp]) {
+            ROS_INFO("            DATA: %d with %s", dataline.first, dataline.second.c_str());
         }
     #endif
         // @todo handle false return - remove from selected
@@ -184,7 +188,7 @@ bool OAController::execute() {
             // @todo handler & parser
             break;
         default:
-            break;
+            return false;
     }
 
     currState_ = SYS_State::SYS_EXEC;
@@ -210,13 +214,30 @@ bool OAController::abort() {
 }
 
 std::vector<SYS_Algs> OAController::selectAlgorithm() {
-    // @todo select algorthm according to environment and config
-    std::vector<SYS_Algs> result;
-    result.push_back(SYS_Algs::ALG_COLLISION);
-    return result;
+    // @todo select algorthm according to environment
+    selectedAlgorithm_.clear();
+    if (OAC_STAGE_SETTING == 1) {
+        selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_LIDAR);
+        // selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
+        // selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_AI);
+    } else if (OAC_STAGE_SETTING == 2) {
+        // @todo
+    } else if (OAC_STAGE_SETTING == 3) {
+        // @todo
+    } else {
+        // @todo
+    }
+    return selectedAlgorithm_;
 }
 
 SYS_SelectedDetermineFun OAController::selectDetermineFunction() {
-    // @todo select determine function according to config
-    return SYS_SelectedDetermineFun::DET_STAGE1;
+    if (OAC_STAGE_SETTING == 1) {
+        return SYS_SelectedDetermineFun::DET_STAGE1;
+    } else if (OAC_STAGE_SETTING == 2) {
+        return SYS_SelectedDetermineFun::DET_STAGE2;
+    } else if (OAC_STAGE_SETTING == 3) {
+        return SYS_SelectedDetermineFun::DET_STAGE3;
+    } else {
+        return SYS_SelectedDetermineFun::DET_INVALID;
+    }
 }

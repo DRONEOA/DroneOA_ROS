@@ -32,8 +32,8 @@
 #include <boost/thread/thread.hpp>
 
 #define ENABLE_POINTCLOUD
-#define PCL_DEBUG_VIEWER
-#define IMG_DEBUG_POPUP
+// #define PCL_DEBUG_VIEWER
+// #define IMG_DEBUG_POPUP
 
 class RSCInterface {
  public:
