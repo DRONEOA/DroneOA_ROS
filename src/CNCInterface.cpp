@@ -348,7 +348,7 @@ void CNCInterface::watchHomePosThread() {
             boost::bind(&CNCInterface::homePos_callback, this, _1));
 
     ROS_WARN("Waiting For 3D Fix ...");
-    while (ros::ok() && !isHomeSet_) {
+    while (ros::ok() && (ENABLE_SAFETY_GPS && !isHomeSet_)) {
         ros::spinOnce();
         r_.sleep();
     }
