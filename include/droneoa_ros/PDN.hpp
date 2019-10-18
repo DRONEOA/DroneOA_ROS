@@ -36,6 +36,9 @@ static const char* FLT_MODE_BRAKE = "BRAKE";
 static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
+// CNC
+static const bool ENABLE_SAFETY_GPS = true;
+
 // OA Controller
 enum CMD_QUEUE_TYPES {
     CMD_CHMOD,  // param: mod name
