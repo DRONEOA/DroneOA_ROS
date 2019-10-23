@@ -45,6 +45,8 @@ class RSCInterface {
     void setRangeSwitch(bool status);
     void setRange(float min, float max);
 
+    int numOfPointsInRange(float width, float height);
+
     // Callback
     void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);
     void pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg);

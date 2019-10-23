@@ -96,6 +96,13 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
     pcl_conversions::toPCL(pointCloud_, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, pcl_pointCloud_);
 
+    /***
+     * Note: 
+     * X axis goes horizontaly, with right to be the positive axis.
+     * Y axis goes vertically, with up to be the positive axis.
+     * The coordinate has the unit Meter.
+     * /
+
     /* INDICES EXTRACT*/
     // pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
     // pcl::ExtractIndices<pcl::PointXYZRGB> extract;
@@ -111,22 +118,22 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
     // extract.filter(pcl_pointCloud_);
 
     /*CONDITION*/
-    pcl::ConditionAnd<pcl::PointXYZRGB>::Ptr range_cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
-    range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
-        pcl::FieldComparison<pcl::PointXYZRGB> ("x", pcl::ComparisonOps::GT, -0.1)));
-    range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
-        pcl::FieldComparison<pcl::PointXYZRGB> ("x", pcl::ComparisonOps::LT, 0.1)));
-    range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
-        pcl::FieldComparison<pcl::PointXYZRGB> ("y", pcl::ComparisonOps::GT, -0.1)));
-    range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
-        pcl::FieldComparison<pcl::PointXYZRGB> ("y", pcl::ComparisonOps::LT, 0.1)));
-    // build the filter
-    pcl::ConditionalRemoval<pcl::PointXYZRGB> condrem;
-    condrem.setCondition(range_cond);
-    condrem.setInputCloud(pcl_pointCloud_.makeShared());
-    condrem.setKeepOrganized(false);
-    // apply filter
-    condrem.filter(pcl_pointCloud_);
+    // pcl::ConditionAnd<pcl::PointXYZRGB>::Ptr range_cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
+    // range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
+    //     pcl::FieldComparison<pcl::PointXYZRGB> ("x", pcl::ComparisonOps::GT, -0.1)));
+    // range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
+    //     pcl::FieldComparison<pcl::PointXYZRGB> ("x", pcl::ComparisonOps::LT, 0.1)));
+    // range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
+    //     pcl::FieldComparison<pcl::PointXYZRGB> ("y", pcl::ComparisonOps::GT, -0.1)));
+    // range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
+    //     pcl::FieldComparison<pcl::PointXYZRGB> ("y", pcl::ComparisonOps::LT, 0.2)));
+    // // build the filter
+    // pcl::ConditionalRemoval<pcl::PointXYZRGB> condrem;
+    // condrem.setCondition(range_cond);
+    // condrem.setInputCloud(pcl_pointCloud_.makeShared());
+    // condrem.setKeepOrganized(false);
+    // // apply filter
+    // condrem.filter(pcl_pointCloud_);
 }
 
 /* Threads */
@@ -217,7 +224,7 @@ void RSCInterface::drawDebugOverlay() {
     }
 
     float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
-    std::string centerDistCloudStr = "Point size: " + std::to_string(pcl_pointCloud_.size());
+    std::string centerDistCloudStr = "Point size: " + std::to_string(numOfPointsInRange(200,200));
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255;
@@ -274,4 +281,21 @@ void RSCInterface::setRangeSwitch(bool status) {
 void RSCInterface::setRange(float min, float max) {
     rangeMin = min;
     rangeMax = max;
+}
+
+/*****************************************************
+ * Hit Pencentage
+ */
+
+int RSCInterface::numOfPointsInRange(float width, float height) {
+    unsigned int tunnelTest = 0;
+    float x = width/2;
+    float y = width/2;
+    for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
+        pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
+        if ( inRange<float>(-x, x, pt.x*1000) && inRange<float>(-y, y, pt.y*1000) ) {
+            tunnelTest++;
+        }
+    }
+    return tunnelTest;
 }
