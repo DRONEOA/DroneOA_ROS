@@ -21,22 +21,23 @@
 #define INCLUDE_DRONEOA_ROS_BASEALG_HPP_  // NOLINT
 
 #include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/PDN.hpp>
 
 class BaseAlg {
  public:
-    BaseAlg();
+    BaseAlg(CNCInterface *cnc);
     virtual ~BaseAlg();
 
-    virtual void init(CNCInterface cnc);
-    virtual void collect();  // Collect required sensor data
-    virtual bool plan();  // Return false when get around is impossible
+    virtual void init(CNCInterface *cnc);  // For restart
+    virtual bool collect() = 0;  // Collect required sensor data
+    virtual bool plan() = 0;  // Return false when get around is impossible
 
-    virtual float getRelativeTurn();
-    virtual float getNewSpeed();
-    virtual GPSPoint getNextWaypointRelative();
-    virtual GPSPoint getNextWaypointGlobal();
- private:
-    CNCInterface cnc_;
+    virtual std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> getCommandQueue();
+    virtual std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> getDataQueue();
+ protected:
+    CNCInterface *cnc_;
+    std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CMDQueue_;
+    std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DATAQueue_;
 };
 
 #endif  // NOLINT

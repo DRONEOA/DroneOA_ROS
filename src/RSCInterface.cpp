@@ -45,9 +45,11 @@ RSCInterface::~RSCInterface() {
     if (thread_watch_pointcloud_) {
         delete thread_watch_pointcloud_;
     }
+#ifdef PCL_DEBUG_VIEWER
     if (viewer) {
         delete viewer;
     }
+#endif
 }
 
 void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
@@ -131,7 +133,7 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
 void RSCInterface::watchDepthImgThread() {
     auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
     auto relative_pos_sub =
-        node->subscribe<sensor_msgs::Image>("/camera/depth/image_rect_raw", 1,
+        node->subscribe<sensor_msgs::Image>("/d435/depth/image_rect_raw", 1,
                 boost::bind(&RSCInterface::depthImg_callback, this, _1));
 
     while (ros::ok()) {
@@ -143,7 +145,7 @@ void RSCInterface::watchDepthImgThread() {
 void RSCInterface::watchPointCloudThread() {
     auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
     auto relative_pos_sub =
-        node->subscribe<sensor_msgs::PointCloud2>("/camera/depth/color/points", 1,
+        node->subscribe<sensor_msgs::PointCloud2>("/d435/depth/color/points", 1,
                 boost::bind(&RSCInterface::pointcloud_callback, this, _1));
 
     while (ros::ok()) {

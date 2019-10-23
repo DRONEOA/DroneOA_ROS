@@ -1,3 +1,4 @@
 .vscode/*
 launch/*
 !launch/*.launch
+!launch/*.md

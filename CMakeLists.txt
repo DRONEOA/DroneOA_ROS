@@ -148,8 +148,9 @@ add_library(droneoa_ros_liblidar
 )
 
 add_library(droneoa_ros_liboa
-  src/OAController.cpp
   src/OAUtils/BaseAlg.cpp
+  src/OAUtils/CAAlgLidar.cpp
+  src/OAController.cpp
 )
 
 ## Add cmake target dependencies of the library

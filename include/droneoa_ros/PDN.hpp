@@ -36,6 +36,28 @@ static const char* FLT_MODE_BRAKE = "BRAKE";
 static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
+// CNC
+static const bool ENABLE_SAFETY_GPS = true;
+
+// OA Controller
+enum CMD_QUEUE_TYPES {
+    CMD_CHMOD,  // param: mod name
+    CMD_SET_MAX_VELOCITY  // param: float speed
+};
+
+enum DATA_QUEUE_TYPES {
+    DATA_CONFIDENCE,  // param: confidence
+    DATA_ALG_NAME  // param: name
+};
+
+static const char* ALG_STR_BUG = "ALG_BUG";
+static const char* ALG_STR_VFF = "ALG_VFF";
+static const char* ALG_STR_COLLISION_LIDAR = "ALG_CA_LIDAR";
+static const char* ALG_STR_COLLISION_DEPTH = "ALG_CA_DEPTH";
+static const char* ALG_STR_COLLISION_AI = "ALG_CA_AI";
+
+static const int OAC_STAGE_SETTING = 1;  // Stage 1 - 3
+
 // Vehicle Data
 static const int VEHICLE_BOUNDBOX_WIDTH = 1200;  // mm
 static const int VEHICLE_BOUNDBOX_LENGTH = 1200;  // mm

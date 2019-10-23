@@ -23,11 +23,15 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <utility>
 
 #include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/LidarInterface.hpp>
+#include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
+#include <droneoa_ros/OAUtils/CAAlgLidar.hpp>
 
-enum sysState {
+enum SYS_State {
     SYS_IDLE,
     SYS_SAFE,  // optional
     SYS_EVALUATED,
@@ -36,52 +40,62 @@ enum sysState {
     SYS_ABORT
 };
 
-enum sysSelectedAlgs {
+enum SYS_Algs {
     ALG_BUG,
     ALG_VFF,
-    ALG_VISUAL_COLLISION,
-    ALG_AI_COLLISION,
-    ALG_LIDAR_COLLISION
+    ALG_COLLISION_LIDAR,
+    ALG_COLLISION_DEPTH,
+    ALG_COLLISION_AI
 };
 
-enum sysSelectedDetermineFun {
+enum SYS_SelectedDetermineFun {
     DET_STAGE1,
     DET_STAGE2,
-    DET_STAGE3
+    DET_STAGE3,
+    DET_INVALID
 };
+
+typedef std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CommandQueue;
+typedef std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DataQueue;
+
+// #define DEBUG_OAC
 
 class OAController {
  public:
-    OAController();
+    OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, ros::Rate r);
     virtual ~OAController();
 
-    void init(CNCInterface cnc);
+    void init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc);
     void tick();
+
+    void masterSwitch(bool isOn);  // Pause / Resume OA Controller
 
  private:
     bool evaluate();  // Collect and Evaluate data from sensors
     bool plan();  // Plan next waypoint use selected algorithm(s)
     bool execute();  // Execute next waypoint use CNC Interface
     bool abort();  // About execution and "Brake"
-    std::vector<sysSelectedAlgs> selectAlgorithm();  // Determine which algorithm to use
-    sysSelectedDetermineFun selectDetermineFunction();  // Determine which determine function to use
+    std::vector<SYS_Algs> selectAlgorithm();  // Determine which algorithm to use
+    SYS_SelectedDetermineFun selectDetermineFunction();  // Determine which determine function to use
 
-    CNCInterface cnc_;
-    std::map<sysSelectedAlgs, BaseAlg> algorithmInstances_;
+    // Thread
+    bool isOn_ = false;
+    void masterThread();
+    boost::thread* thread_oac_master_;
+
+    ros::Rate r_ = ros::Rate(1);;
+    CNCInterface *cnc_;
+    LidarInterface *lidar_;
+    RSCInterface *rsc_;
+    std::map<SYS_Algs, BaseAlg*> algorithmInstances_;
     bool isTerminated = false;
 
-    // Next State
-    float relativeTurnAngle_ = 0;
-    float targetSpeed_ = 0;
-    GPSPoint nextWaypoint_;
-    GPSPoint nextRelativeXYZ_;
-
     // Current State
-    sysState currState_ = sysState::SYS_IDLE;
-    std::vector<sysSelectedAlgs> selectedAlgorithm_;
-    sysSelectedDetermineFun selectedDetermineFun_;
-    float currentHeading_;
-    float currentSpeed_;
+    SYS_State currState_ = SYS_State::SYS_IDLE;
+    std::vector<SYS_Algs> selectedAlgorithm_;
+    SYS_SelectedDetermineFun selectedDetermineFun_;
+    std::map<SYS_Algs, CommandQueue> algCMDmap_;
+    std::map<SYS_Algs, DataQueue> algDATAmap_;
 };
 
 #endif  // NOLINT

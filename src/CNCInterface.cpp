@@ -222,19 +222,14 @@ bool CNCInterface::setMaxSpeed(float speedType, float speed, float isRelative) {
 // - Input: 3D Global Coordinate
 // - Return: client send response
 bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float targetAltitude) {
-    ros::ServiceClient setHome_cl =
-        n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/set_home");
-    mavros_msgs::CommandTOL srv_setHome;
-    srv_setHome.request.altitude = targetAltitude;
-    srv_setHome.request.latitude = targetLatitude;
-    srv_setHome.request.longitude = targetLongitude;
-    if (setHome_cl.call(srv_setHome)) {
-        ROS_INFO("srv_setHome send ok %d", srv_setHome.response.success);
-        return true;
-    } else {
-        ROS_ERROR("Failed Land");
-        return false;
-    }
+    mavros_msgs::CommandLong srv;
+    srv.request.command = mavros_msgs::CommandCode::DO_SET_HOME;
+    srv.request.param1 = 0;
+    srv.request.param5 = targetLatitude;
+    srv.request.param6 = targetLongitude;
+    srv.request.param7 = targetAltitude;
+
+    return generalLongCommand(srv);
 }
 
 /*****************************************************
@@ -353,7 +348,7 @@ void CNCInterface::watchHomePosThread() {
             boost::bind(&CNCInterface::homePos_callback, this, _1));
 
     ROS_WARN("Waiting For 3D Fix ...");
-    while (ros::ok() && !isHomeSet_) {
+    while (ros::ok() && (ENABLE_SAFETY_GPS && !isHomeSet_)) {
         ros::spinOnce();
         r_.sleep();
     }

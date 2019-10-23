@@ -30,7 +30,7 @@
 #include <boost/thread/thread.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#define DEBUG_LIDAR_POPUP
+// #define DEBUG_LIDAR_POPUP
 
 typedef std::vector<float> degreeSector;
 
