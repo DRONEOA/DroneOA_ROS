@@ -22,7 +22,8 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/extract_indices.h>
-#include <pcl/filters/conditional_removal.h>
+// #include <pcl/filters/conditional_removal.h>
+#include <pcl/filters/radius_outlier_removal.h>
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -108,7 +109,8 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
     // pcl::ExtractIndices<pcl::PointXYZRGB> extract;
     // for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
     //     pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
-    //     if ( !inRange<float>(-100, 100, pt.x*1000) || !inRange<float>(-100, 100, pt.y*1000) ) {
+    //     if ( !inRange<float>(-100, 100, pt.x*1000) ||
+    //          !inRange<float>(-100, 100, pt.y*1000) || !inRange<float>( 800, 100000, pt.z*1000) ) {
     //         inliers->indices.push_back(i);
     //     }
     // }
@@ -134,6 +136,16 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
     // condrem.setKeepOrganized(false);
     // // apply filter
     // condrem.filter(pcl_pointCloud_);
+
+    /*Noise Removal*/
+    // pcl::RadiusOutlierRemoval<pcl::PointXYZRGB> outrem;
+    // // build the filter
+    // outrem.setInputCloud(pcl_pointCloud_.makeShared());
+    // outrem.setRadiusSearch(0.1);
+    // outrem.setMinNeighborsInRadius (1);
+    // // apply filter
+    // pcl::PointCloud<pcl::PointXYZRGB>::iterator it;
+    // outrem.filter (pcl_pointCloud_);
 }
 
 /* Threads */
@@ -224,7 +236,7 @@ void RSCInterface::drawDebugOverlay() {
     }
 
     float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
-    std::string centerDistCloudStr = "Point size: " + std::to_string(numOfPointsInRange(200,200));
+    std::string centerDistCloudStr = "Point size: " + std::to_string(numOfPointsInRange(200, 200));
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255;
@@ -287,10 +299,13 @@ void RSCInterface::setRange(float min, float max) {
  * Hit Pencentage
  */
 
-int RSCInterface::numOfPointsInRange(float width, float height) {
+int RSCInterface::numOfPointsInRange(float width, float height, float dist) {
     unsigned int tunnelTest = 0;
     float x = width/2;
     float y = width/2;
+    if (dist < 200) {
+        dist = 200;
+    }
     for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
         if ( inRange<float>(-x, x, pt.x*1000) && inRange<float>(-y, y, pt.y*1000) ) {
