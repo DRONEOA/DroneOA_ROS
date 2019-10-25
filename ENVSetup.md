@@ -189,6 +189,15 @@ source <WORKSPACE_PATH>/devel/setup.bash
 ```
 You can also add this to the end of ``~/.bashrc``
 
+## Part5. Additional Libraries For SITL
+
+Install geographiclib:
+```shell
+$ wget https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh
+$ sudo chmod +x ./install_geographiclib_datasets.sh
+$ ./install_geographiclib_datasets.sh
+```
+
 ### Use With SITL
 - [Launch File README](launch/README.md)
 - [SITL With Gazebo](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
