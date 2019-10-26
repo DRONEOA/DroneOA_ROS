@@ -23,6 +23,7 @@
 #include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/SetMode.h>
 #include <sensor_msgs/NavSatStatus.h>
+#include <std_msgs/String.h>
 #include <tf/tf.h>
 
 #include <cstdlib>
@@ -288,6 +289,23 @@ void CNCInterface::state_callback(const mavros_msgs::State::ConstPtr& msg) {
 /* GPS Fix */
 void CNCInterface::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
     current_gps_fix_ = *msg;
+#ifdef UE4_SITL
+    std_msgs::String msgPub;
+    float dist = getDistanceMeter(GPSPoint(current_home_pos_.geo.latitude, current_home_pos_.geo.longitude, 0),
+        GPSPoint(current_gps_fix_.latitude, current_gps_fix_.longitude, 0));
+    float heading = getBearing(GPSPoint(current_home_pos_.geo.latitude, current_home_pos_.geo.longitude, 0),
+        GPSPoint(current_gps_fix_.latitude, current_gps_fix_.longitude, 0));
+    
+    msgPub.data = "C: " + std::to_string(current_gps_fix_.latitude) + " " +
+        std::to_string(current_gps_fix_.longitude) + " " +
+        std::to_string(current_relative_altitude_.data) + " H: " +
+        std::to_string(current_home_pos_.geo.latitude) + " " +
+        std::to_string(current_home_pos_.geo.longitude) + " " +
+        std::to_string(current_home_pos_.geo.altitude) + " D: " +
+        std::to_string(dist) + " HD: " +
+        std::to_string(heading);
+    gpspos_str_pub.publish(msgPub);
+#endif
 }
 /* Home Position */
 void CNCInterface::homePos_callback(const mavros_msgs::HomePositionConstPtr& msg) {
@@ -335,6 +353,9 @@ void CNCInterface::watchGPSFixThread() {
     auto gpsFix_sub =
         n.subscribe<sensor_msgs::NavSatFix>("mavros/global_position/global", 1,
             boost::bind(&CNCInterface::gpsFix_callback, this, _1));
+#ifdef UE4_SITL
+    gpspos_str_pub = n.advertise<std_msgs::String>("gpsposstr", 1000);
+#endif
 
     while (ros::ok()) {
         ros::spinOnce();

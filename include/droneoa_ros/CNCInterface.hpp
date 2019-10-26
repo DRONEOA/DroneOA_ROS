@@ -135,6 +135,11 @@ class CNCInterface {
     void watchAltitudeThread();
     void watchIMUThread();
 
+    // Publishers
+#ifdef UE4_SITL
+    ros::Publisher gpspos_str_pub;
+#endif
+
     // Private CNC
     bool generalLongCommand(mavros_msgs::CommandLong commandMessage);
 
