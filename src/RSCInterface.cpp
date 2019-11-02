@@ -22,7 +22,6 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/filters/extract_indices.h>
-// #include <pcl/filters/conditional_removal.h>
 #include <pcl/filters/radius_outlier_removal.h>
 
 #include <opencv2/imgproc/imgproc.hpp>
@@ -193,7 +192,7 @@ void RSCInterface::drawDebugOverlay() {
     }
 
     float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
-    std::string centerDistCloudStr = "Point size: " + std::to_string(numOfPointsInRange(200, 200));
+    std::string centerDistCloudStr = "Point size: " + std::to_string(numOfPointsInRange());
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255;
@@ -257,7 +256,7 @@ void RSCInterface::setRange(float min, float max) {
  */
 
 int RSCInterface::numOfPointsInRange(float width, float height, float dist) {
-    unsigned int tunnelTest = 0;
+    unsigned int pointCount = 0;
     float x = width/2;
     float y = width/2;
     if (dist < 200) {
@@ -266,8 +265,8 @@ int RSCInterface::numOfPointsInRange(float width, float height, float dist) {
     for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
         if ( inRange<float>(-x, x, pt.x*1000) && inRange<float>(-y, y, pt.y*1000) ) {
-            tunnelTest++;
+            pointCount++;
         }
     }
-    return tunnelTest;
+    return pointCount;
 }
