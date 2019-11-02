@@ -102,50 +102,7 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
      * X axis goes horizontaly, with right to be the positive axis.
      * Y axis goes vertically, with up to be the positive axis.
      * The coordinate has the unit Meter.
-     * /
-
-    /* INDICES EXTRACT*/
-    // pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
-    // pcl::ExtractIndices<pcl::PointXYZRGB> extract;
-    // for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
-    //     pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
-    //     if ( !inRange<float>(-100, 100, pt.x*1000) ||
-    //          !inRange<float>(-100, 100, pt.y*1000) || !inRange<float>( 800, 100000, pt.z*1000) ) {
-    //         inliers->indices.push_back(i);
-    //     }
-    // }
-    // extract.setInputCloud(pcl_pointCloud_.makeShared());  // BAD
-    // extract.setIndices(inliers);
-    // extract.setNegative(true);
-    // extract.filter(pcl_pointCloud_);
-
-    /*CONDITION*/
-    // pcl::ConditionAnd<pcl::PointXYZRGB>::Ptr range_cond (new pcl::ConditionAnd<pcl::PointXYZRGB> ());
-    // range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
-    //     pcl::FieldComparison<pcl::PointXYZRGB> ("x", pcl::ComparisonOps::GT, -0.1)));
-    // range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
-    //     pcl::FieldComparison<pcl::PointXYZRGB> ("x", pcl::ComparisonOps::LT, 0.1)));
-    // range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
-    //     pcl::FieldComparison<pcl::PointXYZRGB> ("y", pcl::ComparisonOps::GT, -0.1)));
-    // range_cond->addComparison (pcl::FieldComparison<pcl::PointXYZRGB>::ConstPtr (new
-    //     pcl::FieldComparison<pcl::PointXYZRGB> ("y", pcl::ComparisonOps::LT, 0.2)));
-    // // build the filter
-    // pcl::ConditionalRemoval<pcl::PointXYZRGB> condrem;
-    // condrem.setCondition(range_cond);
-    // condrem.setInputCloud(pcl_pointCloud_.makeShared());
-    // condrem.setKeepOrganized(false);
-    // // apply filter
-    // condrem.filter(pcl_pointCloud_);
-
-    /*Noise Removal*/
-    // pcl::RadiusOutlierRemoval<pcl::PointXYZRGB> outrem;
-    // // build the filter
-    // outrem.setInputCloud(pcl_pointCloud_.makeShared());
-    // outrem.setRadiusSearch(0.1);
-    // outrem.setMinNeighborsInRadius (1);
-    // // apply filter
-    // pcl::PointCloud<pcl::PointXYZRGB>::iterator it;
-    // outrem.filter (pcl_pointCloud_);
+     */
 }
 
 /* Threads */
