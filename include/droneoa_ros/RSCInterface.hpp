@@ -27,6 +27,7 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <opencv2/core/core.hpp>
+#include <droneoa_ros/PDN.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
@@ -44,6 +45,11 @@ class RSCInterface {
     cv::Mat depthImgForDesiredDistanceRange(float min, float max, cv::Mat input);
     void setRangeSwitch(bool status);
     void setRange(float min, float max);
+
+    int numOfPointsInRange(
+        float width = VEHICLE_BOUNDBOX_WIDTH,
+        float height = VEHICLE_BOUNDBOX_HEIGHT,
+        float dist = 200.0f);  // @TODO: The minimum distance, left for possibility calculation in the future
 
     // Callback
     void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);

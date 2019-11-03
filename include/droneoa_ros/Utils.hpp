@@ -51,4 +51,10 @@ float validAltitudeCMD(float targetAltitude);
 // Chack target speed, if exceed max allowed, set to max
 float validSpeedCMD(float targetSpeed);
 
+// Check if target is in range [min, max] inclusive
+template<typename T>
+bool inRange(T min, T max, T target) {
+    return (target >= min && target <= max);
+}
+
 #endif  // NOLINT
