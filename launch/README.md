@@ -67,3 +67,14 @@ Launch the node in separate terminal to allow dedicated console input:
 ```shell
 roslaunch step2.launch
 ```
+
+## FAQs
+
+Q: I cannot launch after doing a sudo upgrade. The error contains something like 
+```shell
+API version mismatch: librealsense.so was compiled with API version 2.29.0 but the application was compiled with 2.28.0
+```
+A: You need to update the ``realsence-ros`` repo.
+* Enter ``realsence-ros``
+* Checkout the ``developer`` branch if you did not do so
+* Perform git pull.
