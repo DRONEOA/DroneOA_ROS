@@ -24,6 +24,7 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/radius_outlier_removal.h>
 
+#include <droneoa_ros/Utils.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -82,11 +83,6 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
 #ifdef IMG_DEBUG_POPUP
     drawDebugOverlay();
 #endif
-}
-
-template<typename T>
-bool inRange(T min, T max, T target) {
-    return (target >= min && target <= max);
 }
 
 void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
@@ -259,8 +255,8 @@ int RSCInterface::numOfPointsInRange(float width, float height, float dist) {
     unsigned int pointCount = 0;
     float x = width/2;
     float y = width/2;
-    if (dist < 200) {
-        dist = 200;
+    if (dist < 200.0f) {
+        dist = 200.0f;
     }
     for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);

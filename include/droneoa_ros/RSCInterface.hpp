@@ -33,8 +33,8 @@
 #include <boost/thread/thread.hpp>
 
 #define ENABLE_POINTCLOUD
-#define PCL_DEBUG_VIEWER
-#define IMG_DEBUG_POPUP
+// #define PCL_DEBUG_VIEWER
+// #define IMG_DEBUG_POPUP
 
 class RSCInterface {
  public:
@@ -49,7 +49,7 @@ class RSCInterface {
     int numOfPointsInRange(
         float width = VEHICLE_BOUNDBOX_WIDTH,
         float height = VEHICLE_BOUNDBOX_HEIGHT,
-        float dist = 200);  // @TODO: The minimum distance, left for possibility calculation in the future
+        float dist = 200.0f);  // @TODO: The minimum distance, left for possibility calculation in the future
 
     // Callback
     void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);

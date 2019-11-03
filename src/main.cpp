@@ -208,7 +208,7 @@ int main(int argc, char **argv) {
             std::cout << "- info                       - print information" << std::endl;
             std::cout << "- yaw [heading] <dist> <alt> - fly heading" << std::endl;
             std::cout << "- velocity [speed]           - set max speed" << std::endl;
-            std::cout << "- rsc range [max] [min]      - set range" << std::endl;
+            std::cout << "- rsc range [max(mm)] [min(mm)]      - set range" << std::endl;
             std::cout << "- rc                         - cancel range" << std::endl;
             std::cout << ">>>>>>>>>> HELP END  <<<<<<<<<<" << std::endl;
         }
