@@ -169,16 +169,27 @@ int main(int argc, char **argv) {
             }
             cnc.setMaxSpeed(1, vel, 0);
         } else if (commandIn.front() == 'r') {
-            // @todo refactor this command to: rsc range [max] [min]
             commandIn = commandIn.substr(1);
             if (commandIn.front() == 'c') {
                 rsc.setRangeSwitch(false);
             } else {
-                size_t mid = commandIn.find('-');
-                int min = std::stoi(commandIn.substr(0, mid), 0);
-                int max = std::stoi(commandIn.substr(mid+1), 0);
-                rsc.setRange(min, max);
-                rsc.setRangeSwitch(true);
+                try {
+                    size_t start = commandIn.find("range");
+                    if (start == std::string::npos) {
+                        throw 1;
+                    }
+                    commandIn = commandIn.substr(start+6);
+                    size_t mid = commandIn.find(' ');
+                    int max = std::stoi(commandIn.substr(0, mid), 0);
+                    int min = std::stoi(commandIn.substr(mid+1), 0);
+                    if (max < min) {
+                        throw 1;
+                    }
+                    rsc.setRange(min, max);
+                    rsc.setRangeSwitch(true);
+                } catch (...) {
+                    std::cout << "Invalid range command! Check help for reference." << std::endl;
+                }
             }
         } else {
             std::cout << ">>>>>>>>>> HELP START <<<<<<<<<<" << std::endl;
@@ -197,7 +208,7 @@ int main(int argc, char **argv) {
             std::cout << "- info                       - print information" << std::endl;
             std::cout << "- yaw [heading] <dist> <alt> - fly heading" << std::endl;
             std::cout << "- velocity [speed]           - set max speed" << std::endl;
-            std::cout << "- r[min]-[max]               - set range" << std::endl;
+            std::cout << "- rsc range [max(mm)] [min(mm)]      - set range" << std::endl;
             std::cout << "- rc                         - cancel range" << std::endl;
             std::cout << ">>>>>>>>>> HELP END  <<<<<<<<<<" << std::endl;
         }

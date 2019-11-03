@@ -21,7 +21,10 @@
 #include <cv_bridge/cv_bridge.h>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/radius_outlier_removal.h>
 
+#include <droneoa_ros/Utils.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -88,6 +91,13 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(pointCloud_, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, pcl_pointCloud_);
+
+    /***
+     * Note: 
+     * X axis goes horizontaly, with right to be the positive axis.
+     * Y axis goes vertically, with up to be the positive axis.
+     * The coordinate has the unit Meter.
+     */
 }
 
 /* Threads */
@@ -178,6 +188,7 @@ void RSCInterface::drawDebugOverlay() {
     }
 
     float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
+    std::string centerDistCloudStr = "Point size: " + std::to_string(numOfPointsInRange());
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255;
@@ -190,6 +201,7 @@ void RSCInterface::drawDebugOverlay() {
 
     drawText(debugImage255, cv::Point(20, 20), "Debug Overlay:", 0.5, 1);
     drawText(debugImage255, cv::Point(20, 40), centerDistStr, 0.5, 1);
+    drawText(debugImage255, cv::Point(20, 60), centerDistCloudStr, 0.5, 1);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y - 7),
             cv::Point(debugMousePos.x + 7, debugMousePos.y + 7), cv::Scalar(0xffff), 2);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y + 7),
@@ -233,4 +245,24 @@ void RSCInterface::setRangeSwitch(bool status) {
 void RSCInterface::setRange(float min, float max) {
     rangeMin = min;
     rangeMax = max;
+}
+
+/*****************************************************
+ * Hit Pencentage
+ */
+
+int RSCInterface::numOfPointsInRange(float width, float height, float dist) {
+    unsigned int pointCount = 0;
+    float x = width/2;
+    float y = width/2;
+    if (dist < 200.0f) {
+        dist = 200.0f;
+    }
+    for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
+        pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
+        if ( inRange<float>(-x, x, pt.x*1000) && inRange<float>(-y, y, pt.y*1000) ) {
+            pointCount++;
+        }
+    }
+    return pointCount;
 }
