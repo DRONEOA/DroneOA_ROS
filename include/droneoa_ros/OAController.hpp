@@ -30,6 +30,7 @@
 #include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
 #include <droneoa_ros/OAUtils/CAAlgLidar.hpp>
+#include <droneoa_ros/OAUtils/CAAlgDepthCam.hpp>
 
 enum SYS_State {
     SYS_IDLE,
@@ -58,7 +59,7 @@ enum SYS_SelectedDetermineFun {
 typedef std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CommandQueue;
 typedef std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DataQueue;
 
-// #define DEBUG_OAC
+#define DEBUG_OAC
 
 class OAController {
  public:

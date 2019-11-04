@@ -23,10 +23,36 @@ CAAlgDepthCam::CAAlgDepthCam(CNCInterface *cnc, RSCInterface *rsc) : BaseAlg(cnc
     init(rsc);
 }
 
-CAAlgDepthCam::~CAAlgDepthCam() {}
+CAAlgDepthCam::~CAAlgDepthCam() {
+    CMDQueue_.clear();
+}
 
 void CAAlgDepthCam::init(RSCInterface *rsc) {
     rsc_ = rsc;
-}  // For restart
-bool CAAlgDepthCam::collect() {}  // Collect required sensor data
-bool CAAlgDepthCam::plan() {}
+}
+
+bool CAAlgDepthCam::collect() {
+    float gSpeed = cnc_->getHUDData().groundspeed;
+    camThreshold_ = gSpeed * 200;
+    std::vector<float> zCoords = rsc_->pointCloudZCoordsInRange();
+    float sum = 0.0f;
+    for(auto zCoord : zCoords) {
+        sum += zCoord;
+    }
+    float avg = sum / zCoords.size();
+    ROS_INFO("[CAAlgDepthCam] Avg Z Coords: %f", avg);
+    return true;
+}
+
+bool CAAlgDepthCam::plan() {
+    CMDQueue_.clear();
+    DATAQueue_.clear();
+    DATAQueue_.push_back(
+        std::pair<DATA_QUEUE_TYPES, std::string>(DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_DEPTH));
+    if (true) {
+        CMDQueue_.push_back(std::pair<CMD_QUEUE_TYPES, std::string>(CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
+        DATAQueue_.push_back(std::pair<DATA_QUEUE_TYPES, std::string>(
+            DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(0)));
+    }
+    return true;
+}
