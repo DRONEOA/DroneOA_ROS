@@ -177,6 +177,7 @@ bool OAController::plan() {
 
 bool OAController::execute() {
     // Entry state: SYS_PLANNED
+    selectDetermineFunction();
     switch (selectedDetermineFun_) {
         case SYS_SelectedDetermineFun::DET_STAGE1:
             // @todo handler & parser
@@ -232,12 +233,13 @@ std::vector<SYS_Algs> OAController::selectAlgorithm() {
 
 SYS_SelectedDetermineFun OAController::selectDetermineFunction() {
     if (OAC_STAGE_SETTING == 1) {
-        return SYS_SelectedDetermineFun::DET_STAGE1;
+        selectedDetermineFun_ = SYS_SelectedDetermineFun::DET_STAGE1;
     } else if (OAC_STAGE_SETTING == 2) {
-        return SYS_SelectedDetermineFun::DET_STAGE2;
+        selectedDetermineFun_ = SYS_SelectedDetermineFun::DET_STAGE2;
     } else if (OAC_STAGE_SETTING == 3) {
-        return SYS_SelectedDetermineFun::DET_STAGE3;
+        selectedDetermineFun_ = SYS_SelectedDetermineFun::DET_STAGE3;
     } else {
-        return SYS_SelectedDetermineFun::DET_INVALID;
+        selectedDetermineFun_ = SYS_SelectedDetermineFun::DET_INVALID;
     }
+    return selectedDetermineFun_;
 }
