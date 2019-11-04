@@ -26,11 +26,13 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
+#include <vector>
 #include <opencv2/core/core.hpp>
 #include <droneoa_ros/PDN.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
+
 
 #define ENABLE_POINTCLOUD
 #define PCL_DEBUG_VIEWER
