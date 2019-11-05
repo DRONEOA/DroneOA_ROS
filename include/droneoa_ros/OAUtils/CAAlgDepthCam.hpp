@@ -28,6 +28,7 @@
 class CAAlgDepthCam : public BaseAlg {
     RSCInterface *rsc_;
     float camThreshold_;
+    float camPossibility_;
  public:
     CAAlgDepthCam(CNCInterface *cnc, RSCInterface *rsc);
     ~CAAlgDepthCam() override;
