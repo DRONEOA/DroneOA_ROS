@@ -37,4 +37,4 @@ class CAAlgLidar : public BaseAlg {
     bool plan() override;  // Return false when get around is impossible
 };
 
-#endif
+#endif  // NOLINT
