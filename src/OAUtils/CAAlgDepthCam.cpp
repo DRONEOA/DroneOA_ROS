@@ -46,7 +46,24 @@ float avgInRangeHelper(std::vector<float> source, float min, float max){
 
 bool CAAlgDepthCam::collect() {
     float gSpeed = cnc_->getHUDData().groundspeed;
-    camThreshold_ = gSpeed * 200;
+    float a = 50.0f;
+
+    /**
+     * The following equation calculates the brack distance of the droone.
+     * Credit: High school textbook published by People's Education Press(PEP).
+     * Formula: d = (vt^2 - v0^2) / 2a
+     * d = braking distance in metres (to be calculated).
+     * vt = final speed in m/s.
+     * v0 = initial speed in m/s.
+     * a = acceleration in m/s^2
+     * @TODO test a.
+     */
+    camThreshold_ =  ((gSpeed * gSpeed) / (2 * a)) * 1000;
+    
+    if(camThreshold_ < 150.0f) {
+        camThreshold_ = 150.0f;
+    } // Official documentation said the min dist is 105mm; to be safe, use 150 mm instead.
+
     std::vector<float> zCoords = rsc_->pointCloudZCoordsInRange();
     float sum = 0.0f;
     for(auto zCoord : zCoords) {
