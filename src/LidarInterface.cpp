@@ -43,6 +43,7 @@ void LidarInterface::init(ros::NodeHandle nh, ros::Rate r) {
     r_ = r;
     thread_watch_lidar_ = new boost::thread(boost::bind(&LidarInterface::watchLidarThread, this));
 #ifdef DEBUG_LIDAR_POPUP
+    cv::startWindowThread();  // DEBUG
     drawLidarData();
 #endif
     ROS_INFO("[LIDAR] init");
@@ -60,9 +61,15 @@ void LidarInterface::lidar_callback(const sensor_msgs::LaserScanConstPtr& msg) {
 
 /* Thread */
 void LidarInterface::watchLidarThread() {
+#if defined(UE4_SITL)
+    auto lidar_sub =
+        n_.subscribe<sensor_msgs::LaserScan>("/sitl_lidar_test", 1000,
+            boost::bind(&LidarInterface::lidar_callback, this, _1));
+#else
     auto lidar_sub =
         n_.subscribe<sensor_msgs::LaserScan>("/scan", 1000,
             boost::bind(&LidarInterface::lidar_callback, this, _1));
+#endif
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -148,6 +155,8 @@ void LidarInterface::printLidarInfo() {
         getMaxRange(), getMinRnage());
     ROS_INFO("[LIDAR] RAW MaxAngle: %f, MinAngle: %f, Increment: %f",
         getMaxAngle(), getMinAngle(), getIncreament());
+    ROS_INFO("[LIDAR] time_increment: %f, scan_time: %f",
+        scannerData_.time_increment, scannerData_.scan_time);
 }
 
 void drawLidarPoint(const cv::Mat &img, const cv::Point &center, float angle, float range, bool isLine = false) {
