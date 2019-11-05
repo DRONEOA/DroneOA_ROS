@@ -263,7 +263,7 @@ std::vector<float> RSCInterface::pointCloudZCoordsInRange(float width, float hei
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
         if ( inRange<float>(-x, x, pt.x*1000) && inRange<float>(-y, y, pt.y*1000) ) {
             pointCount++;
-            zCoords.push_back(pt.z);
+            zCoords.push_back(pt.z*1000);
         }
     }
     return zCoords;
