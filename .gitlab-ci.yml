@@ -3,7 +3,7 @@ stages:
   - build
   - unittest
 
-image: ros:melodic-ros-core
+image: ros:melodic-perception
 
 cache:
   paths:
