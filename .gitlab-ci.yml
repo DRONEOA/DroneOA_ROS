@@ -3,7 +3,7 @@ stages:
   - build
   - unittest
 
-image: ros:melodic-ros-core
+image: ros:melodic-perception
 
 cache:
   paths:
@@ -13,30 +13,6 @@ variables:
   ROS_PACKAGES_TO_INSTALL: "mavros"
 
 before_script:
-  - apt-get update
-  - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-  - source ros_gitlab_ci/gitlab-ci.bash >/dev/null
-  - echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
-  - apt-key add ./src/droneoa_ros/scripts/realsenseKey
-  - apt-get update
-  - apt-get install librealsense2-dkms --allow-unauthenticated -y
-  - apt-get install librealsense2-dev --allow-unauthenticated -y
-  - apt-get install ros-melodic-cv-bridge -y
-  - apt-get install ros-melodic-image-transport
-  - apt-get install ros-melodic-tf -y
-  - apt-get install ros-melodic-diagnostic-updater -y
-  - apt-get install ros-melodic-ddynamic-reconfigure -y
-  - apt-get install ros-melodic-nodelet -y
-  - apt-get install ros-melodic-perception -y
-  - apt-get install ros-melodic-pcl-ros -y
-  - apt-get install ros-melodic-pcl-conversions -y
-  - cd src
-  - git clone https://github.com/IntelRealSense/realsense-ros.git
-  - git clone http://tuotuogzs.ddns.net/droneoa/ydlidar-x2l-local.git
-  - cd realsense-ros/
-  - git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
-  - cd ..
-  - cd ..
 
 cpplint:
   stage: cpplint
@@ -51,18 +27,81 @@ cpplint:
 catkin_make:
   stage: build
   script:
+    - echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
+    - apt-key add ./src/droneoa_ros/scripts/realsenseKey
+    - apt-get update
+    - apt-get install librealsense2-dkms --allow-unauthenticated -y
+    - apt-get install librealsense2-dev --allow-unauthenticated -y
+    - apt-get install ros-melodic-cv-bridge -y
+    - apt-get install ros-melodic-image-transport
+    - apt-get install ros-melodic-tf -y
+    - apt-get install ros-melodic-diagnostic-updater -y
+    - apt-get install ros-melodic-ddynamic-reconfigure -y
+    - apt-get install ros-melodic-nodelet -y
+    - apt-get install ros-melodic-perception -y
+    - apt-get install ros-melodic-pcl-ros -y
+    - apt-get install ros-melodic-pcl-conversions -y
+    - cd src
+    - git clone https://github.com/IntelRealSense/realsense-ros.git
+    - git clone http://tuotuogzs.ddns.net/droneoa/ydlidar-x2l-local.git
+    - cd realsense-ros/
+    - git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
+    - cd ..
+    - cd ..
     - catkin_make
   retry: 2
 
 catkin tools:
   stage: build
   script:
+    - echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
+    - apt-key add ./src/droneoa_ros/scripts/realsenseKey
+    - apt-get update
+    - apt-get install librealsense2-dkms --allow-unauthenticated -y
+    - apt-get install librealsense2-dev --allow-unauthenticated -y
+    - apt-get install ros-melodic-cv-bridge -y
+    - apt-get install ros-melodic-image-transport
+    - apt-get install ros-melodic-tf -y
+    - apt-get install ros-melodic-diagnostic-updater -y
+    - apt-get install ros-melodic-ddynamic-reconfigure -y
+    - apt-get install ros-melodic-nodelet -y
+    - apt-get install ros-melodic-perception -y
+    - apt-get install ros-melodic-pcl-ros -y
+    - apt-get install ros-melodic-pcl-conversions -y
+    - cd src
+    - git clone https://github.com/IntelRealSense/realsense-ros.git
+    - git clone http://tuotuogzs.ddns.net/droneoa/ydlidar-x2l-local.git
+    - cd realsense-ros/
+    - git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
+    - cd ..
+    - cd ..
     - catkin build --summarize --no-status --force-color
   retry: 2
 
 Unittest:
   stage: unittest
   script:
+    - echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
+    - apt-key add ./src/droneoa_ros/scripts/realsenseKey
+    - apt-get update
+    - apt-get install librealsense2-dkms --allow-unauthenticated -y
+    - apt-get install librealsense2-dev --allow-unauthenticated -y
+    - apt-get install ros-melodic-cv-bridge -y
+    - apt-get install ros-melodic-image-transport
+    - apt-get install ros-melodic-tf -y
+    - apt-get install ros-melodic-diagnostic-updater -y
+    - apt-get install ros-melodic-ddynamic-reconfigure -y
+    - apt-get install ros-melodic-nodelet -y
+    - apt-get install ros-melodic-perception -y
+    - apt-get install ros-melodic-pcl-ros -y
+    - apt-get install ros-melodic-pcl-conversions -y
+    - cd src
+    - git clone https://github.com/IntelRealSense/realsense-ros.git
+    - git clone http://tuotuogzs.ddns.net/droneoa/ydlidar-x2l-local.git
+    - cd realsense-ros/
+    - git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
+    - cd ..
+    - cd ..
     - catkin_make
     - source ./devel/setup.sh
     - rosrun droneoa_ros droneoa_ros_utiltest
