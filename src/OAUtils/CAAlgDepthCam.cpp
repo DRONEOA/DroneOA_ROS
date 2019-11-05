@@ -31,6 +31,19 @@ void CAAlgDepthCam::init(RSCInterface *rsc) {
     rsc_ = rsc;
 }
 
+float avgInRangeHelper(std::vector<float> source, float min, float max){
+    float sum = 0.0f;
+    float count = 0.0f;
+    for(auto zCoord : source) {
+        if(inRange<float>(min, max, zCoord)) {
+            sum += zCoord;
+            count += 1.0f;
+        }
+    }
+    float avg = sum / count;
+    return (std::isnan(avg) ? -1 : avg);
+}
+
 bool CAAlgDepthCam::collect() {
     float gSpeed = cnc_->getHUDData().groundspeed;
     camThreshold_ = gSpeed * 200;
