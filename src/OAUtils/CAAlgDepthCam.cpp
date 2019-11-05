@@ -18,6 +18,7 @@
  */
 
 #include <droneoa_ros/OAUtils/CAAlgDepthCam.hpp>
+#include <droneoa_ros/Utils.hpp>
 
 CAAlgDepthCam::CAAlgDepthCam(CNCInterface *cnc, RSCInterface *rsc) : BaseAlg(cnc) {
     init(rsc);
@@ -65,12 +66,30 @@ bool CAAlgDepthCam::collect() {
     } // Official documentation said the min dist is 105mm; to be safe, use 150 mm instead.
 
     std::vector<float> zCoords = rsc_->pointCloudZCoordsInRange();
-    float sum = 0.0f;
-    for(auto zCoord : zCoords) {
-        sum += zCoord;
+    float danger = avgInRangeHelper(zCoords, 150.0f, camThreshold_);
+    float neutral = avgInRangeHelper(zCoords, camThreshold_, 2*camThreshold_);
+    float safe = avgInRangeHelper(zCoords, 2*camThreshold_, 3*camThreshold_);
+#ifdef DEBUG_ALG_COLLISION
+    ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f", danger, neutral, safe, camThreshold_);
+#endif
+    
+    if(danger != -1) {
+        camPossibility_ = 1.0f;
+    } else if(neutral != -1) {
+        camPossibility_ = scale<float>(neutral, camThreshold_, 2*camThreshold_, 100, 50);
+    } else if(safe != -1) {
+        camPossibility_ = scale<float>(
+            safe,
+            2*camThreshold_,
+            3*camThreshold_,
+            50,
+            0);
+    } else {
+        camPossibility_ = 0.0f;
     }
-    float avg = sum / zCoords.size();
-    ROS_INFO("[CAAlgDepthCam] Avg Z Coords: %f", avg);
+#ifdef DEBUG_ALG_COLLISION
+    ROS_INFO("[CAAlgDepthCam] Possibility: %f", camPossibility_);
+#endif
     return true;
 }
 
@@ -79,10 +98,10 @@ bool CAAlgDepthCam::plan() {
     DATAQueue_.clear();
     DATAQueue_.push_back(
         std::pair<DATA_QUEUE_TYPES, std::string>(DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_DEPTH));
-    if (true) {
+    if (camPossibility_ > 0.9) {
         CMDQueue_.push_back(std::pair<CMD_QUEUE_TYPES, std::string>(CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
         DATAQueue_.push_back(std::pair<DATA_QUEUE_TYPES, std::string>(
-            DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(0)));
+            DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(camPossibility_)));
     }
     return true;
 }
