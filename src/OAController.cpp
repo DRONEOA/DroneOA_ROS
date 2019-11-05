@@ -178,11 +178,7 @@ bool OAController::plan() {
 
 bool OAController::execute() {
     // Entry state: SYS_PLANNED
-<<<<<<< HEAD
-    selectedDetermineFun_ = selectDetermineFunction();
-=======
     selectDetermineFunction();
->>>>>>> 8a332b55692b0870e797da9a8e3131890ffebeb1
     switch (selectedDetermineFun_) {
         case SYS_SelectedDetermineFun::DET_STAGE1:
             // @todo handler & parser
