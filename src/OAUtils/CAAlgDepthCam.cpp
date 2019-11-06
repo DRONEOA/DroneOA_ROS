@@ -98,7 +98,7 @@ bool CAAlgDepthCam::plan() {
     DATAQueue_.clear();
     DATAQueue_.push_back(
         std::pair<DATA_QUEUE_TYPES, std::string>(DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_DEPTH));
-    if (camPossibility_ > 0.9) {
+    if (camPossibility_ > 0.5) {
         CMDQueue_.push_back(std::pair<CMD_QUEUE_TYPES, std::string>(CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
         DATAQueue_.push_back(std::pair<DATA_QUEUE_TYPES, std::string>(
             DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(camPossibility_)));
