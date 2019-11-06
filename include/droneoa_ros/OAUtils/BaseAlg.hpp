@@ -20,12 +20,15 @@
 #ifndef INCLUDE_DRONEOA_ROS_BASEALG_HPP_  // NOLINT
 #define INCLUDE_DRONEOA_ROS_BASEALG_HPP_  // NOLINT
 
+#include <utility>
+#include <string>
+#include <vector>
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/PDN.hpp>
 
 class BaseAlg {
  public:
-    BaseAlg(CNCInterface *cnc);
+    explicit BaseAlg(CNCInterface *cnc);
     virtual ~BaseAlg();
 
     virtual void init(CNCInterface *cnc);  // For restart

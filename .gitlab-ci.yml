@@ -3,7 +3,7 @@ stages:
   - build
   - unittest
 
-image: ros:melodic-ros-core
+image: ros:melodic-perception
 
 cache:
   paths:
@@ -13,6 +13,7 @@ variables:
   ROS_PACKAGES_TO_INSTALL: "mavros"
 
 before_script:
+  - apt-get update
   - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
   - source ros_gitlab_ci/gitlab-ci.bash >/dev/null
   - echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
