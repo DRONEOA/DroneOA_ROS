@@ -188,7 +188,6 @@ void RSCInterface::drawDebugOverlay() {
     }
 
     float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
-    // std::string centerDistCloudStr = "Point size: " + std::to_string(pointCloudZCoordsInRange());
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255;
@@ -201,7 +200,6 @@ void RSCInterface::drawDebugOverlay() {
 
     drawText(debugImage255, cv::Point(20, 20), "Debug Overlay:", 0.5, 1);
     drawText(debugImage255, cv::Point(20, 40), centerDistStr, 0.5, 1);
-    // drawText(debugImage255, cv::Point(20, 60), centerDistCloudStr, 0.5, 1);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y - 7),
             cv::Point(debugMousePos.x + 7, debugMousePos.y + 7), cv::Scalar(0xffff), 2);
     cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y + 7),
