@@ -43,7 +43,7 @@ cpplint:
   script:
     - pip install cpplint --quiet
     - cd ./src/droneoa_ros
-    - cpplint --linelength=120 ./test/*.cpp ./src/*.cpp ./include/droneoa_ros/*.hpp
+    - cpplint --linelength=120 ./test/*.cpp ./src/*.cpp ./include/droneoa_ros/*.hpp ./src/OAUtils/*.cpp ./include/droneoa_ros/OAUtils/*.hpp
     - cd ..
     - cd ..
   retry: 2
