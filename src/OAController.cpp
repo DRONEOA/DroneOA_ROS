@@ -48,6 +48,7 @@ void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *
     currState_ = SYS_State::SYS_IDLE;
     // create algorithm instances
     algorithmInstances_[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(cnc_, lidar_);
+    algorithmInstances_[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(cnc_, rsc_);
     ROS_INFO("[OACONTROLLER] init");
 }
 
@@ -219,7 +220,7 @@ std::vector<SYS_Algs> OAController::selectAlgorithm() {
     selectedAlgorithm_.clear();
     if (OAC_STAGE_SETTING == 1) {
         selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_LIDAR);
-        // selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
+        selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
         // selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_AI);
     } else if (OAC_STAGE_SETTING == 2) {
         // @todo

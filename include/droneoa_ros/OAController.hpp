@@ -30,6 +30,7 @@
 #include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
 #include <droneoa_ros/OAUtils/CAAlgLidar.hpp>
+#include <droneoa_ros/OAUtils/CAAlgDepthCam.hpp>
 
 enum SYS_State {
     SYS_IDLE,
