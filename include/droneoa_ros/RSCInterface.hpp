@@ -26,11 +26,13 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
+#include <vector>
 #include <opencv2/core/core.hpp>
 #include <droneoa_ros/PDN.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
+
 
 #define ENABLE_POINTCLOUD
 // #define PCL_DEBUG_VIEWER
@@ -46,7 +48,7 @@ class RSCInterface {
     void setRangeSwitch(bool status);
     void setRange(float min, float max);
 
-    int numOfPointsInRange(
+    std::vector<float> pointCloudZCoordsInRange(
         float width = VEHICLE_BOUNDBOX_WIDTH,
         float height = VEHICLE_BOUNDBOX_HEIGHT,
         float dist = 200.0f);  // @TODO: The minimum distance, left for possibility calculation in the future
@@ -58,6 +60,7 @@ class RSCInterface {
     // Debug Print
     void printImgInfo();
     static void mouseCallback(int event, int x, int y, int flags, void* userdata);
+    pcl::PointCloud<pcl::PointXYZRGB> getPointCloud();
 
  private:
     ros::NodeHandle n;

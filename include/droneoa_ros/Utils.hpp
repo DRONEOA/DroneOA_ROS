@@ -57,4 +57,10 @@ bool inRange(T min, T max, T target) {
     return (target >= min && target <= max);
 }
 
+// Scale target in [rmin, rmax] to [tmin, tmax]
+template<typename T>
+T scale(T target, T rmin, T rmax, T tmin, T tmax) {
+    return ((target-rmin)*(tmax-tmin))/(rmax-rmin)+tmin;
+}
+
 #endif  // NOLINT
