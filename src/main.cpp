@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     }
 
     // Create OA Controller
-    OAController oac(&cnc, &lidar, &rsc, ros::Rate(1));
+    OAController oac(&cnc, &lidar, &rsc, ros::Rate(OAC_REFRESH_FREQ));
 
     // Command Paser
     // Only For Testing

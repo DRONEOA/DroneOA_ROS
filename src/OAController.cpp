@@ -28,6 +28,7 @@ OAController::OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterfac
 }
 
 OAController::~OAController() {
+    if (parserExecuter_) delete parserExecuter_;
     for (const auto& elem : algorithmInstances_) {
         if (elem.second) {
             delete elem.second;
@@ -46,6 +47,9 @@ void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *
     lidar_ = lidar;
     rsc_ = rsc;
     currState_ = SYS_State::SYS_IDLE;
+    // init parser
+    if (parserExecuter_) delete parserExecuter_;
+    parserExecuter_ = new CMDParser(cnc_);
     // create algorithm instances
     algorithmInstances_[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(cnc_, lidar_);
     algorithmInstances_[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(cnc_, rsc_);
@@ -181,7 +185,37 @@ bool OAController::execute() {
     selectDetermineFunction();
     switch (selectedDetermineFun_) {
         case SYS_SelectedDetermineFun::DET_STAGE1:
-            // @todo handler & parser
+            // @todo handler & parser & determine function
+            double lidarConf, depthConf;
+            try {
+                algDATAmap_.at(SYS_Algs::ALG_COLLISION_LIDAR);
+                for (auto dataline : algDATAmap_[SYS_Algs::ALG_COLLISION_LIDAR]) {
+                    if (dataline.first == DATA_QUEUE_TYPES::DATA_CONFIDENCE) {
+                        lidarConf = std::stof(dataline.second);
+                    }
+                }
+            } catch(...) {
+                lidarConf = 0.0;
+            }
+            try {
+                algDATAmap_.at(SYS_Algs::ALG_COLLISION_DEPTH);
+                for (auto dataline : algDATAmap_[SYS_Algs::ALG_COLLISION_DEPTH]) {
+                    if (dataline.first == DATA_QUEUE_TYPES::DATA_CONFIDENCE) {
+                        depthConf = std::stof(dataline.second);
+                    }
+                }
+            } catch(...) {
+                depthConf = 0.0;
+            }
+            if (depthConf >= 0.9 || lidarConf >= 0.9) {
+                // In this stage, all CMD queue should have the same content
+                if (depthConf >= lidarConf) {
+                    parserExecuter_->parseCMDQueue(algCMDmap_[SYS_Algs::ALG_COLLISION_DEPTH]);
+                } else {
+                    parserExecuter_->parseCMDQueue(algCMDmap_[SYS_Algs::ALG_COLLISION_LIDAR]);
+                }
+            }
+
             break;
         case SYS_SelectedDetermineFun::DET_STAGE2:
             // @todo handler & parser
@@ -190,6 +224,7 @@ bool OAController::execute() {
             // @todo handler & parser
             break;
         default:
+            currState_ = SYS_State::SYS_ABORT;
             return false;
     }
 

@@ -40,14 +40,25 @@ static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 static const bool ENABLE_SAFETY_GPS = true;
 
 // OA Controller
+static const double OAC_REFRESH_FREQ = 1;  // Hz
 enum CMD_QUEUE_TYPES {
-    CMD_CHMOD,  // param: mod name
+    CMD_CHMOD = 0,  // param: mod name
     CMD_SET_MAX_VELOCITY  // param: float speed
 };
 
 enum DATA_QUEUE_TYPES {
-    DATA_CONFIDENCE,  // param: confidence
+    DATA_CONFIDENCE = 0,  // param: confidence
     DATA_ALG_NAME  // param: name
+};
+
+static const char* CMD_QUEUE_TYPES_NAME[] {
+    "CMD_CHMOD",
+    "CMD_SET_MAX_VELOCITY"
+};
+
+static const char* DATA_QUEUE_TYPES_NAME[] {
+    "DATA_CONFIDENCE",
+    "DATA_ALG_NAME"
 };
 
 static const char* ALG_STR_BUG = "ALG_BUG";
@@ -64,6 +75,7 @@ static const int VEHICLE_BOUNDBOX_LENGTH = 1200;  // mm
 static const int VEHICLE_BOUNDBOX_HEIGHT = 1000;  // mm
 static const int VEHICLE_MAX_SPEED_HORIZONTAL = 12;  // m/s
 static const float VEHICLE_MAX_ALTITUDE_RELATIVE = 10;  // m
+static const float VEHICLE_MAX_ACCELEATION = 50.0f;  // m/s^2 Placeholder, Need to measure
 
 // Module Enable
 static const bool ENABLE_RSC = true;

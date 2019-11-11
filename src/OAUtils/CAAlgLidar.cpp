@@ -37,7 +37,7 @@ bool CAAlgLidar::collect() {
     // @todo Statue Check
     // @todo Compute Thresholds
     float gSpeed = cnc_->getHUDData().groundspeed;
-    lidarThreshold_ = 200 * gSpeed;  // @todo need field test brake curve / PID turning
+    lidarThreshold_ = ((gSpeed * gSpeed) / (2 * VEHICLE_MAX_ACCELEATION)) * 1000;  // @todo need field test brake curve
     // @todo Compute Collision Possibility
     std::pair<float, float> closeSector = lidar_->getClosestSectorData();
     if (lidarThreshold_ > closeSector.second) {
