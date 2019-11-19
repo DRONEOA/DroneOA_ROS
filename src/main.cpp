@@ -100,6 +100,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoRelative(dist, 0, alt);
+            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "s") {
             float dist = getFloatCmdArg(ss);
             float alt = getFloatCmdArg(ss);
@@ -107,6 +108,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoRelative(-dist, 0, alt);
+            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "a") {
             float dist = getFloatCmdArg(ss);
             float alt = getFloatCmdArg(ss);
@@ -114,6 +116,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoRelative(0, -dist, alt);
+            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "d") {
             float dist = getFloatCmdArg(ss);
             float alt = getFloatCmdArg(ss);
@@ -121,6 +124,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoRelative(0, dist, alt);
+            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "rtl") {
             cnc.setMode(FLT_MODE_RTL);
         } else if (cmdType == "land") {
