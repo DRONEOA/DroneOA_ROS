@@ -80,6 +80,14 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
     }
 
     depthFrame_ = cv_ptr->image;
+#ifdef UE4_SITL
+    for(int i = 0; i < depthFrame_.rows; i++) {
+        float* Mi = depthFrame_.ptr<float>(i);
+        for(int j = 0; j < depthFrame_.cols; j++) {
+            Mi[j] *= UE4_SITL_SCALE;
+        }
+    }
+#endif
 #ifdef IMG_DEBUG_POPUP
     drawDebugOverlay();
 #endif
@@ -91,6 +99,13 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(pointCloud_, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, pcl_pointCloud_);
+#ifdef UE4_SITL
+    pcl::PointCloud<pcl::PointXYZRGB> temp;
+    Eigen::Affine3f transform_2 = Eigen::Affine3f::Identity();
+    transform_2.scale(UE4_SITL_SCALE);
+    pcl::transformPointCloud (pcl_pointCloud_, temp, transform_2);
+    pcl_pointCloud_ = temp;
+#endif
     // @TODO need to change coordinates if needed
     /***
      * Note: 
