@@ -37,7 +37,7 @@ bool CAAlgLidar::collect() {
     // @todo Statue Check
     // @todo Compute Thresholds
     float gSpeed = cnc_->getHUDData().groundspeed;
-    lidarThreshold_ = ((gSpeed * gSpeed) / (2 * VEHICLE_MAX_ACCELEATION)) * 1000;  // @todo need field test brake curve
+    lidarThreshold_ = ((gSpeed * gSpeed) / (2 * VEHICLE_MAX_ACCELEATION)) + VEHICLE_MIN_SAFE_DISTANCE;
     // @todo Compute Collision Possibility
     std::pair<float, float> closeSector = lidar_->getClosestSectorData();
     if (lidarThreshold_ > closeSector.second) {
@@ -46,8 +46,9 @@ bool CAAlgLidar::collect() {
         lidarPossibility_ = 0.0;
     }
     // Debug Prints
-#ifdef DEBUG_ALG_COLLISION
+#ifdef DEBUG_ALG_COLLISION_LIDAR
     ROS_INFO("[CAAlgLidar] Collect:");
+    ROS_INFO("    CNC:   result: groundspeed=%f", gSpeed);
     ROS_INFO("    Lidar: result: %f as range=%f threshold=%f", lidarPossibility_, closeSector.second, lidarThreshold_);
 #endif
     return true;

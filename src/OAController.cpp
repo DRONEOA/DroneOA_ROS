@@ -254,8 +254,8 @@ std::vector<SYS_Algs> OAController::selectAlgorithm() {
     // @todo select algorthm according to environment
     selectedAlgorithm_.clear();
     if (OAC_STAGE_SETTING == 1) {
-        selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_LIDAR);
-        selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
+        if (ENABLE_LIDAR) selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_LIDAR);
+        if (ENABLE_RSC) selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
         // selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_AI);
     } else if (OAC_STAGE_SETTING == 2) {
         // @todo

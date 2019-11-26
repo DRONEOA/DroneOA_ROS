@@ -129,6 +129,8 @@ int main(int argc, char **argv) {
             cnc.setMode(FLT_MODE_RTL);
         } else if (cmdType == "land") {
             cnc.land(1);
+        } else if (cmdType == "guided") {
+            cnc.setMode(FLT_MODE_GUIDED);
         } else if (cmdType == "info") {
             GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
             std::cout << ">>>>>>>>>> INFO START <<<<<<<<<<" << std::endl;
@@ -206,6 +208,7 @@ int main(int argc, char **argv) {
             std::cout << "- a [dist] <alt>             - move west" << std::endl;
             std::cout << "- d [dist] <alt>             - move east" << std::endl;
             std::cout << "- rtl                        - return to home" << std::endl;
+            std::cout << "- guided                     - setmode GUIDED" << std::endl;
             std::cout << "- land                       - land" << std::endl;
             std::cout << "- takeoff [alt]              - takeoff to altitude" << std::endl;
             std::cout << "- arm                        - arm motor" << std::endl;

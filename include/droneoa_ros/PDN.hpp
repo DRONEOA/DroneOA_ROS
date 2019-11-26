@@ -36,11 +36,14 @@ static const char* FLT_MODE_BRAKE = "BRAKE";
 static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
+// SITL
+#define UE4_SITL
+
 // CNC
 static const bool ENABLE_SAFETY_GPS = true;
 
 // OA Controller
-static const double OAC_REFRESH_FREQ = 1;  // Hz
+static const double OAC_REFRESH_FREQ = 20;  // Hz
 enum CMD_QUEUE_TYPES {
     CMD_CHMOD = 0,  // param: mod name
     CMD_SET_MAX_VELOCITY  // param: float speed
@@ -75,7 +78,8 @@ static const int VEHICLE_BOUNDBOX_LENGTH = 1200;  // mm
 static const int VEHICLE_BOUNDBOX_HEIGHT = 1000;  // mm
 static const int VEHICLE_MAX_SPEED_HORIZONTAL = 12;  // m/s
 static const float VEHICLE_MAX_ALTITUDE_RELATIVE = 10;  // m
-static const float VEHICLE_MAX_ACCELEATION = 50.0f;  // m/s^2 Placeholder, Need to measure
+static const float VEHICLE_MAX_ACCELEATION = 0.4f;  // m/s^2 Placeholder, Need to measure
+static const float VEHICLE_MIN_SAFE_DISTANCE = 0.5f;
 
 // Module Enable
 static const bool ENABLE_RSC = true;
@@ -87,8 +91,5 @@ static const bool ENABLE_NGN = true;
 static const float LIDAR_ORIENTATION_CW = 180;
 static const float LIDAR_FILTER_LOW = 0.1;  // in m
 static const float LIDAR_FILTER_HIGH = 10;  // in m
-
-// SITL
-// #define UE4_SITL
 
 #endif  // NOLINT
