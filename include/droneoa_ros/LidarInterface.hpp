@@ -48,9 +48,9 @@ class LidarInterface {
     float getMinAngle();
     float getMaxRange();
     float getMinRnage();
-    std::map<float, degreeSector> getScannerDataMap();
+    std::map<float, degreeSector> getScannerDataMap();  // Dist unit m
     float getIncreament();
-    std::pair<float, float> getClosestSectorData();
+    std::pair<float, float> getClosestSectorData();  // Dist unit m
 
     // Debug
     void printLidarInfo();

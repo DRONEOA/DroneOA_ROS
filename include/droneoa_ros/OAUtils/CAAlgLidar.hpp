@@ -23,7 +23,7 @@
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
 #include <droneoa_ros/LidarInterface.hpp>
 
-// #define DEBUG_ALG_COLLISION
+// #define DEBUG_ALG_COLLISION_LIDAR
 
 class CAAlgLidar : public BaseAlg {
     LidarInterface *lidar_;
