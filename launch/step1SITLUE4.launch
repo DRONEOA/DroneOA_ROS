@@ -1,0 +1,7 @@
+<launch>
+    <include file="./apmSITL.launch" />
+    <include file="./rosbridge_tcp.launch">
+        <arg name="bson_only_mode" value="true" /> 
+    </include>
+    <include file="./imageToPC2.launch" />
+</launch>
