@@ -47,7 +47,6 @@ float avgInRangeHelper(std::vector<float> source, float min, float max) {
 
 bool CAAlgDepthCam::collect() {
     float gSpeed = cnc_->getHUDData().groundspeed;
-    float a = 50.0f;
 
     /**
      * The following equation calculates the brack distance of the droone.
@@ -59,7 +58,7 @@ bool CAAlgDepthCam::collect() {
      * a = acceleration in m/s^2
      * @TODO test a.
      */
-    camThreshold_ =  ((gSpeed * gSpeed) / (2 * a)) * 1000;
+    camThreshold_ =  ((gSpeed * gSpeed) / (2 * VEHICLE_MAX_ACCELEATION)) * 1000;
 
     if (camThreshold_ < 150.0f) {
         camThreshold_ = 150.0f;
@@ -70,7 +69,7 @@ bool CAAlgDepthCam::collect() {
     float neutral = avgInRangeHelper(zCoords, camThreshold_, 2*camThreshold_);
     float safe = avgInRangeHelper(zCoords, 2*camThreshold_, 3*camThreshold_);
 
-#ifdef DEBUG_ALG_COLLISION
+#ifdef DEBUG_ALG_COLLISION_DEPTH
     ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f",
     danger, neutral, safe, camThreshold_);
 #endif
@@ -89,7 +88,7 @@ bool CAAlgDepthCam::collect() {
     } else {
         camPossibility_ = 0.0f;
     }
-#ifdef DEBUG_ALG_COLLISION
+#ifdef DEBUG_ALG_COLLISION_DEPTH
     ROS_INFO("[CAAlgDepthCam] Possibility: %f", camPossibility_);
 #endif
     return true;

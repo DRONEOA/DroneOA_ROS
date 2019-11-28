@@ -151,6 +151,7 @@ add_library(droneoa_ros_liboa
   src/OAUtils/BaseAlg.cpp
   src/OAUtils/CAAlgLidar.cpp
   src/OAUtils/CAAlgDepthCam.cpp
+  src/OAUtils/CMDParser.cpp
   src/OAController.cpp
 )
 
