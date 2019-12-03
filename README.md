@@ -3,7 +3,17 @@
 [![pipeline status](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/badges/master/pipeline.svg)](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/commits/master)
 
 ## Introduction
-@TODO
+Drones are used in an unprecedented number of ways since the advent, with millions of people using it for agriculture, journalism, photography, courier services, etc. Seeing this opportunity, we propose to develop some solution that make drones safer.
+
+**OASIS**, short for `Obstacle Avoidance with Spontaneous Itinerancy Strategies`, is a software package we have been working on to tackle this target. It provides a unified interface for a flight controller with automatic obstacle avoidance feature, powered by multiple strategies running simultaneously. For example, both LIDAR and traditional camera with AI can be used to determine collision probabilities independently, which are then synthesized to provide final decision.
+
+We plan to get official support in Ardupilot community, and possibly develop a mobile ground control station as a side project. The challenge we face was mainly the strict requirement of correctness of the specification and implementation due to the safety critical nature of the project.
+
+### Current Progress:
+- Stage 1: Simple Colission Avoidance (stop when collision is possible, and waiting for human input). This stage is designed for hardware-software interface development & testing and system intergration to verify fesibility. [80% DONE]
+- Stage 2: Add in 2D environment path planning [PLANNED]
+- Stage 3: Add in 3D environment path planning [PLANNED (may combine with S2)]
+- Stage 4: Objact avoidance and path planning with memory. [FUTURE]
 
 ### Test Hardware
 
