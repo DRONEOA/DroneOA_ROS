@@ -1,6 +1,6 @@
 # ROS Package For Drone Obstacle Avoidance Project
 
-[![pipeline status](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/badges/master/pipeline.svg)](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/commits/master)
+[![pipeline status](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros/badges/master/pipeline.svg)](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros/commits/master)
 
 ## Introduction
 Drones are used in an unprecedented number of ways since the advent, with millions of people using it for agriculture, journalism, photography, courier services, etc. Seeing this opportunity, we propose to develop some solution that make drones safer.
@@ -18,7 +18,7 @@ We plan to get official support in Ardupilot community, and possibly develop a m
 ### Test Hardware
 
 #### Test Platform:
-- [OA450](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Test-Vehicle-OA450)
+- [OA450](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros/wikis/Test-Vehicle-OA450)
 - OA650 (WIP)
 
 #### Supported Sensors:
@@ -61,10 +61,10 @@ We plan to get official support in Ardupilot community, and possibly develop a m
         - Flight Path Filtering
     - "Black Box" logging
 - AIInterface [Planned]
-- OAController [Stage 1](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Stage-1-Collision-Avoidance-Flow)
+- OAController [Stage 1](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros/wikis/Stage-1-Collision-Avoidance-Flow)
     - Main controller
     - Switch between OA modes
-    - Application level fail safety handling [Stage 1 Fail Safety](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/Stage-1-Fail-Safety-Graph)
+    - Application level fail safety handling [Stage 1 Fail Safety](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros/wikis/Stage-1-Fail-Safety-Graph)
     - Mission queue
 - Utils
 - Unittests
@@ -77,11 +77,11 @@ We plan to get official support in Ardupilot community, and possibly develop a m
 
 ### Launch With SITL
 - [Launch File README](launch/README.md)
-- [SITL With UE4](http://tuotuogzs.ddns.net/droneoa/droneoa_ros_ue4_simulator)
-- [SITL With Gazebo (Discontinued)](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
+- [SITL With UE4](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros_ue4_simulator)
+- [SITL With Gazebo (Discontinued)](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
 
 ### Launch With Real Vehicle
-- [Set Up Jetson OBC](http://tuotuogzs.ddns.net/droneoa/jetson-nano-obc-setup)
+- [Set Up Jetson OBC](http://gitlab.tuotuogzs.com/droneoa/jetson-nano-obc-setup)
 - [Launch File README](launch/README.md)
 
 ## Credit
