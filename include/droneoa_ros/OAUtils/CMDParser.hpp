@@ -24,13 +24,12 @@
 #include <vector>
 #include <string>
 #include "droneoa_ros/CNCInterface.hpp"
+#include "droneoa_ros/OAUtils/Command.hpp"
 
 class CMDParser {
-    typedef std::pair<CMD_QUEUE_TYPES, std::string> CommandLine;
-    typedef std::vector<CommandLine> CommandQueue;
-
     CNCInterface *cnc_;
     bool parseCMD(const CommandLine& cmdline);
+
  public:
     explicit CMDParser(CNCInterface *cnc);
     bool parseCMDQueue(const CommandQueue& cmdqueue);

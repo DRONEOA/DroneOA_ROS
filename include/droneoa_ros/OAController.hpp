@@ -60,8 +60,6 @@ enum SYS_SelectedDetermineFun {
 // #define DEBUG_OAC
 
 class OAController {
-    typedef std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CommandQueue;
-    typedef std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DataQueue;
     CMDParser *parserExecuter_ = nullptr;
 
  public:
