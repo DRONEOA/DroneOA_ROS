@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_UTILS_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_UTILS_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_UTILS_HPP_
+#define INCLUDE_DRONEOA_ROS_UTILS_HPP_
 
 #include <string>
 #include <vector>
@@ -63,4 +63,4 @@ T scale(T target, T rmin, T rmax, T tmin, T tmax) {
     return ((target-rmin)*(tmax-tmin))/(rmax-rmin)+tmin;
 }
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_UTILS_HPP_

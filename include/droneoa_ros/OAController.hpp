@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_
+#define INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_
 
 #include <string>
 #include <vector>
@@ -61,9 +61,10 @@ enum SYS_SelectedDetermineFun {
 
 class OAController {
     CMDParser *parserExecuter_ = nullptr;
+    CMDRunner *theRunner_ = nullptr;
 
  public:
-    OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, ros::Rate r);
+    OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, CMDRunner *runner, ros::Rate r);
     virtual ~OAController();
 
     void init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc);
@@ -99,4 +100,4 @@ class OAController {
     std::map<SYS_Algs, DataQueue> algDATAmap_;
 };
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_

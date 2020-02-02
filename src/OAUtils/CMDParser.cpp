@@ -19,34 +19,11 @@
 
 #include "droneoa_ros/OAUtils/CMDParser.hpp"
 
-CMDParser::CMDParser(CNCInterface *cnc) : cnc_(cnc) {}
+CMDParser::CMDParser(CNCInterface *cnc, CMDRunner *runner) : cnc_(cnc), cmdRunner_(runner) {}
 
-/*
- * Parse each single line of command
- * - Input: command line (std::pair<CMD_QUEUE_TYPES, std::string>)
- * - Output: whether operation is succesuful
- */
-bool CMDParser::parseCMD(const CommandLine& cmdline) {
-    try {
-        switch (cmdline.first) {
-            case CMD_QUEUE_TYPES::CMD_CHMOD:
-            {
-                if (cnc_->getMode() == cmdline.second) return true;
-                return cnc_->setMode(cmdline.second);
-            }
-            case CMD_QUEUE_TYPES::CMD_SET_MAX_VELOCITY:
-            {
-                float targetSpeed = std::stof(cmdline.second);
-                targetSpeed = targetSpeed >= 0 ? targetSpeed : 0;
-                return cnc_->setMaxSpeed(1, targetSpeed, 0);
-            }
-            default:
-                throw 1;
-        }
-    } catch (...) {
-        ROS_ERROR("[CMD PARSER] Invalid Command or arguments: %s, %s", CMD_QUEUE_TYPES_NAME[cmdline.first],
-                cmdline.second.c_str());
-        return false;
+CMDParser::~CMDParser() {
+    if (cmdRunner_) {
+        delete cmdRunner_;
     }
 }
 
@@ -56,12 +33,17 @@ bool CMDParser::parseCMD(const CommandLine& cmdline) {
  * - Output: whether operation is succesuful
  * - TODO: support timed commands (currently all commands are sent with no delay or complete check)
  */
-bool CMDParser::parseCMDQueue(const CommandQueue& cmdqueue) {
-    for (auto cmdline : cmdqueue) {
-        if (!parseCMD(cmdline)) {
-            ROS_ERROR("[CMD PARSER] Queue Parser Terminated With ERROR !!!");
-            return false;
+bool CMDParser::parseCMDQueue(const CommandQueue& cmdqueue, bool isInstant) {
+    if (isInstant) {
+        for (auto cmdline : cmdqueue) {
+            if (!parseCMD(cnc_, cmdline)) {
+                ROS_ERROR("[CMD PARSER] Queue Parser Terminated With ERROR !!!");
+                return false;
+            }
         }
+    } else {
+        //! @todo(shibohan) should we wait for previous queue to finish in some cases?
+        cmdRunner_->setupRunner(cmdqueue);
     }
     return true;
 }

@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_COLLISIONAVOIDANCE_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_COLLISIONAVOIDANCE_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CAALGLIDAR_HPP_
+#define INCLUDE_DRONEOA_ROS_OAUTILS_CAALGLIDAR_HPP_
 
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
 #include <droneoa_ros/LidarInterface.hpp>
@@ -37,4 +37,4 @@ class CAAlgLidar : public BaseAlg {
     bool plan() override;  // Return false when get around is impossible
 };
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CAALGLIDAR_HPP_

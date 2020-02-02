@@ -17,12 +17,13 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_COMMAND_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_COMMAND_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_
+#define INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_
 
 #include <utility>
 #include <vector>
 #include <string>
+#include "droneoa_ros/CNCInterface.hpp"
 
 /*
  * Command
@@ -30,12 +31,14 @@
 
 enum CMD_QUEUE_TYPES {
     CMD_CHMOD = 0,  // @param: mod name
-    CMD_SET_MAX_VELOCITY  // @param: float speed
+    CMD_SET_MAX_VELOCITY,  // @param: float speed
+    CMD_DELAY_MSEC  // @param: uint32 time in ms
 };
 
 static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_CHMOD",
-    "CMD_SET_MAX_VELOCITY"
+    "CMD_SET_MAX_VELOCITY",
+    "CMD_DELAY_MSEC"
 };
 
 typedef std::pair<CMD_QUEUE_TYPES, std::string> CommandLine;
@@ -58,4 +61,15 @@ static const char* DATA_QUEUE_TYPES_NAME[] {
 typedef std::pair<DATA_QUEUE_TYPES, std::string> DataLine;
 typedef std::vector<DataLine> DataQueue;
 
-#endif  // NOLINT
+/*
+ * Generic Parser
+ */
+
+/*
+ * Parse each single line of command
+ * - Input: command line (std::pair<CMD_QUEUE_TYPES, std::string>)
+ * - Output: whether operation is succesuful
+ */
+bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline);
+
+#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_

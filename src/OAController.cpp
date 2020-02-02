@@ -20,7 +20,9 @@
 #include <droneoa_ros/OAController.hpp>
 #include <string>
 
-OAController::OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, ros::Rate r) {
+OAController::OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc,
+        CMDRunner *runner, ros::Rate r) {
+    theRunner_ = runner;
     init(cnc, lidar, rsc);
     r_ = r;
 
@@ -49,7 +51,7 @@ void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *
     currState_ = SYS_State::SYS_IDLE;
     // init parser
     if (parserExecuter_) delete parserExecuter_;
-    parserExecuter_ = new CMDParser(cnc_);
+    parserExecuter_ = new CMDParser(cnc_, theRunner_);
     // create algorithm instances
     algorithmInstances_[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(cnc_, lidar_);
     algorithmInstances_[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(cnc_, rsc_);
@@ -118,7 +120,7 @@ void OAController::tick() {
 }
 
 void OAController::masterThread() {
-    ROS_WARN("[OAC] MASTER THREAD START");
+    ROS_WARN("[OAC] MASTER THREAD START - PAUSED");
 
     while (ros::ok()) {
         if (isOn_) {
