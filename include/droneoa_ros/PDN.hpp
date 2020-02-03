@@ -44,25 +44,6 @@ static const bool ENABLE_SAFETY_GPS = true;
 
 // OA Controller
 static const double OAC_REFRESH_FREQ = 20;  // Hz
-enum CMD_QUEUE_TYPES {
-    CMD_CHMOD = 0,  // param: mod name
-    CMD_SET_MAX_VELOCITY  // param: float speed
-};
-
-enum DATA_QUEUE_TYPES {
-    DATA_CONFIDENCE = 0,  // param: confidence
-    DATA_ALG_NAME  // param: name
-};
-
-static const char* CMD_QUEUE_TYPES_NAME[] {
-    "CMD_CHMOD",
-    "CMD_SET_MAX_VELOCITY"
-};
-
-static const char* DATA_QUEUE_TYPES_NAME[] {
-    "DATA_CONFIDENCE",
-    "DATA_ALG_NAME"
-};
 
 static const char* ALG_STR_BUG = "ALG_BUG";
 static const char* ALG_STR_VFF = "ALG_VFF";
@@ -94,4 +75,4 @@ static const float LIDAR_FILTER_HIGH = 10;  // in m
 
 static const float UE4_SITL_SCALE = 1000.0f;
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT

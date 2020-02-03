@@ -17,23 +17,24 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, November 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_CMDPARSER_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_CMDPARSER_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_  // NOLINT
 
 #include <utility>
 #include <vector>
 #include <string>
 #include "droneoa_ros/CNCInterface.hpp"
+#include "droneoa_ros/OAUtils/Command.hpp"
+#include "droneoa_ros/OAUtils/CMDRunner.hpp"
 
 class CMDParser {
-    typedef std::pair<CMD_QUEUE_TYPES, std::string> CommandLine;
-    typedef std::vector<CommandLine> CommandQueue;
-
     CNCInterface *cnc_;
-    bool parseCMD(const CommandLine& cmdline);
+    CMDRunner *cmdRunner_;
+
  public:
-    explicit CMDParser(CNCInterface *cnc);
-    bool parseCMDQueue(const CommandQueue& cmdqueue);
+    explicit CMDParser(CNCInterface *cnc, CMDRunner *runner);
+    virtual ~CMDParser();
+    bool parseCMDQueue(const CommandQueue& cmdqueue, bool isInstant = true);
 };
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_  // NOLINT

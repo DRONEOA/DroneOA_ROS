@@ -92,4 +92,4 @@ class RSCInterface {
 #endif
 };
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT

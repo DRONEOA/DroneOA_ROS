@@ -60,12 +60,11 @@ enum SYS_SelectedDetermineFun {
 // #define DEBUG_OAC
 
 class OAController {
-    typedef std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CommandQueue;
-    typedef std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DataQueue;
     CMDParser *parserExecuter_ = nullptr;
+    CMDRunner *theRunner_ = nullptr;
 
  public:
-    OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, ros::Rate r);
+    OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, CMDRunner *runner, ros::Rate r);
     virtual ~OAController();
 
     void init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc);
@@ -101,4 +100,4 @@ class OAController {
     std::map<SYS_Algs, DataQueue> algDATAmap_;
 };
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT
