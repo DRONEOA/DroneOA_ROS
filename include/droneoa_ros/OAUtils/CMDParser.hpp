@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, November 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_
-#define INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_  // NOLINT
 
 #include <utility>
 #include <vector>
@@ -37,4 +37,4 @@ class CMDParser {
     bool parseCMDQueue(const CommandQueue& cmdqueue, bool isInstant = true);
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_
+#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CMDPARSER_HPP_  // NOLINT

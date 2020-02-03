@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_
-#define INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_  // NOLINT
 
 #include <boost/thread.hpp>
 #include "droneoa_ros/OAUtils/Command.hpp"
@@ -68,4 +68,4 @@ class CMDRunner {
     RUNNER_STATE getRunnerState();
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_
+#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_  // NOLINT

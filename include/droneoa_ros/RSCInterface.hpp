@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_
-#define INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -92,4 +92,4 @@ class RSCInterface {
 #endif
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_
+#endif  // INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT

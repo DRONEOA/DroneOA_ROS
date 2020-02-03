@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_PDN_HPP_
-#define INCLUDE_DRONEOA_ROS_PDN_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT
 
 static const char* FLT_MODE_STABILIZE = "STABILIZE";
 static const char* FLT_MODE_ACRO = "ACRO";
@@ -75,4 +75,4 @@ static const float LIDAR_FILTER_HIGH = 10;  // in m
 
 static const float UE4_SITL_SCALE = 1000.0f;
 
-#endif  // INCLUDE_DRONEOA_ROS_PDN_HPP_
+#endif  // INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT

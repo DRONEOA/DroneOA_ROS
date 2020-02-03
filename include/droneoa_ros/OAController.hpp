@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_
-#define INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT
 
 #include <string>
 #include <vector>
@@ -100,4 +100,4 @@ class OAController {
     std::map<SYS_Algs, DataQueue> algDATAmap_;
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_
+#endif  // INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT

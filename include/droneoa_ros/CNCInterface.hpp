@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_CNCINTERFACE_HPP_
-#define INCLUDE_DRONEOA_ROS_CNCINTERFACE_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_CNCINTERFACE_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_CNCINTERFACE_HPP_  // NOLINT
 
 #include <ros/ros.h>
 #include <mavros_msgs/Waypoint.h>
@@ -142,4 +142,4 @@ class CNCInterface {
     std::vector<float> RPYOffsets;
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_CNCINTERFACE_HPP_
+#endif  // INCLUDE_DRONEOA_ROS_CNCINTERFACE_HPP_  // NOLINT

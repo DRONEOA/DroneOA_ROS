@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_
-#define INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_  // NOLINT
 
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
@@ -73,4 +73,4 @@ class LidarInterface {
     void generateDegreeSector();
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_
+#endif  // INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_  // NOLINT

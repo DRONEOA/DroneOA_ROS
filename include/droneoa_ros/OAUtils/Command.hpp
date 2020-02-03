@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_
-#define INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_
+#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_  // NOLINT
 
 #include <utility>
 #include <vector>
@@ -72,4 +72,4 @@ typedef std::vector<DataLine> DataQueue;
  */
 bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline);
 
-#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_
+#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_  // NOLINT
