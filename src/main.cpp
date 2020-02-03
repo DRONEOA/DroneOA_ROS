@@ -64,12 +64,14 @@ int main(int argc, char **argv) {
         lidar.init(n, r);
     }
 
+    // Create CMD Queue Runner
+    CMDRunner runner(&cnc);
+
     // Create OA Controller
-    OAController oac(&cnc, &lidar, &rsc, ros::Rate(OAC_REFRESH_FREQ));
+    OAController oac(&cnc, &lidar, &rsc, &runner, ros::Rate(OAC_REFRESH_FREQ));
 
     // Command Paser
     // Only For Testing
-    // @todo Do we need a command line based direct control interface and a command queue in final product ?
     std::string commandIn;
     while (std::getline(std::cin, commandIn)) {
         std::stringstream ss;
@@ -174,6 +176,15 @@ int main(int argc, char **argv) {
                 continue;
             }
             cnc.setMaxSpeed(1, vel, 0);
+        } else if (cmdType == "runnerstate") {
+            ROS_INFO("Runner State: %s", RUNNER_STATE_STR[runner.getRunnerState()]);
+        } else if (cmdType == "runner") {
+            //! @todo(shibohan) add console support for string command queue input
+            CommandQueue testQueue;
+            testQueue.push_back({CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_LAND});
+            testQueue.push_back({CMD_QUEUE_TYPES::CMD_DELAY_MSEC, "5000"});
+            testQueue.push_back({CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_STABILIZE});
+            runner.setupRunner(testQueue);
         } else if (commandIn.front() == 'r') {
             commandIn = commandIn.substr(1);
             if (commandIn.front() == 'c') {

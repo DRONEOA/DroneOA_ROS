@@ -142,4 +142,4 @@ class CNCInterface {
     std::vector<float> RPYOffsets;
 };
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_CNCINTERFACE_HPP_  // NOLINT
