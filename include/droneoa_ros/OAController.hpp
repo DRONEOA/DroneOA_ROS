@@ -31,6 +31,7 @@
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
 #include <droneoa_ros/OAUtils/CAAlgLidar.hpp>
 #include <droneoa_ros/OAUtils/CAAlgDepthCam.hpp>
+#include <droneoa_ros/OAUtils/CMDParser.hpp>
 
 enum SYS_State {
     SYS_IDLE,
@@ -56,12 +57,13 @@ enum SYS_SelectedDetermineFun {
     DET_INVALID
 };
 
-typedef std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CommandQueue;
-typedef std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DataQueue;
-
 // #define DEBUG_OAC
 
 class OAController {
+    typedef std::vector<std::pair<CMD_QUEUE_TYPES, std::string>> CommandQueue;
+    typedef std::vector<std::pair<DATA_QUEUE_TYPES, std::string>> DataQueue;
+    CMDParser *parserExecuter_ = nullptr;
+
  public:
     OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, ros::Rate r);
     virtual ~OAController();
@@ -84,7 +86,7 @@ class OAController {
     void masterThread();
     boost::thread* thread_oac_master_;
 
-    ros::Rate r_ = ros::Rate(1);;
+    ros::Rate r_ = ros::Rate(OAC_REFRESH_FREQ);
     CNCInterface *cnc_;
     LidarInterface *lidar_;
     RSCInterface *rsc_;

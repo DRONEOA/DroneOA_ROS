@@ -14,27 +14,26 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, November 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_COLLISIONAVOIDANCE_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_COLLISIONAVOIDANCE_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_CMDPARSER_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_CMDPARSER_HPP_  // NOLINT
 
-#include <droneoa_ros/OAUtils/BaseAlg.hpp>
-#include <droneoa_ros/LidarInterface.hpp>
+#include <utility>
+#include <vector>
+#include <string>
+#include "droneoa_ros/CNCInterface.hpp"
 
-// #define DEBUG_ALG_COLLISION_LIDAR
+class CMDParser {
+    typedef std::pair<CMD_QUEUE_TYPES, std::string> CommandLine;
+    typedef std::vector<CommandLine> CommandQueue;
 
-class CAAlgLidar : public BaseAlg {
-    LidarInterface *lidar_;
-    float lidarThreshold_;
-    float lidarPossibility_;
+    CNCInterface *cnc_;
+    bool parseCMD(const CommandLine& cmdline);
  public:
-    CAAlgLidar(CNCInterface *cnc, LidarInterface *lidar);
-    ~CAAlgLidar() override;
-    void init(LidarInterface *lidar);  // For restart
-    bool collect() override;  // Collect required sensor data
-    bool plan() override;  // Return false when get around is impossible
+    explicit CMDParser(CNCInterface *cnc);
+    bool parseCMDQueue(const CommandQueue& cmdqueue);
 };
 
 #endif  // NOLINT
