@@ -63,4 +63,4 @@ T scale(T target, T rmin, T rmax, T tmin, T tmax) {
     return ((target-rmin)*(tmax-tmin))/(rmax-rmin)+tmin;
 }
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_UTILS_HPP_  // NOLINT

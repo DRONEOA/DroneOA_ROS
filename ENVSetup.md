@@ -114,7 +114,7 @@ Install opencv tools
 sudo apt-get install ros-melodic-perception
 ```
 
-Checkout [.gitlab-ci.yml](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/blob/master/.gitlab-ci.yml) if still missing dependencies
+Checkout [.gitlab-ci.yml](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros/blob/master/.gitlab-ci.yml) if still missing dependencies
 
 ## Part 3. Setup Realsense
 
@@ -168,8 +168,8 @@ source ~/.bashrc
 **ONLY** do this if you don't them already
 ```shell
 git clone https://github.com/IntelRealSense/realsense-ros.git
-git clone http://tuotuogzs.ddns.net/droneoa/ydlidar-x2l-local.git
-git clone http://tuotuogzs.ddns.net/droneoa/droneoa_ros.git
+git clone http://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
+git clone http://gitlab.tuotuogzs.com/droneoa/droneoa_ros.git
 git clone https://github.com/hoangthien94/vision_to_mavros.git
 ```
 
@@ -200,9 +200,9 @@ $ ./install_geographiclib_datasets.sh
 
 ### Use With SITL
 - [Launch File README](launch/README.md)
-- [SITL With Gazebo](http://tuotuogzs.ddns.net/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
+- [SITL With Gazebo](http://gitlab.tuotuogzs.com/droneoa/droneoa_ros/wikis/SITL%20With%20Gazebo)
 
 ### Use With Real Vehicle
-- [Set Up Jetson OBC](http://tuotuogzs.ddns.net/droneoa/jetson-nano-obc-setup)
+- [Set Up Jetson OBC](http://gitlab.tuotuogzs.com/droneoa/jetson-nano-obc-setup)
 - [Launch File README](launch/README.md)
 

@@ -17,8 +17,8 @@
  * Written by Xiao Zhou <x258zhou@edu.uwaterloo.ca>, Nov. 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_COLLISIONAVOIDANCEDC_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_COLLISIONAVOIDANCEDC_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CAALGDEPTHCAM_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAUTILS_CAALGDEPTHCAM_HPP_  // NOLINT
 
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
 #include <droneoa_ros/RSCInterface.hpp>
@@ -37,4 +37,4 @@ class CAAlgDepthCam : public BaseAlg {
     bool plan() override;  // Return false when get around is impossible
 };
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CAALGDEPTHCAM_HPP_  // NOLINT

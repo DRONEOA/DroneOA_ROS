@@ -73,4 +73,4 @@ class LidarInterface {
     void generateDegreeSector();
 };
 
-#endif  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_  // NOLINT
