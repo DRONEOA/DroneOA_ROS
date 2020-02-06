@@ -77,7 +77,7 @@ static const float LIDAR_FILTER_LOW = 0.1;  // in m
 static const float LIDAR_FILTER_HIGH = 10;  // in m
 
 // SITL
-// #define UE4_SITL
+#define UE4_SITL
 static const float UE4_SITL_SCALE = 1000.0f;
 
 #endif  // NOLINT

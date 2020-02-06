@@ -23,7 +23,7 @@
 #include <droneoa_ros/OAUtils/BaseAlg.hpp>
 #include <droneoa_ros/RSCInterface.hpp>
 
-// #define DEBUG_ALG_COLLISION
+#define DEBUG_ALG_COLLISION
 
 class CAAlgDepthCam : public BaseAlg {
     RSCInterface *rsc_;
