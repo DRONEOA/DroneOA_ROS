@@ -37,7 +37,7 @@ static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
 // SITL
-// #define UE4_SITL
+#define UE4_SITL
 
 // CNC
 static const bool ENABLE_SAFETY_GPS = true;
@@ -64,7 +64,7 @@ static const float VEHICLE_MIN_SAFE_DISTANCE = 0.5f;
 
 // Module Enable
 static const bool ENABLE_RSC = true;
-static const bool ENABLE_LIDAR = true;
+static const bool ENABLE_LIDAR = false;
 static const bool ENABLE_AI = true;
 static const bool ENABLE_NGN = true;
 
@@ -73,8 +73,6 @@ static const float LIDAR_ORIENTATION_CW = 180;
 static const float LIDAR_FILTER_LOW = 0.1;  // in m
 static const float LIDAR_FILTER_HIGH = 10;  // in m
 
-// SITL
-#define UE4_SITL
 static const float UE4_SITL_SCALE = 1000.0f;
 
 #endif  // INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT

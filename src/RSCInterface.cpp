@@ -277,17 +277,18 @@ void RSCInterface::setRange(float min, float max) {
  */
 
 std::vector<float> RSCInterface::pointCloudZCoordsInRange(float width, float height, float dist) {
-    unsigned int pointCount = 0;
+    //unsigned int pointCount = 0;
     float x = width/2;
     float y = width/2;
     if (dist < 200.0f) {
         dist = 200.0f;
     }
     std::vector<float> zCoords;
+    if(pcl_pointCloud_.points.size()<5000) {return zCoords;}
     for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
         if ( inRange<float>(-x, x, pt.x*1000) && inRange<float>(-y, y, pt.y*1000) ) {
-            pointCount++;
+            //pointCount++;
             zCoords.push_back(pt.z*1000);
         }
     }

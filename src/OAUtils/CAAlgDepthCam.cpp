@@ -41,7 +41,15 @@ float avgInRangeHelper(std::vector<float> source, float min, float max) {
             count += 1.0f;
         }
     }
+
+    //#ifdef DEBUG_ALG_COLLISION
+    //ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f, avg=%f",
+    //danger, neutral, safe, camThreshold_, avgInRangeHelper(zCoords, 1, 100000000));
+    //ROS_INFO("count=%f", count);
+    //#endif
+
     float avg = sum / count;
+    if(count<=1) {return -1;}
     return (std::isnan(avg) ? -1 : avg);
 }
 
@@ -65,13 +73,18 @@ bool CAAlgDepthCam::collect() {
     }  // Official documentation said the min dist is 105mm; to be safe, use 150 mm instead.
 
     std::vector<float> zCoords = rsc_->pointCloudZCoordsInRange();
+    //ROS_INFO("count=%f", zCoords.size());
     float danger = avgInRangeHelper(zCoords, 150.0f, camThreshold_);
     float neutral = avgInRangeHelper(zCoords, camThreshold_, 2*camThreshold_);
     float safe = avgInRangeHelper(zCoords, 2*camThreshold_, 3*camThreshold_);
 
 #ifdef DEBUG_ALG_COLLISION
-    ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f, avg=%f",
-    danger, neutral, safe, camThreshold_, avgInRangeHelper(zCoords, 1, 100000000));
+    //ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f, avg=%f",
+    //danger, neutral, safe, camThreshold_, avgInRangeHelper(zCoords, 1, 100000000));
+    //ROS_INFO("count=%f", zCoords.size());
+    ROS_INFO("dis=%f, possi=%f, velo=%f",
+    avgInRangeHelper(zCoords, 1, 100000000), camPossibility_, gSpeed);
+    //ROS_INFO("count=%f", zCoords.size());
 #endif
 
     if (danger != -1) {
