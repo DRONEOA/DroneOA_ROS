@@ -17,6 +17,14 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
+/**
+ * @file Command.hpp
+ * @author DroneOA (Bohan Shi)
+ * @brief Define Command Related Types And Generic Parsers
+ * @version 1.0
+ * @date 2020-02
+ */
+
 #ifndef INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_  // NOLINT
 #define INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_  // NOLINT
 
@@ -25,50 +33,69 @@
 #include <string>
 #include "droneoa_ros/CNCInterface.hpp"
 
-/*
- * Command
+/**
+ * @brief ENUM of supported COMMAND types
  */
-
 enum CMD_QUEUE_TYPES {
-    CMD_CHMOD = 0,  // @param: mod name
-    CMD_SET_MAX_VELOCITY,  // @param: float speed
-    CMD_DELAY_MSEC  // @param: uint32 time in ms
+    CMD_CHMOD = 0,  /*!< DATA: mod name */
+    CMD_SET_MAX_VELOCITY,  /*!< DATA: float speed */
+    CMD_DELAY_MSEC,  /*!< DATA: uint32 time in ms */
 };
 
+/**
+ * @brief ENUM of supported COMMAND types's name
+ */
 static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_CHMOD",
     "CMD_SET_MAX_VELOCITY",
-    "CMD_DELAY_MSEC"
+    "CMD_DELAY_MSEC",
 };
 
+/**
+ * @brief Represent a line of command
+ * pair.first is the type of the command
+ * pair.second is the data requied by the command
+ */
 typedef std::pair<CMD_QUEUE_TYPES, std::string> CommandLine;
+/**
+ * @brief Represent a queue of command in time order
+ * a vector of commandlines
+ */
 typedef std::vector<CommandLine> CommandQueue;
 
-/*
- * Data
+/**
+ * @brief ENUM of supported DATA types
  */
-
 enum DATA_QUEUE_TYPES {
-    DATA_CONFIDENCE = 0,  // param: confidence
-    DATA_ALG_NAME  // param: name
+    DATA_CONFIDENCE = 0,  /*!< DATA: confidence */
+    DATA_ALG_NAME,  /*!< DATA: algorithm name */
 };
 
+/**
+ * @brief ENUM of supported DATA types's name
+ */
 static const char* DATA_QUEUE_TYPES_NAME[] {
     "DATA_CONFIDENCE",
     "DATA_ALG_NAME"
 };
 
+/**
+ * @brief Represent a line of data
+ * pair.first is the type of the data
+ * pair.second is the data content
+ */
 typedef std::pair<DATA_QUEUE_TYPES, std::string> DataLine;
+/**
+ * @brief Represent a queue of data
+ * a vector of datalines
+ */
 typedef std::vector<DataLine> DataQueue;
 
-/*
- * Generic Parser
- */
-
-/*
- * Parse each single line of command
- * - Input: command line (std::pair<CMD_QUEUE_TYPES, std::string>)
- * - Output: whether operation is succesuful
+/**
+ * @brief Generic Parser for a single line of command
+ * @param cnc the pointer to the shared command and control module
+ * @param cmdline the source CommandLine
+ * @return whether the operation is successful
  */
 bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline);
 
