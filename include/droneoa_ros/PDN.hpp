@@ -37,7 +37,7 @@ static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
 // SITL
-#define UE4_SITL
+// #define UE4_SITL
 
 // CNC
 static const bool ENABLE_SAFETY_GPS = true;
@@ -64,7 +64,7 @@ static const float VEHICLE_MIN_SAFE_DISTANCE = 0.5f;
 
 // Module Enable
 static const bool ENABLE_RSC = true;
-static const bool ENABLE_LIDAR = false;
+static const bool ENABLE_LIDAR = true;
 static const bool ENABLE_AI = true;
 static const bool ENABLE_NGN = true;
 

@@ -42,15 +42,8 @@ float avgInRangeHelper(std::vector<float> source, float min, float max) {
         }
     }
 
-    //#ifdef DEBUG_ALG_COLLISION
-    //ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f, avg=%f",
-    //danger, neutral, safe, camThreshold_, avgInRangeHelper(zCoords, 1, 100000000));
-    //ROS_INFO("count=%f", count);
-    //#endif
-
     float avg = sum / count;
-    if(count<=1) {return -1;}
-    return (std::isnan(avg) ? -1 : avg);
+    return (std::isnan(avg) || count<=1 ? -1 : avg);
 }
 
 bool CAAlgDepthCam::collect() {
@@ -63,9 +56,9 @@ bool CAAlgDepthCam::collect() {
      * d = braking distance in metres (to be calculated).
      * vt = final speed in m/s.
      * v0 = initial speed in m/s.
-     * a = acceleration in m/s^2
-     * @TODO test a.
+     * a = acceleration in m/s^2 TESTED
      */
+
     camThreshold_ =  ((gSpeed * gSpeed) / (2 * VEHICLE_MAX_ACCELEATION)) * 1000;
 
     if (camThreshold_ < 150.0f) {
@@ -73,31 +66,26 @@ bool CAAlgDepthCam::collect() {
     }  // Official documentation said the min dist is 105mm; to be safe, use 150 mm instead.
 
     std::vector<float> zCoords = rsc_->pointCloudZCoordsInRange();
-    //ROS_INFO("count=%f", zCoords.size());
     float danger = avgInRangeHelper(zCoords, 150.0f, camThreshold_);
     float neutral = avgInRangeHelper(zCoords, camThreshold_, 2*camThreshold_);
     float safe = avgInRangeHelper(zCoords, 2*camThreshold_, 3*camThreshold_);
 
 #ifdef DEBUG_ALG_COLLISION
-    //ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f, avg=%f",
-    //danger, neutral, safe, camThreshold_, avgInRangeHelper(zCoords, 1, 100000000));
-    //ROS_INFO("count=%f", zCoords.size());
-    ROS_INFO("dis=%f, possi=%f, velo=%f",
-    avgInRangeHelper(zCoords, 1, 100000000), camPossibility_, gSpeed);
-    //ROS_INFO("count=%f", zCoords.size());
+    ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f, avg=%f",
+    danger, neutral, safe, camThreshold_, avgInRangeHelper(zCoords, 1, 100000));
 #endif
 
     if (danger != -1) {
         camPossibility_ = 1.0f;
     } else if (neutral != -1) {
-        camPossibility_ = scale<float>(neutral, camThreshold_, 2*camThreshold_, 100, 50);
+        camPossibility_ = scale<float>(neutral, camThreshold_, 2*camThreshold_, 1.0f, 0.5f);
     } else if (safe != -1) {
         camPossibility_ = scale<float>(
             safe,
             2*camThreshold_,
             3*camThreshold_,
-            50,
-            0);
+            0.5f,
+            0.0f);
     } else {
         camPossibility_ = 0.0f;
     }
