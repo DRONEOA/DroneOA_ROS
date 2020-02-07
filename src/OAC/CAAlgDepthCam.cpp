@@ -43,7 +43,7 @@ float avgInRangeHelper(std::vector<float> source, float min, float max) {
     }
 
     float avg = sum / count;
-    return (std::isnan(avg) || count<=1 ? -1 : avg);
+    return (std::isnan(avg) || count <= 1 ? -1 : avg);
 }
 
 bool CAAlgDepthCam::collect() {
