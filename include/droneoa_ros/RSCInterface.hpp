@@ -81,6 +81,8 @@ class RSCInterface {
     boost::thread* thread_watch_pointcloud_ = nullptr;
     void watchDepthImgThread();
     void watchPointCloudThread();
+    boost::shared_mutex depth_img_mutex;
+    boost::shared_mutex pointcloud_mutex;
 
     // Debug
     void drawDebugOverlay();
