@@ -24,9 +24,10 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/radius_outlier_removal.h>
 
-#include <droneoa_ros/Utils.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+
+#include <droneoa_ros/Utils/GeneralUtils.hpp>
 
 static const char* OPENCV_WINDOW = "Debug window";
 cv::Point RSCInterface::debugMousePos = cv::Point(0, 0);
@@ -290,7 +291,7 @@ std::vector<float> RSCInterface::pointCloudZCoordsInRange(float width, float hei
     std::vector<float> zCoords;
     for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
-        if ( inRange<float>(-x, x, pt.x*1000) && inRange<float>(-y, y, pt.y*1000) ) {
+        if ( GeneralUtility::inRange<float>(-x, x, pt.x*1000) && GeneralUtility::inRange<float>(-y, y, pt.y*1000) ) {
             pointCount++;
             zCoords.push_back(pt.z*1000);
         }

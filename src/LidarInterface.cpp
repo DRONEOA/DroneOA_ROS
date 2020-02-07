@@ -18,7 +18,7 @@
  */
 
 #include <droneoa_ros/LidarInterface.hpp>
-#include <droneoa_ros/Utils.hpp>
+#include <droneoa_ros/Utils/GeneralUtils.hpp>
 #include <droneoa_ros/PDN.hpp>
 
 #include <opencv2/imgproc/imgproc.hpp>
@@ -129,7 +129,7 @@ void LidarInterface::generateDataMap() {
                 count, scannerData_.ranges.size());
             break;
         }
-        float degree = radToDeg(getMinAngle() + getIncreament() * i);
+        float degree = GeneralUtility::radToDeg(getMinAngle() + getIncreament() * i);
         degree = 0 - degree;  // Fix YDLidar's strange coordinate system
         degree = static_cast<int>(degree + LIDAR_ORIENTATION_CW) % 360;
         if (!std::isinf(scannerData_.ranges[i]) &&

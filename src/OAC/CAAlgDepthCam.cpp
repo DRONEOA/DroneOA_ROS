@@ -17,8 +17,8 @@
  * Written by Xiao Zhou <x258zhou@edu.uwaterloo.ca>, Nov. 2019
  */
 
-#include <droneoa_ros/OAUtils/CAAlgDepthCam.hpp>
-#include <droneoa_ros/Utils.hpp>
+#include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
+#include <droneoa_ros/Utils/GeneralUtils.hpp>
 
 CAAlgDepthCam::CAAlgDepthCam(CNCInterface *cnc, RSCInterface *rsc) : BaseAlg(cnc) {
     init(rsc);
@@ -36,7 +36,7 @@ float avgInRangeHelper(std::vector<float> source, float min, float max) {
     float sum = 0.0f;
     float count = 0.0f;
     for (auto zCoord : source) {
-        if (inRange<float>(min, max, zCoord)) {
+        if (GeneralUtility::inRange<float>(min, max, zCoord)) {
             sum += zCoord;
             count += 1.0f;
         }
@@ -77,9 +77,9 @@ bool CAAlgDepthCam::collect() {
     if (danger != -1) {
         camPossibility_ = 1.0f;
     } else if (neutral != -1) {
-        camPossibility_ = scale<float>(neutral, camThreshold_, 2*camThreshold_, 100, 50);
+        camPossibility_ = GeneralUtility::scale<float>(neutral, camThreshold_, 2*camThreshold_, 100, 50);
     } else if (safe != -1) {
-        camPossibility_ = scale<float>(
+        camPossibility_ = GeneralUtility::scale<float>(
             safe,
             2*camThreshold_,
             3*camThreshold_,

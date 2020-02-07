@@ -17,7 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <droneoa_ros/OAUtils/CAAlgLidar.hpp>
+#include <droneoa_ros/OAC/CAAlgLidar.hpp>
 
 CAAlgLidar::CAAlgLidar(CNCInterface *cnc, LidarInterface *lidar) : BaseAlg(cnc) {
     init(lidar);

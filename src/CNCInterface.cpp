@@ -30,7 +30,7 @@
 #include <iostream>
 
 #include <droneoa_ros/CNCInterface.hpp>
-#include <droneoa_ros/Utils.hpp>
+#include <droneoa_ros/Utils/CNCUtils.hpp>
 
 CNCInterface::CNCInterface() {
     watchHomePosThread();
@@ -136,7 +136,7 @@ bool CNCInterface::isReady(std::string modeName) {
 // - Input: float targetAltitude
 // - Return: client send response
 bool CNCInterface::takeoff(float targetAltitude) {
-    targetAltitude = validAltitudeCMD(targetAltitude);
+    targetAltitude = CNCUtility::validAltitudeCMD(targetAltitude);
     ros::ServiceClient takeoff_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
     mavros_msgs::CommandTOL srv_takeoff;
     srv_takeoff.request.altitude = targetAltitude;
@@ -202,7 +202,7 @@ bool CNCInterface::setYaw(float targetYaw, bool isRelative) {
 // --- float isRelative: (0: absolute, 1: relative)
 // - Return: client send response
 bool CNCInterface::setMaxSpeed(float speedType, float speed, float isRelative) {
-    speed = validSpeedCMD(speed);
+    speed = CNCUtility::validSpeedCMD(speed);
     mavros_msgs::CommandLong srv;
     srv.request.command = mavros_msgs::CommandCode::DO_CHANGE_SPEED;
     srv.request.param1 = speedType;
@@ -242,7 +242,7 @@ bool CNCInterface::setHome(float targetLatitude, float targetLongitude, float ta
 // --- uint16_t command (default NAV_WAYPOINT)
 // - Return: client send response
 bool CNCInterface::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
-    z_alt = validSpeedCMD(z_alt);
+    z_alt = CNCUtility::validSpeedCMD(z_alt);
     ros::ServiceClient pushWP_cl = n.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
     mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
     mavros_msgs::Waypoint wp;
@@ -476,13 +476,13 @@ bool CNCInterface::gotoGlobal(float x_lat, float y_long, float z_alt) {
 // Goto Relative Waypoint (North+, East+)
 bool CNCInterface::gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta) {
     // @TODO: check GPS available
-    GPSPoint tmpPoint = getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
+    GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
     return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);
 }
 
 // Goto Target Head
 bool CNCInterface::gotoHeading(float heading, float distance, float z_alt) {
-    std::pair<float, float> tempRelative = getNorthEastDistanceFromHeading(heading, distance);
+    std::pair<float, float> tempRelative = CNCUtility::getNorthEastDistanceFromHeading(heading, distance);
     return gotoRelative(tempRelative.first, tempRelative.second, z_alt);
 }
 
