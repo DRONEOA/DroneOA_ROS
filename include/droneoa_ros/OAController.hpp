@@ -28,10 +28,10 @@
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/LidarInterface.hpp>
 #include <droneoa_ros/RSCInterface.hpp>
-#include <droneoa_ros/OAUtils/BaseAlg.hpp>
-#include <droneoa_ros/OAUtils/CAAlgLidar.hpp>
-#include <droneoa_ros/OAUtils/CAAlgDepthCam.hpp>
-#include <droneoa_ros/OAUtils/CMDParser.hpp>
+#include <droneoa_ros/OAC/BaseAlg.hpp>
+#include <droneoa_ros/OAC/CAAlgLidar.hpp>
+#include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
+#include <droneoa_ros/OAC/CMDParser.hpp>
 
 enum SYS_State {
     SYS_IDLE,

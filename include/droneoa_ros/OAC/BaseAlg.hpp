@@ -17,24 +17,30 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CAALGLIDAR_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAUTILS_CAALGLIDAR_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT
 
-#include <droneoa_ros/OAUtils/BaseAlg.hpp>
-#include <droneoa_ros/LidarInterface.hpp>
+#include <utility>
+#include <string>
+#include <vector>
+#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/OAC/Command.hpp>
 
-// #define DEBUG_ALG_COLLISION_LIDAR
-
-class CAAlgLidar : public BaseAlg {
-    LidarInterface *lidar_;
-    float lidarThreshold_;
-    float lidarPossibility_;
+class BaseAlg {
  public:
-    CAAlgLidar(CNCInterface *cnc, LidarInterface *lidar);
-    ~CAAlgLidar() override;
-    void init(LidarInterface *lidar);  // For restart
-    bool collect() override;  // Collect required sensor data
-    bool plan() override;  // Return false when get around is impossible
+    explicit BaseAlg(CNCInterface *cnc);
+    virtual ~BaseAlg();
+
+    virtual void init(CNCInterface *cnc);  // For restart
+    virtual bool collect() = 0;  // Collect required sensor data
+    virtual bool plan() = 0;  // Return false when get around is impossible
+
+    virtual CommandQueue getCommandQueue();
+    virtual DataQueue getDataQueue();
+ protected:
+    CNCInterface *cnc_;
+    CommandQueue CMDQueue_;
+    DataQueue DATAQueue_;
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CAALGLIDAR_HPP_  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT

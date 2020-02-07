@@ -14,33 +14,27 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, November 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_BASEALG_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAUTILS_BASEALG_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAC_CMDPARSER_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAC_CMDPARSER_HPP_  // NOLINT
 
 #include <utility>
-#include <string>
 #include <vector>
+#include <string>
 #include <droneoa_ros/CNCInterface.hpp>
-#include <droneoa_ros/OAUtils/Command.hpp>
+#include <droneoa_ros/OAC/Command.hpp>
+#include <droneoa_ros/OAC/CMDRunner.hpp>
 
-class BaseAlg {
- public:
-    explicit BaseAlg(CNCInterface *cnc);
-    virtual ~BaseAlg();
-
-    virtual void init(CNCInterface *cnc);  // For restart
-    virtual bool collect() = 0;  // Collect required sensor data
-    virtual bool plan() = 0;  // Return false when get around is impossible
-
-    virtual CommandQueue getCommandQueue();
-    virtual DataQueue getDataQueue();
- protected:
+class CMDParser {
     CNCInterface *cnc_;
-    CommandQueue CMDQueue_;
-    DataQueue DATAQueue_;
+    CMDRunner *cmdRunner_;
+
+ public:
+    explicit CMDParser(CNCInterface *cnc, CMDRunner *runner);
+    virtual ~CMDParser();
+    bool parseCMDQueue(const CommandQueue& cmdqueue, bool isInstant = true);
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_BASEALG_HPP_  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OAC_CMDPARSER_HPP_  // NOLINT

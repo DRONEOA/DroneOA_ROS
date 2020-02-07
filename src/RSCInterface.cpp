@@ -24,9 +24,10 @@
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/radius_outlier_removal.h>
 
-#include <droneoa_ros/Utils.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+
+#include <droneoa_ros/Utils/GeneralUtils.hpp>
 
 static const char* OPENCV_WINDOW = "Debug window";
 cv::Point RSCInterface::debugMousePos = cv::Point(0, 0);
@@ -69,6 +70,7 @@ void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
 
 /* Callback */
 void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
+    boost::unique_lock<boost::shared_mutex> uniqueLock(depth_img_mutex);
     depthImage_ = *msg;
 
     cv_bridge::CvImagePtr cv_ptr;
@@ -94,6 +96,7 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
 }
 
 void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
+    boost::unique_lock<boost::shared_mutex> uniqueLock(pointcloud_mutex);
     pointCloud_ = *msg;
     // Convert to pointcloud
     pcl::PCLPointCloud2 pcl_pc2;
@@ -154,6 +157,7 @@ void RSCInterface::watchPointCloudThread() {
 
 #ifdef PCL_DEBUG_VIEWER
 void RSCInterface::updatePointCloudViewerThread() {
+    boost::shared_lock<boost::shared_mutex> lock(pointcloud_mutex);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(&pcl_pointCloud_);
     pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
     // PCL Viewer
@@ -271,6 +275,11 @@ void RSCInterface::setRange(float min, float max) {
  */
 
 std::vector<float> RSCInterface::pointCloudZCoordsInRange(float width, float height, float dist) {
+<<<<<<< HEAD
+=======
+    boost::shared_lock<boost::shared_mutex> lock(pointcloud_mutex);
+    unsigned int pointCount = 0;
+>>>>>>> da1a9e4b724f2bab80b914aeccab16cad2ae92bb
     float x = width/2;
     float y = width/2;
     if (dist < 200.0f) {
@@ -279,7 +288,12 @@ std::vector<float> RSCInterface::pointCloudZCoordsInRange(float width, float hei
     std::vector<float> zCoords;
     for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
+<<<<<<< HEAD
         if ( inRange<float>(-x, x, pt.x*1000) && inRange<float>(-y, y, pt.y*1000) ) {
+=======
+        if ( GeneralUtility::inRange<float>(-x, x, pt.x*1000) && GeneralUtility::inRange<float>(-y, y, pt.y*1000) ) {
+            pointCount++;
+>>>>>>> da1a9e4b724f2bab80b914aeccab16cad2ae92bb
             zCoords.push_back(pt.z*1000);
         }
     }

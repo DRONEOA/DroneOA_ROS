@@ -27,7 +27,7 @@
 #include <droneoa_ros/RSCInterface.hpp>
 #include <droneoa_ros/LidarInterface.hpp>
 #include <droneoa_ros/OAController.hpp>
-#include <droneoa_ros/Utils.hpp>
+#include <droneoa_ros/Utils/CNCUtils.hpp>
 
 float getFloatCmdArg(std::stringstream& ss) {
     float result = 0.0;
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoRelative(dist, 0, alt);
-            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "s") {
             float dist = getFloatCmdArg(ss);
             float alt = getFloatCmdArg(ss);
@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoRelative(-dist, 0, alt);
-            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "a") {
             float dist = getFloatCmdArg(ss);
             float alt = getFloatCmdArg(ss);
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoRelative(0, -dist, alt);
-            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "d") {
             float dist = getFloatCmdArg(ss);
             float alt = getFloatCmdArg(ss);
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoRelative(0, dist, alt);
-            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "rtl") {
             cnc.setMode(FLT_MODE_RTL);
         } else if (cmdType == "land") {
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
                 alt = cnc.getTargetAltitude();
             }
             cnc.gotoHeading(yawAngle, dist, alt);
-            cnc.setYaw(getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
         } else if (cmdType == "velocity") {
             float vel = getFloatCmdArg(ss);
             if (vel == 0.0) {

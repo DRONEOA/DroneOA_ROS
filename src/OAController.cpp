@@ -77,39 +77,21 @@ void OAController::tick() {
 
     switch (currState_) {
         case SYS_State::SYS_IDLE:
-        #ifdef DEBUG_OAC
-            ROS_INFO("[TICK] SYS_IDLE");
-        #endif
             evaluate();
             break;
         case SYS_State::SYS_EVALUATED:
-        #ifdef DEBUG_OAC
-            ROS_INFO("[TICK] SYS_EVALUATED");
-        #endif
             plan();
             break;
         case SYS_State::SYS_PLANNED:
-        #ifdef DEBUG_OAC
-            ROS_INFO("[TICK] SYS_PLANNED");
-        #endif
             execute();
             break;
         case SYS_State::SYS_ABORT:
-        #ifdef DEBUG_OAC
-            ROS_INFO("[TICK] SYS_ABORT");
-        #endif
             abort();
             break;
         case SYS_State::SYS_EXEC:
-        #ifdef DEBUG_OAC
-            ROS_INFO("[TICK] SYS_EXEC");
-        #endif
             currState_ = SYS_State::SYS_IDLE;
             break;
         case SYS_State::SYS_SAFE:
-        #ifdef DEBUG_OAC
-            ROS_INFO("[TICK] SYS_SAFE");
-        #endif
             currState_ = SYS_State::SYS_IDLE;
             break;
         default:
