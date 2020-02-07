@@ -280,7 +280,7 @@ std::vector<float> RSCInterface::pointCloudZCoordsInRange(float width, float hei
     float y = width/2;
     if (dist < 200.0f) {
         dist = 200.0f;
-    } // Reserved for range filter
+    }  // Reserved for range filter
     std::vector<float> zCoords;
     for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
