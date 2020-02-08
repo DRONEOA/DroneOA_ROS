@@ -13,8 +13,19 @@ sudo apt update
 sudo apt install ros-melodic-desktop-full -y
 sudo rosdep init
 rosdep update
-echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
-source ~/.bashrc
+
+BASH_FILE=~/.bashrc
+ZSH_FILE=~/.zshrc
+if test -f "$BASH_FILE"; then
+	echo "$BASH_FILE exist"
+	echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
+	source ~/.bashrc
+fi
+if test -f "$ZSH_FILE"; then
+	echo "$ZSH_FILE exists"
+	echo "source /opt/ros/melodic/setup.zsh" >> ~/.zshrc
+	source ~/.zshrc
+fi
 sudo apt install python-rosinstall python-rosinstall-generator python-wstool build-essential -y
 
 sudo apt install git gitk -y
