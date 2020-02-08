@@ -102,13 +102,7 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(pointCloud_, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, pcl_pointCloud_);
-#ifdef UE4_SITL
-    pcl::PointCloud<pcl::PointXYZRGB> temp;
-    Eigen::Affine3f transform_2 = Eigen::Affine3f::Identity();
-    transform_2.scale(UE4_SITL_SCALE);
-    pcl::transformPointCloud(pcl_pointCloud_, temp, transform_2);
-    pcl_pointCloud_ = temp;
-#endif
+
     // @TODO need to change coordinates if needed
     /***
      * Note: 
@@ -282,17 +276,15 @@ void RSCInterface::setRange(float min, float max) {
 
 std::vector<float> RSCInterface::pointCloudZCoordsInRange(float width, float height, float dist) {
     boost::shared_lock<boost::shared_mutex> lock(pointcloud_mutex);
-    unsigned int pointCount = 0;
     float x = width/2;
     float y = width/2;
     if (dist < 200.0f) {
         dist = 200.0f;
-    }
+    }  // Reserved for range filter
     std::vector<float> zCoords;
     for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
         pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
         if ( GeneralUtility::inRange<float>(-x, x, pt.x*1000) && GeneralUtility::inRange<float>(-y, y, pt.y*1000) ) {
-            pointCount++;
             zCoords.push_back(pt.z*1000);
         }
     }
