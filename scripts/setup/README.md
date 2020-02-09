@@ -10,16 +10,4 @@ chmod +x *
 
 ## FAQ
 ### sim_vehicle.py command not found:
-Please do this:
-(for bash)
-```shell
-	echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
-	source ~/.bashrc
-```
-Or
-(for zsh)
-```shell
-	echo "source /opt/ros/melodic/setup.zsh" >> ~/.zshrc
-	source ~/.zshrc
-```
-
+This happens sometimes. Rebooting your computer will solve this.
