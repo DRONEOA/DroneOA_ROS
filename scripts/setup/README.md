@@ -10,4 +10,6 @@ chmod +x *
 
 ## FAQ
 ### sim_vehicle.py command not found:
-This happens sometimes. Rebooting your computer will solve this.
+Solutions:
+- Rebooting / Sign out your computer.
+- If still not found, you can find this script here: `<Ardupilot_Path>/Tools/autotest/sim_vehicle.py`
