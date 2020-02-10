@@ -33,8 +33,7 @@ class GeneralUtility {
     static float radToDeg(float rad);
 
     /**
-     * @brief Read config from file [float array]
-     * Format: <key> <data1> <data2> ...
+     * @brief Read config from file [float array] Format: <key> <data1> <data2> ...
      * @param path 
      * @param keyName 
      * @return std::vector<float> data array as float
