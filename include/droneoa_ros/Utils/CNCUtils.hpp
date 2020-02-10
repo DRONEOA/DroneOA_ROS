@@ -28,22 +28,51 @@
 
 class CNCUtility {
  public:
-    // Get the GPD location dNorth, dEast from the original position
+    /**
+     * @brief Get the GPD location dNorth, dEast from the original position
+     * @param originLoc start GPS point
+     * @param dNorth north axis distance
+     * @param dEast east axis distance
+     * @return stop location GPSPoint 
+     */
     static GPSPoint getLocationMeter(GPSPoint originLoc, float dNorth, float dEast);
 
-    // Get distance between 2 GPS point in meter
+    /**
+     * @brief Get distance between 2 GPS point in meter
+     * @param point1 
+     * @param point2 
+     * @return float distance between 2 GPS points
+     */
     static float getDistanceMeter(GPSPoint point1, GPSPoint point2);
 
-    // Get bearing in order to reach a location
+    /**
+     * @brief Get bearing in order to reach a location
+     * @param point1 start point
+     * @param point2 end point
+     * @return bearing required to reach the end point (float)
+     */
     static float getBearing(GPSPoint point1, GPSPoint point2);
 
-    // Get target dNorth, dEast with heading and distance
+    /**
+     * @brief Get target dNorth, dEast with heading and distance
+     * @param heading 
+     * @param distance 
+     * @return std::pair<float, float> North axis distance, East axis distance
+     */
     static std::pair<float, float> getNorthEastDistanceFromHeading(float heading, float distance);
 
-    // Chack target altitude, if exceed max allowed, set to max
+    /**
+     * @brief Chack target altitude, if exceed max allowed, set to max
+     * @param targetAltitude 
+     * @return float 
+     */
     static float validAltitudeCMD(float targetAltitude);
 
-    // Chack target speed, if exceed max allowed, set to max
+    /**
+     * @brief Chack target speed, if exceed max allowed, set to max
+     * @param targetSpeed 
+     * @return float 
+     */
     static float validSpeedCMD(float targetSpeed);
 };
 
