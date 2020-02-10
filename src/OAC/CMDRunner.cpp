@@ -17,7 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
-#include "droneoa_ros/OAUtils/CMDRunner.hpp"
+#include <droneoa_ros/OAC/CMDRunner.hpp>
 
 CMDRunner::CMDRunner(CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), cnc_(cnc) {
     toggleState(RUNNER_STATE::INIT);

@@ -17,12 +17,12 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT
 
 #include <boost/thread.hpp>
-#include "droneoa_ros/OAUtils/Command.hpp"
-#include "droneoa_ros/CNCInterface.hpp"
+#include <droneoa_ros/OAC/Command.hpp>
+#include <droneoa_ros/CNCInterface.hpp>
 
 enum RUNNER_STATE {
     INIT = 0,
@@ -68,4 +68,4 @@ class CMDRunner {
     RUNNER_STATE getRunnerState();
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_CMDRUNNER_HPP_  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT

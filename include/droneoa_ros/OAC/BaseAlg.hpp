@@ -25,14 +25,14 @@
  * @date 2019-08
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_BASEALG_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAUTILS_BASEALG_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT
 
 #include <utility>
 #include <string>
 #include <vector>
 #include <droneoa_ros/CNCInterface.hpp>
-#include <droneoa_ros/OAUtils/Command.hpp>
+#include <droneoa_ros/OAC/Command.hpp>
 
 class BaseAlg {
  public:
@@ -66,4 +66,4 @@ class BaseAlg {
     DataQueue DATAQueue_;
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_BASEALG_HPP_  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT

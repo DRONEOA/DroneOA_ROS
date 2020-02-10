@@ -17,7 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, November 2019
  */
 
-#include "droneoa_ros/OAUtils/CMDParser.hpp"
+#include <droneoa_ros/OAC/CMDParser.hpp>
 
 CMDParser::CMDParser(CNCInterface *cnc, CMDRunner *runner) : cnc_(cnc), cmdRunner_(runner) {}
 

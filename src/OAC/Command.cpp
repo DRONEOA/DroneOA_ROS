@@ -17,7 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
-#include "droneoa_ros/OAUtils/Command.hpp"
+#include <droneoa_ros/OAC/Command.hpp>
 
 bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline) {
     try {

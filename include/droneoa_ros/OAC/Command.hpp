@@ -25,13 +25,13 @@
  * @date 2020-02
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_  // NOLINT
+#ifndef INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT
 
 #include <utility>
 #include <vector>
 #include <string>
-#include "droneoa_ros/CNCInterface.hpp"
+#include <droneoa_ros/CNCInterface.hpp>
 
 /**
  * @brief ENUM of supported COMMAND types
@@ -99,4 +99,4 @@ typedef std::vector<DataLine> DataQueue;
  */
 bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline);
 
-#endif  // INCLUDE_DRONEOA_ROS_OAUTILS_COMMAND_HPP_  // NOLINT
+#endif  // INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT

@@ -17,22 +17,24 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <droneoa_ros/OAUtils/BaseAlg.hpp>
+#ifndef INCLUDE_DRONEOA_ROS_OAC_CAALGLIDAR_HPP_  // NOLINT
+#define INCLUDE_DRONEOA_ROS_OAC_CAALGLIDAR_HPP_  // NOLINT
 
-void BaseAlg::init(CNCInterface *cnc) {
-    cnc_ = cnc;
-}
+#include <droneoa_ros/OAC/BaseAlg.hpp>
+#include <droneoa_ros/LidarInterface.hpp>
 
-BaseAlg::BaseAlg(CNCInterface *cnc) {
-    init(cnc);
-}
+// #define DEBUG_ALG_COLLISION_LIDAR
 
-BaseAlg::~BaseAlg() {}
+class CAAlgLidar : public BaseAlg {
+    LidarInterface *lidar_;
+    float lidarThreshold_;
+    float lidarPossibility_;
+ public:
+    CAAlgLidar(CNCInterface *cnc, LidarInterface *lidar);
+    ~CAAlgLidar() override;
+    void init(LidarInterface *lidar);  // For restart
+    bool collect() override;  // Collect required sensor data
+    bool plan() override;  // Return false when get around is impossible
+};
 
-CommandQueue BaseAlg::getCommandQueue() {
-    return CMDQueue_;
-}
-
-DataQueue BaseAlg::getDataQueue() {
-    return DATAQueue_;
-}
+#endif  // INCLUDE_DRONEOA_ROS_OAC_CAALGLIDAR_HPP_  // NOLINT
