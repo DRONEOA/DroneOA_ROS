@@ -34,6 +34,12 @@ class CMDParser {
  public:
     explicit CMDParser(CNCInterface *cnc, CMDRunner *runner);
     virtual ~CMDParser();
+    /**
+     * @brief Parse and execute the command queue
+     * @param cmdqueue a queue of command
+     * @param isInstant true if all command can be executed at the same time, false will use the runner
+     * @return whether the operation is successful
+     */
     bool parseCMDQueue(const CommandQueue& cmdqueue, bool isInstant = true);
 };
 
