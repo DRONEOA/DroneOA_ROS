@@ -1,4 +1,4 @@
-cd ../launch
+cd ../../launch
 gnome-terminal -e "roslaunch ./step1SITLUE4.launch"
 echo "sleep 10s"
 sleep 10
