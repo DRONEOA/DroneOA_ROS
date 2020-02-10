@@ -39,6 +39,11 @@ class BaseAlg {
     explicit BaseAlg(CNCInterface *cnc);
     virtual ~BaseAlg();
 
+    /**
+     * @brief Init the algorithm instance
+     * Seperated from constructor due to the planned restart feature
+     * @param cnc pointer to the Command And Control interface
+     */
     virtual void init(CNCInterface *cnc);  // For restart
     /**
      * @brief Collect Data From Sensor And FCU Interface

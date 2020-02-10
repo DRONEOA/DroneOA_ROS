@@ -33,6 +33,9 @@
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
 #include <droneoa_ros/OAC/CMDParser.hpp>
 
+/**
+ * @brief Obstacle Avoidance Controller System states
+ */
 enum SYS_State {
     SYS_IDLE,
     SYS_SAFE,  // optional
@@ -42,6 +45,9 @@ enum SYS_State {
     SYS_ABORT
 };
 
+/**
+ * @brief Supported Algorithms
+ */
 enum SYS_Algs {
     ALG_BUG,
     ALG_VFF,
@@ -50,6 +56,10 @@ enum SYS_Algs {
     ALG_COLLISION_AI
 };
 
+/**
+ * @brief Supported Decision Strategies (Between algorithms if more than 1)
+ * Planned Future Feature
+ */
 enum SYS_SelectedDetermineFun {
     DET_STAGE1,
     DET_STAGE2,
@@ -67,9 +77,22 @@ class OAController {
     OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, CMDRunner *runner, ros::Rate r);
     virtual ~OAController();
 
+    /**
+     * @brief Init the OA Controller
+     * Seperated from constructor due to the planned restart feature
+     * @param cnc pointer to command and control interface
+     * @param lidar pointer to lidar interface
+     * @param rsc pointer to realsense camera interface
+     */
     void init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc);
+    /**
+     * @brief Tick event, which stepping the state machine
+     */
     void tick();
-
+    /**
+     * @brief Control Switch to pause / resume the OAController
+     * @param isOn new switch state (true = on)
+     */
     void masterSwitch(bool isOn);  // Pause / Resume OA Controller
 
  private:
