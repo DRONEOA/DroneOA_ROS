@@ -49,10 +49,11 @@ class RSCInterface {
     void setRangeSwitch(bool status);
     void setRange(float min, float max);
 
+    //! @todo(Xiao Zhou): The minimum distance, left for possibility calculation in the future
     std::vector<float> pointCloudZCoordsInRange(
         float width = VEHICLE_BOUNDBOX_WIDTH,
         float height = VEHICLE_BOUNDBOX_HEIGHT,
-        float dist = 200.0f);  // @TODO: The minimum distance, left for possibility calculation in the future
+        float dist = 200.0f);
 
     // Callback
     void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);

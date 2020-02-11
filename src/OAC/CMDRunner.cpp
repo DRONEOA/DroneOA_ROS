@@ -59,7 +59,7 @@ bool CMDRunner::setupRunner(CommandQueue commands) {
 }
 
 bool CMDRunner::startRunner() {
-    // @todo do we need this ?
+    //! @todo do we need this ?
 }
 
 RUNNER_STATE CMDRunner::getRunnerState() {

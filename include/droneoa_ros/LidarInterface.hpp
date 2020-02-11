@@ -38,23 +38,28 @@ class LidarInterface {
  public:
     LidarInterface();
     virtual ~LidarInterface();
+    /**
+     * @brief Init the Lidar Interface
+     * Seperated from constructor due to the planned restart feature
+     * @param nh ROS Node Handler
+     * @param r Rate of ROS node
+     */
     void init(ros::NodeHandle nh, ros::Rate r);
 
     // Callback
     void lidar_callback(const sensor_msgs::LaserScanConstPtr& msg);
 
     // Accesser
-    float getMaxAngle();
-    float getMinAngle();
-    float getMaxRange();
-    float getMinRnage();
-    std::map<float, degreeSector> getScannerDataMap();  // Dist unit m
-    float getIncreament();
-    std::pair<float, float> getClosestSectorData();  // Dist unit m
+    float getMaxAngle();  /*!< Unit: rad */
+    float getMinAngle();  /*!< Unit: rad */
+    float getMaxRange();  /*!< Unit: rad */
+    float getMinRnage();  /*!< Unit: rad */
+    std::map<float, degreeSector> getScannerDataMap();  /*!< Unit: m */
+    float getIncreament();  /*!< Unit: rad */
+    std::pair<float, float> getClosestSectorData();  /*!< Unit: m */
 
     // Debug
     void printLidarInfo();
-    void drawLidarData();
 
  private:
     ros::NodeHandle n_;
@@ -71,6 +76,9 @@ class LidarInterface {
     // Processor
     void generateDataMap();
     void generateDegreeSector();
+
+    // Debug
+    void drawLidarData();
 };
 
 #endif  // INCLUDE_DRONEOA_ROS_LIDARINTERFACE_HPP_  // NOLINT

@@ -24,12 +24,15 @@
 #include <droneoa_ros/OAC/Command.hpp>
 #include <droneoa_ros/CNCInterface.hpp>
 
+/**
+ * @brief 5 States Of The Runner
+ */
 enum RUNNER_STATE {
-    INIT = 0,
-    RUNNING,
-    PAUSED,
-    STOPPED,
-    IDLE
+    INIT = 0,  /*!< initilize the runner */
+    RUNNING,  /*!< the runner is processing a cmd queue, delay is treated as running */
+    PAUSED,  /*!< the runner is pause due to unsatified condition of manual input */
+    STOPPED,  /*!< the runner is stopped due to fatal error or shutdown */
+    IDLE,  /*!< the runner is idle or have an empty cmd queue */
 };
 
 static const char* RUNNER_STATE_STR[] = {
@@ -40,6 +43,9 @@ static const char* RUNNER_STATE_STR[] = {
     "IDLE"
 };
 
+/**
+ * @brief Interval between runner ticks (usually 50 ~ 250)
+ */
 static const int RUNNER_TICK_TIME = 100;
 
 class CMDRunner {
@@ -58,13 +64,25 @@ class CMDRunner {
     bool populateCMDQueue(CommandQueue commands);
     bool toggleState(RUNNER_STATE newState);
     bool isShutDownRequested();
+
  public:
     explicit CMDRunner(CNCInterface *cnc);
     virtual ~CMDRunner();
+    /**
+     * @brief Send a new command queue to the runner
+     * This operation will replace the original command queue in the runner
+     * @param commands a CommandQueue
+     * @return true operation is successful
+     * @return false condition unsatisfied or command queue contains error
+     */
     bool setupRunner(CommandQueue commands);
     bool startRunner();
     //! @todo(shibohan) interrupt and management
 
+    /**
+     * @brief Get the current Runner State
+     * @return RUNNER_STATE
+     */
     RUNNER_STATE getRunnerState();
 };
 
