@@ -50,23 +50,65 @@ class CNCInterface {
     virtual ~CNCInterface();
     void init(ros::NodeHandle nh, ros::Rate r);
 
-    // Mode Control
+    /**
+     * @brief Set Flight Mode
+     * @param modeName please use PDN flight mode names
+     * @return true is operation is successful. false otherwise.
+     */
     bool setMode(std::string modeName);
 
     // Safety
+    /**
+     * @brief Arm the vehicle (include motor)
+     * @return false if arm failed, vehicle not ready. Otherwise true
+     */
     bool armVehicle();
+    /**
+     * @brief Check whether the vehicle is ready for to arm under certain mode
+     * @param modeName (Only Allow: GUIDED, STABLIZED, ALT_HOLD)
+     * @return true if ready to arm. Otherwise false
+     */
     bool isReady(std::string modeName);
 
     // Guided Flight Control
     bool takeoff(float targetAltitude);
     bool land(int minAboutAltitude);
+    /**
+     * @brief Set Yaw Command
+     * @param targetYaw in degree
+     * @param isRelative (default false)
+     * @return client send response
+     */
     bool setYaw(float targetYaw, bool isRelative = false);
+    /**
+     * @brief Set Maximum Speed Command
+     * @param speedType (0=Airspeed, 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
+     * @param speed (-1 indicates no change m/s)
+     * @param isRelative (0: absolute, 1: relative)
+     * @return client send response
+     */
     bool setMaxSpeed(float speedType, float speed, float isRelative);
 
     // Navigation
+    /**
+     * @brief Replace Home Position [Global] [USE WITH CAUTION]
+     * @param targetLatitude 3D Global Coordinate's Latitude
+     * @param targetLongitude 3D Global Coordinate's Longitude
+     * @param targetAltitude 3D Global Coordinate's Altitude
+     * @return client send response
+     */
     bool setHome(float targetLatitude, float targetLongitude, float targetAltitude);
 
     // Mission
+    /**
+     * @brief Push New Waypoint List
+     * @param x_lat
+     * @param y_long
+     * @param z_alt
+     * @param isCurrent (2 = isCurrent Guided)
+     * @param command (default NAV_WAYPOINT)
+     * @return client send response
+     */
     bool pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent = 2,
         uint16_t command = mavros_msgs::CommandCode::NAV_WAYPOINT);
     bool clearWaypoint();
@@ -103,8 +145,30 @@ class CNCInterface {
     mavros_msgs::VFR_HUD getHUDData();
 
     // User Simple Function
+    /**
+     * @brief Goto Global Waypoint, 3D GPS Point
+     * @param x_lat
+     * @param y_long
+     * @param z_alt in meter
+     * @return client send response
+     */
     bool gotoGlobal(float x_lat, float y_long, float z_alt);
+    /**
+     * @brief Goto Relative Waypoint (North+, East+)
+     * @param x_lat North+ in meter
+     * @param y_long East+ in meter
+     * @param z_alt default 10 in meter
+     * @param isAltDelta not used
+     * @return client send response
+     */
     bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false);
+    /**
+     * @brief Goto Target Head
+     * @param heading in degree
+     * @param distance in meter
+     * @param z_alt in meter
+     * @return client send response
+     */
     bool gotoHeading(float heading, float distance, float z_alt);
 
  private:

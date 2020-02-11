@@ -25,22 +25,44 @@
 
 class GeneralUtility {
  public:
-    // Get deg angle from rad angle
+    /**
+     * @brief Get deg angle from rad angle
+     * @param rad 
+     * @return float degree
+     */
     static float radToDeg(float rad);
 
-    // Read config from file [float array]
-    // Format: <key> <data1> <data2> ...
+    /**
+     * @brief Read config from file [float array] Format: <key> <data1> <data2> ...
+     * @param path 
+     * @param keyName 
+     * @return std::vector<float> data array as float
+     */
     static std::vector<float> getFloatDataFromConfig(std::string path, std::string keyName);
 
-
-    // Check if target is in range [min, max] inclusive
     template<typename T>
+    /**
+     * @brief Check if target is in range [min, max] inclusive
+     * @param min 
+     * @param max 
+     * @param target the input data to be examined
+     * @return true is inrange
+     */
     static bool inRange(T min, T max, T target) {
         return (target >= min && target <= max);
     }
 
-    // Scale target in [rmin, rmax] to [tmin, tmax]
     template<typename T>
+    /**
+     * @brief Scale target in [rmin, rmax] to [tmin, tmax]
+     * 
+     * @param target the input data to be scaled
+     * @param rmin original range min
+     * @param rmax original range max
+     * @param tmin new range min
+     * @param tmax new range max
+     * @return scaled data 
+     */
     static T scale(T target, T rmin, T rmax, T tmin, T tmax) {
         return ((target-rmin)*(tmax-tmin))/(rmax-rmin)+tmin;
     }
