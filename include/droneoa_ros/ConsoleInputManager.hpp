@@ -35,6 +35,12 @@ class ConsoleInputManager {
  public:
     explicit ConsoleInputManager(bool* masterSwitch);
     bool init(CNCInterface* cnc, RSCInterface *rsc, OAController *oac, LidarInterface *lidar);
+
+    /**
+     * @brief Pass the input console command, and execute if valid
+     * @param cmd the input command (only support single command in this version)
+     * @return whether the command is valid and request is successfuly sent
+     */
     bool parseAndExecuteConsole(std::string cmd);
 
  private:
