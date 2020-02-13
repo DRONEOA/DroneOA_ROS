@@ -52,12 +52,10 @@ std::vector<float> GeneralUtility::getFloatDataFromConfig(std::string path, std:
     return result;
 }
 
-char GeneralUtility::asciitolower(char in) {
-    if (in <= 'Z' && in >= 'A')
-        return in - ('Z' - 'z');
-    return in;
+void GeneralUtility::toLowerCaseStr(std::string* input) {
+    std::transform(input->begin(), input->end(), input->begin(), ::tolower);
 }
 
-void GeneralUtility::toLowerCaseStr(std::string* input) {
-    std::transform(input->begin(), input->end(), input->begin(), asciitolower);
+void GeneralUtility::toUpperCaseStr(std::string* input) {
+    std::transform(input->begin(), input->end(), input->begin(), ::toupper);
 }

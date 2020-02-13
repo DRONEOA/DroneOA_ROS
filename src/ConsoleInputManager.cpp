@@ -112,6 +112,7 @@ bool ConsoleInputManager::handleCNCCommands() {
                 ROS_WARN("Flight Mode Does Not Exist !!!");
                 return false;
             }
+            GeneralUtility::toUpperCaseStr(&newMode);
             ROS_WARN("::ChangeMode %s -> %s::", currentMode.c_str(), newMode.c_str());
             cnc_->setMode(newMode);
         } else if (cmdType == "land") {
@@ -141,15 +142,34 @@ bool ConsoleInputManager::handleCNCCommands() {
                 ROS_WARN("::GOTO YAW -> yaw:%f dist:%f alt:%f::", yawAngle, dist, alt);
                 cnc_->gotoHeading(yawAngle, dist, alt);
             }
+        } else if (cmdType == "info") {
+            GPSPoint tmpGPSPoint = cnc_->getCurrentGPSPoint();
+            ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
+            ROS_INFO("[DISPLAY] gps: %f %f", tmpGPSPoint.latitude_, tmpGPSPoint.longitude_);
+            ROS_INFO("[DISPLAY] altitude: %f", cnc_->getRelativeAltitude());
+            ROS_INFO("[DISPLAY] mode: %s", cnc_->getMode().c_str());
+            ROS_INFO("[DISPLAY] voltage: %f", cnc_->getBatteryVoltage());
+            ROS_INFO("[DISPLAY] orientation: %f, %f, %f", cnc_->getIMUData().orientation.x,
+                                                        cnc_->getIMUData().orientation.y,
+                                                        cnc_->getIMUData().orientation.z);
+            ROS_INFO("[HUD] heading: %d", cnc_->getHUDData().heading);
+            ROS_INFO("[HUD] airspeed: %f", cnc_->getHUDData().airspeed);
+            ROS_INFO("[HUD] groundspeed: %f", cnc_->getHUDData().groundspeed);
+            ROS_INFO("[HUD] altitude: %f", cnc_->getHUDData().altitude);
+            ROS_INFO("[HUD] climb: %f", cnc_->getHUDData().climb);
+            ROS_INFO("[HUD] throttle: %f", cnc_->getHUDData().throttle);
+            ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else if (cmdType == "quit") {
             ROS_WARN("::QUIT::");
             oac_->masterSwitch(false);
             *masterSwitch_ = false;
         } else {
             ROS_WARN("Unknown CNC command");
+            printCNCHelper();
         }
     } catch (...) {
         ROS_WARN("ERROR happened while processing CNC command");
+        printCNCHelper();
     }
     return true;
 }
@@ -165,9 +185,11 @@ bool ConsoleInputManager::handleOACCommands() {
             oac_->masterSwitch(false);
         } else {
             ROS_WARN("Unknown OAC command");
+            printOACHelper();
         }
     } catch (...) {
         ROS_WARN("ERROR happened while processing OAC command");
+        printOACHelper();
     }
     return true;
 }
@@ -214,19 +236,81 @@ bool ConsoleInputManager::handleQuickCommands() {
             cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
         } else {
             ROS_WARN("Unknown Quick command");
+            printQuickHelper();
         }
     } catch (...) {
-        ROS_WARN("ERROR happened while processing OAC command");
+        ROS_WARN("ERROR happened while processing Quick command");
+        printQuickHelper();
     }
     return true;
 }
 
 bool ConsoleInputManager::handleRSCCommands() {
+    try {
+        std::string cmdType = currentCommand_.second.at(0);
+        if (cmdType == "info") {
+            rsc_->printImgInfo();
+        } else {
+            ROS_WARN("Unknown RSC command");
+            printRSCHelper();
+        }
+    } catch (...) {
+        ROS_WARN("ERROR happened while processing RSC command");
+        printRSCHelper();
+    }
     return true;
 }
 
 bool ConsoleInputManager::handleLIDARCommands() {
+    try {
+        std::string cmdType = currentCommand_.second.at(0);
+        if (cmdType == "info") {
+            lidar_->printLidarInfo();
+        } else {
+            ROS_WARN("Unknown LIDAR command");
+            printLIDARHelper();
+        }
+    } catch (...) {
+        ROS_WARN("ERROR happened while processing LIDAR command");
+        printLIDARHelper();
+    }
     return true;
+}
+
+void ConsoleInputManager::printCNCHelper() {
+    ROS_WARN("CNC Commands: [required] <optional>");
+    ROS_WARN("    arm:                                  Arm the vehicle motor");
+    ROS_WARN("    takeoff:                              Takeoff");
+    ROS_WARN("    chmod [mode name]:                    Change flight mode");
+    ROS_WARN("    rtl:                                  Return to land");
+    ROS_WARN("    velocity [Speed]:                     Set max velocity");
+    ROS_WARN("    yaw [Heading] <Distance> <Altitude>:  Change yaw / go to heading");
+    ROS_WARN("    info:                                 Print information");
+    ROS_WARN("    quit:                                 Quit the node");
+}
+
+void ConsoleInputManager::printRSCHelper() {
+    ROS_WARN("RSC Commands: [required] <optional>");
+    ROS_WARN("    info:                                 Print information");
+}
+
+void ConsoleInputManager::printOACHelper() {
+    ROS_WARN("OAC Commands: [required] <optional>");
+    ROS_WARN("    on:           Resume OAC");
+    ROS_WARN("    off:          Pause OAC");
+}
+
+void ConsoleInputManager::printLIDARHelper() {
+    ROS_WARN("LIDAR Commands: [required] <optional>");
+    ROS_WARN("    info:                                 Print information");
+}
+
+void ConsoleInputManager::printQuickHelper() {
+    ROS_WARN("Quick Commands: [required] <optional>");
+    ROS_WARN("    w [Distance] <Altitude>:         Go to North");
+    ROS_WARN("    s [Distance] <Altitude>:         Go to South");
+    ROS_WARN("    a [Distance] <Altitude>:         Go to West");
+    ROS_WARN("    d [Distance] <Altitude>:         Go to East");
 }
 
 void ConsoleInputManager::printFormatHelper() {

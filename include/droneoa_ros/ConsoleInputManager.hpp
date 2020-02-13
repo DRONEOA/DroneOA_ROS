@@ -61,6 +61,11 @@ class ConsoleInputManager {
     // Helper
     void printFormatHelper();
     void printModuleHelper();
+    void printCNCHelper();
+    void printRSCHelper();
+    void printOACHelper();
+    void printLIDARHelper();
+    void printQuickHelper();
 };
 
 #endif  // INCLUDE_DRONEOA_ROS_CONSOLEINPUTMANAGER_HPP_  // NOLINT

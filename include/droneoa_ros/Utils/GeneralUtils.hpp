@@ -68,19 +68,16 @@ class GeneralUtility {
     }
 
     /**
-     * @brief Convert any ascii char to lower case
-     * @param in input char
-     * @return char lower case char
-     */
-    static char asciitolower(char in);
-
-    /**
      * @brief Convert any string to lower case
      * @param input string, used for output
      */
     static void toLowerCaseStr(std::string* input);
+
+    /**
+     * @brief Convert any string to upper case
+     * @param input string, used for output
+     */
+    static void toUpperCaseStr(std::string* input);
 };
-
-
 
 #endif  // INCLUDE_DRONEOA_ROS_UTILS_GENERALUTILS_HPP_  // NOLINT

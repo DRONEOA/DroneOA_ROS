@@ -31,6 +31,7 @@
 
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/Utils/CNCUtils.hpp>
+#include <droneoa_ros/Utils/GeneralUtils.hpp>
 
 CNCInterface::CNCInterface() {
     watchHomePosThread();
@@ -54,6 +55,7 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
 }
 
 bool CNCInterface::checkFModeExist(std::string modeName) {
+    GeneralUtility::toUpperCaseStr(&modeName);
     if (FLT_MODE_STABILIZE == modeName) return true;
     if (FLT_MODE_ACRO == modeName) return true;
     if (FLT_MODE_ALT_HOLD == modeName) return true;
