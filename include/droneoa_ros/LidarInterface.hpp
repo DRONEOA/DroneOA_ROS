@@ -25,6 +25,7 @@
 
 #include <map>
 #include <vector>
+#include <string>
 #include <utility>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
@@ -33,6 +34,9 @@
 // #define DEBUG_LIDAR_POPUP
 
 typedef std::vector<float> degreeSector;
+
+static const char* LIDAR_SOURCE_YDLIDAR = "/scan";
+static const char* LIDAR_SOURCE_UE4 = "/sitl_lidar_test";
 
 class LidarInterface {
  public:
@@ -58,6 +62,12 @@ class LidarInterface {
     float getIncreament();  /*!< Unit: rad */
     std::pair<float, float> getClosestSectorData();  /*!< Unit: m */
 
+    /**
+     * @brief Change lidar data source [USE WITH CAUTION]
+     * @param lidarSource string of the new lidar data source
+     */
+    void changeLidarSource(std::string lidarSource);
+
     // Debug
     void printLidarInfo();
 
@@ -66,12 +76,16 @@ class LidarInterface {
     ros::Rate r_ = ros::Rate(10.0);
 
     // Data
+    std::string currentLidarSource_;
     sensor_msgs::LaserScan scannerData_;  // Raw data
     std::map<float, degreeSector> scannerDataMap_;  // Degree - Range map
 
     // Threads
     boost::thread* thread_watch_lidar_ = nullptr;
     void watchLidarThread();
+
+    // Subscriber
+    ros::Subscriber lidar_sub_;
 
     // Processor
     void generateDataMap();

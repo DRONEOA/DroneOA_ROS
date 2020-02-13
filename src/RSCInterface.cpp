@@ -40,7 +40,11 @@ RSCInterface::RSCInterface() {
 }
 
 RSCInterface::~RSCInterface() {
-    cv::destroyWindow(OPENCV_WINDOW);
+    try {
+        cv::destroyWindow(OPENCV_WINDOW);
+    } catch(...) {
+        ROS_INFO("cv::destroyWindow warn");
+    }
     if (thread_watch_depth_img_) {
         delete thread_watch_depth_img_;
     }
@@ -52,6 +56,7 @@ RSCInterface::~RSCInterface() {
         delete viewer;
     }
 #endif
+    ROS_INFO("Destroy RSCInterface");
 }
 
 void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {

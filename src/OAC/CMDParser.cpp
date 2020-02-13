@@ -22,9 +22,7 @@
 CMDParser::CMDParser(CNCInterface *cnc, CMDRunner *runner) : cnc_(cnc), cmdRunner_(runner) {}
 
 CMDParser::~CMDParser() {
-    if (cmdRunner_) {
-        delete cmdRunner_;
-    }
+    ROS_INFO("Destroy CMDParser");
 }
 
 /*

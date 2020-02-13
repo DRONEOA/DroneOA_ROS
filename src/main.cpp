@@ -28,6 +28,7 @@
 #include <droneoa_ros/LidarInterface.hpp>
 #include <droneoa_ros/OAController.hpp>
 #include <droneoa_ros/Utils/CNCUtils.hpp>
+#include <droneoa_ros/ConsoleInputManager.hpp>
 
 float getFloatCmdArg(std::stringstream& ss) {
     float result = 0.0;
@@ -73,166 +74,173 @@ int main(int argc, char **argv) {
     // Command Paser
     // Only For Testing
     std::string commandIn;
+    bool masterSW = true;
+    ConsoleInputManager consoleInputManager(&masterSW);
     while (std::getline(std::cin, commandIn)) {
-        std::stringstream ss;
-        ss << commandIn;
-        std::string cmdType;
-        ss >> cmdType;
-
-        if (cmdType == "quit") {
+        consoleInputManager.parseAndExecuteConsole(commandIn);
+        if (!masterSW) {
             oac.masterSwitch(false);
             break;
-        } else if (cmdType == "arm") {
-            cnc.setMode(FLT_MODE_GUIDED);
-            cnc.armVehicle();
-        } else if (cmdType == "takeoff") {
-            if (!cnc.isArmed()) {
-                std::cerr << "VEHICLE NOT ARMED !!!" << std::endl;
-                continue;
-            }
-            cnc.takeoff(getFloatCmdArg(ss));
-            sleep(10);
-        } else if (cmdType == "oac") {
-            float switchPosition = getFloatCmdArg(ss);
-            switchPosition == 0 ? oac.masterSwitch(false) : oac.masterSwitch(true);
-        } else if (cmdType == "w") {
-            float dist = getFloatCmdArg(ss);
-            float alt = getFloatCmdArg(ss);
-            if (alt == 0.0) {
-                alt = cnc.getTargetAltitude();
-            }
-            cnc.gotoRelative(dist, 0, alt);
-            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-        } else if (cmdType == "s") {
-            float dist = getFloatCmdArg(ss);
-            float alt = getFloatCmdArg(ss);
-            if (alt == 0.0) {
-                alt = cnc.getTargetAltitude();
-            }
-            cnc.gotoRelative(-dist, 0, alt);
-            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-        } else if (cmdType == "a") {
-            float dist = getFloatCmdArg(ss);
-            float alt = getFloatCmdArg(ss);
-            if (alt == 0.0) {
-                alt = cnc.getTargetAltitude();
-            }
-            cnc.gotoRelative(0, -dist, alt);
-            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-        } else if (cmdType == "d") {
-            float dist = getFloatCmdArg(ss);
-            float alt = getFloatCmdArg(ss);
-            if (alt == 0.0) {
-                alt = cnc.getTargetAltitude();
-            }
-            cnc.gotoRelative(0, dist, alt);
-            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-        } else if (cmdType == "rtl") {
-            cnc.setMode(FLT_MODE_RTL);
-        } else if (cmdType == "land") {
-            cnc.land(1);
-        } else if (cmdType == "guided") {
-            cnc.setMode(FLT_MODE_GUIDED);
-        } else if (cmdType == "info") {
-            GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
-            std::cout << ">>>>>>>>>> INFO START <<<<<<<<<<" << std::endl;
-            std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " "
-                                           << tmpGPSPoint.longitude_<< " " << std::endl;
-            std::cout << "[DISPLAY] altitude: " << cnc.getRelativeAltitude() << std::endl;
-            std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
-            std::cout << "[DISPLAY] voltage: " << cnc.getBatteryVoltage() << std::endl;
-            std::cout << "[DISPLAY] orientation: " << cnc.getIMUData().orientation.x << ", "
-                                                   << cnc.getIMUData().orientation.y << ", "
-                                                   << cnc.getIMUData().orientation.z << std::endl;
-            std::cout << "[HUD] heading: " << cnc.getHUDData().heading << std::endl;
-            std::cout << "[HUD] airspeed: " << cnc.getHUDData().airspeed << std::endl;
-            std::cout << "[HUD] groundspeed: " << cnc.getHUDData().groundspeed << std::endl;
-            std::cout << "[HUD] altitude: " << cnc.getHUDData().altitude << std::endl;
-            std::cout << "[HUD] climb: " << cnc.getHUDData().climb << std::endl;
-            std::cout << "[HUD] throttle: " << cnc.getHUDData().throttle << std::endl;
-            if (ENABLE_RSC) {
-                rsc.printImgInfo();
-            }
-            if (ENABLE_LIDAR) {
-                lidar.printLidarInfo();
-            }
-            std::cout << ">>>>>>>>>> INFO END  <<<<<<<<<<" << std::endl;
-        } else if (cmdType == "yaw") {
-            float yawAngle = getFloatCmdArg(ss);
-            float dist = getFloatCmdArg(ss);
-            if (dist == 0.0) {
-                dist = 1000;
-            }
-            float alt = getFloatCmdArg(ss);
-            if (alt == 0.0) {
-                alt = cnc.getTargetAltitude();
-            }
-            cnc.gotoHeading(yawAngle, dist, alt);
-            cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-        } else if (cmdType == "velocity") {
-            float vel = getFloatCmdArg(ss);
-            if (vel == 0.0) {
-                std::cerr << "Invalid Speed Setting" << std::endl;
-                continue;
-            }
-            cnc.setMaxSpeed(1, vel, 0);
-        } else if (cmdType == "runnerstate") {
-            ROS_INFO("Runner State: %s", RUNNER_STATE_STR[runner.getRunnerState()]);
-        } else if (cmdType == "runner") {
-            //! @todo(shibohan) add console support for string command queue input
-            CommandQueue testQueue;
-            testQueue.push_back({CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_LAND});
-            testQueue.push_back({CMD_QUEUE_TYPES::CMD_DELAY_MSEC, "5000"});
-            testQueue.push_back({CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_STABILIZE});
-            runner.setupRunner(testQueue);
-        } else if (commandIn.front() == 'r') {
-            commandIn = commandIn.substr(1);
-            if (commandIn.front() == 'c') {
-                rsc.setRangeSwitch(false);
-            } else {
-                try {
-                    size_t start = commandIn.find("range");
-                    if (start == std::string::npos) {
-                        throw 1;
-                    }
-                    commandIn = commandIn.substr(start+6);
-                    size_t mid = commandIn.find(' ');
-                    int max = std::stoi(commandIn.substr(0, mid), 0);
-                    int min = std::stoi(commandIn.substr(mid+1), 0);
-                    if (max < min) {
-                        throw 1;
-                    }
-                    rsc.setRange(min, max);
-                    rsc.setRangeSwitch(true);
-                } catch (...) {
-                    std::cout << "Invalid range command! Check help for reference." << std::endl;
-                }
-            }
-        } else {
-            std::cout << ">>>>>>>>>> HELP START <<<<<<<<<<" << std::endl;
-            std::cout << "+ COMMAND HELP LIST" << std::endl;
-            std::cout << "+ Argument [] is required, <> is optional" << std::endl;
-            std::cout << "- quit                       - quit" << std::endl;
-            std::cout << "- oac [0/1]                  - switch oac on/off" << std::endl;
-            std::cout << "- w [dist] <alt>             - move north" << std::endl;
-            std::cout << "- s [dist] <alt>             - move south" << std::endl;
-            std::cout << "- a [dist] <alt>             - move west" << std::endl;
-            std::cout << "- d [dist] <alt>             - move east" << std::endl;
-            std::cout << "- rtl                        - return to home" << std::endl;
-            std::cout << "- guided                     - setmode GUIDED" << std::endl;
-            std::cout << "- land                       - land" << std::endl;
-            std::cout << "- takeoff [alt]              - takeoff to altitude" << std::endl;
-            std::cout << "- arm                        - arm motor" << std::endl;
-            std::cout << "- info                       - print information" << std::endl;
-            std::cout << "- yaw [heading] <dist> <alt> - fly heading" << std::endl;
-            std::cout << "- velocity [speed]           - set max speed" << std::endl;
-            std::cout << "- rsc range [max(mm)] [min(mm)]      - set range" << std::endl;
-            std::cout << "- rc                         - cancel range" << std::endl;
-            std::cout << ">>>>>>>>>> HELP END  <<<<<<<<<<" << std::endl;
         }
+    //     std::stringstream ss;
+    //     ss << commandIn;
+    //     std::string cmdType;
+    //     ss >> cmdType;
+
+    //     if (cmdType == "quit") {
+    //         oac.masterSwitch(false);
+    //         break;
+    //     } else if (cmdType == "arm") {
+    //         cnc.setMode(FLT_MODE_GUIDED);
+    //         cnc.armVehicle();
+    //     } else if (cmdType == "takeoff") {
+    //         if (!cnc.isArmed()) {
+    //             std::cerr << "VEHICLE NOT ARMED !!!" << std::endl;
+    //             continue;
+    //         }
+    //         cnc.takeoff(getFloatCmdArg(ss));
+    //         sleep(10);
+    //     } else if (cmdType == "oac") {
+    //         float switchPosition = getFloatCmdArg(ss);
+    //         switchPosition == 0 ? oac.masterSwitch(false) : oac.masterSwitch(true);
+    //     } else if (cmdType == "w") {
+    //         float dist = getFloatCmdArg(ss);
+    //         float alt = getFloatCmdArg(ss);
+    //         if (alt == 0.0) {
+    //             alt = cnc.getTargetAltitude();
+    //         }
+    //         cnc.gotoRelative(dist, 0, alt);
+    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+    //     } else if (cmdType == "s") {
+    //         float dist = getFloatCmdArg(ss);
+    //         float alt = getFloatCmdArg(ss);
+    //         if (alt == 0.0) {
+    //             alt = cnc.getTargetAltitude();
+    //         }
+    //         cnc.gotoRelative(-dist, 0, alt);
+    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+    //     } else if (cmdType == "a") {
+    //         float dist = getFloatCmdArg(ss);
+    //         float alt = getFloatCmdArg(ss);
+    //         if (alt == 0.0) {
+    //             alt = cnc.getTargetAltitude();
+    //         }
+    //         cnc.gotoRelative(0, -dist, alt);
+    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+    //     } else if (cmdType == "d") {
+    //         float dist = getFloatCmdArg(ss);
+    //         float alt = getFloatCmdArg(ss);
+    //         if (alt == 0.0) {
+    //             alt = cnc.getTargetAltitude();
+    //         }
+    //         cnc.gotoRelative(0, dist, alt);
+    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+    //     } else if (cmdType == "rtl") {
+    //         cnc.setMode(FLT_MODE_RTL);
+    //     } else if (cmdType == "land") {
+    //         cnc.land(1);
+    //     } else if (cmdType == "guided") {
+    //         cnc.setMode(FLT_MODE_GUIDED);
+    //     } else if (cmdType == "info") {
+    //         GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
+    //         std::cout << ">>>>>>>>>> INFO START <<<<<<<<<<" << std::endl;
+    //         std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " "
+    //                                        << tmpGPSPoint.longitude_<< " " << std::endl;
+    //         std::cout << "[DISPLAY] altitude: " << cnc.getRelativeAltitude() << std::endl;
+    //         std::cout << "[DISPLAY] mode: " << cnc.getMode() << std::endl;
+    //         std::cout << "[DISPLAY] voltage: " << cnc.getBatteryVoltage() << std::endl;
+    //         std::cout << "[DISPLAY] orientation: " << cnc.getIMUData().orientation.x << ", "
+    //                                                << cnc.getIMUData().orientation.y << ", "
+    //                                                << cnc.getIMUData().orientation.z << std::endl;
+    //         std::cout << "[HUD] heading: " << cnc.getHUDData().heading << std::endl;
+    //         std::cout << "[HUD] airspeed: " << cnc.getHUDData().airspeed << std::endl;
+    //         std::cout << "[HUD] groundspeed: " << cnc.getHUDData().groundspeed << std::endl;
+    //         std::cout << "[HUD] altitude: " << cnc.getHUDData().altitude << std::endl;
+    //         std::cout << "[HUD] climb: " << cnc.getHUDData().climb << std::endl;
+    //         std::cout << "[HUD] throttle: " << cnc.getHUDData().throttle << std::endl;
+    //         if (ENABLE_RSC) {
+    //             rsc.printImgInfo();
+    //         }
+    //         if (ENABLE_LIDAR) {
+    //             lidar.printLidarInfo();
+    //         }
+    //         std::cout << ">>>>>>>>>> INFO END  <<<<<<<<<<" << std::endl;
+    //     } else if (cmdType == "yaw") {
+    //         float yawAngle = getFloatCmdArg(ss);
+    //         float dist = getFloatCmdArg(ss);
+    //         if (dist == 0.0) {
+    //             dist = 1000;
+    //         }
+    //         float alt = getFloatCmdArg(ss);
+    //         if (alt == 0.0) {
+    //             alt = cnc.getTargetAltitude();
+    //         }
+    //         cnc.gotoHeading(yawAngle, dist, alt);
+    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
+    //     } else if (cmdType == "velocity") {
+    //         float vel = getFloatCmdArg(ss);
+    //         if (vel == 0.0) {
+    //             std::cerr << "Invalid Speed Setting" << std::endl;
+    //             continue;
+    //         }
+    //         cnc.setMaxSpeed(1, vel, 0);
+    //     } else if (cmdType == "runnerstate") {
+    //         ROS_INFO("Runner State: %s", RUNNER_STATE_STR[runner.getRunnerState()]);
+    //     } else if (cmdType == "runner") {
+    //         //! @todo(shibohan) add console support for string command queue input
+    //         CommandQueue testQueue;
+    //         testQueue.push_back({CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_LAND});
+    //         testQueue.push_back({CMD_QUEUE_TYPES::CMD_DELAY_MSEC, "5000"});
+    //         testQueue.push_back({CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_STABILIZE});
+    //         runner.setupRunner(testQueue);
+    //     } else if (commandIn.front() == 'r') {
+    //         commandIn = commandIn.substr(1);
+    //         if (commandIn.front() == 'c') {
+    //             rsc.setRangeSwitch(false);
+    //         } else {
+    //             try {
+    //                 size_t start = commandIn.find("range");
+    //                 if (start == std::string::npos) {
+    //                     throw 1;
+    //                 }
+    //                 commandIn = commandIn.substr(start+6);
+    //                 size_t mid = commandIn.find(' ');
+    //                 int max = std::stoi(commandIn.substr(0, mid), 0);
+    //                 int min = std::stoi(commandIn.substr(mid+1), 0);
+    //                 if (max < min) {
+    //                     throw 1;
+    //                 }
+    //                 rsc.setRange(min, max);
+    //                 rsc.setRangeSwitch(true);
+    //             } catch (...) {
+    //                 std::cout << "Invalid range command! Check help for reference." << std::endl;
+    //             }
+    //         }
+    //     } else {
+    //         std::cout << ">>>>>>>>>> HELP START <<<<<<<<<<" << std::endl;
+    //         std::cout << "+ COMMAND HELP LIST" << std::endl;
+    //         std::cout << "+ Argument [] is required, <> is optional" << std::endl;
+    //         std::cout << "- quit                       - quit" << std::endl;
+    //         std::cout << "- oac [0/1]                  - switch oac on/off" << std::endl;
+    //         std::cout << "- w [dist] <alt>             - move north" << std::endl;
+    //         std::cout << "- s [dist] <alt>             - move south" << std::endl;
+    //         std::cout << "- a [dist] <alt>             - move west" << std::endl;
+    //         std::cout << "- d [dist] <alt>             - move east" << std::endl;
+    //         std::cout << "- rtl                        - return to home" << std::endl;
+    //         std::cout << "- guided                     - setmode GUIDED" << std::endl;
+    //         std::cout << "- land                       - land" << std::endl;
+    //         std::cout << "- takeoff [alt]              - takeoff to altitude" << std::endl;
+    //         std::cout << "- arm                        - arm motor" << std::endl;
+    //         std::cout << "- info                       - print information" << std::endl;
+    //         std::cout << "- yaw [heading] <dist> <alt> - fly heading" << std::endl;
+    //         std::cout << "- velocity [speed]           - set max speed" << std::endl;
+    //         std::cout << "- rsc range [max(mm)] [min(mm)]      - set range" << std::endl;
+    //         std::cout << "- rc                         - cancel range" << std::endl;
+    //         std::cout << ">>>>>>>>>> HELP END  <<<<<<<<<<" << std::endl;
+    //     }
     }
 
-    while (n.ok()) {
+    while (n.ok() && masterSW) {
       ros::spinOnce();
       r.sleep();
     }

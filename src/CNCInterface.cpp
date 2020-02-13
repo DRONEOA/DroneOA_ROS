@@ -40,6 +40,7 @@ CNCInterface::~CNCInterface() {
     delete thread_watch_Altitude_;
     delete thread_watch_GPSFix_;
     delete thread_watch_state_;
+    ROS_INFO("Destroy CNCInterface");
 }
 
 void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
