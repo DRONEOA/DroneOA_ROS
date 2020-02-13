@@ -144,6 +144,13 @@ class CNCInterface {
     geometry_msgs::Vector3 getIMURawAttitude();
     mavros_msgs::VFR_HUD getHUDData();
 
+    /**
+     * @brief Check if a flight mode name is valid
+     * @param modeName 
+     * @return true if name is valid
+     */
+    static bool checkFModeExist(std::string modeName);
+
     // User Simple Function
     /**
      * @brief Goto Global Waypoint, 3D GPS Point

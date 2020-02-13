@@ -18,24 +18,20 @@
  */
 
 #include <sstream>
-#include <algorithm>
-#include <cctype>
 #include <string>
 #include <droneoa_ros/ConsoleInputManager.hpp>
-#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/Utils/GeneralUtils.hpp>
+#include <droneoa_ros/Utils/CNCUtils.hpp>
 
-/* Helper Function */
-char asciitolower(char in) {
-    if (in <= 'Z' && in >= 'A')
-        return in - ('Z' - 'z');
-    return in;
+ConsoleInputManager::ConsoleInputManager(bool* masterSwitch) : masterSwitch_(masterSwitch),
+        cnc_(nullptr), rsc_(nullptr), oac_(nullptr), lidar_(nullptr) {}
+
+bool ConsoleInputManager::init(CNCInterface* cnc, RSCInterface *rsc, OAController *oac, LidarInterface *lidar) {
+    cnc_ = cnc;
+    rsc_ = rsc;
+    oac_ = oac;
+    lidar_ = lidar;
 }
-
-void toLowerCaseStr(std::string* input) {
-    std::transform(input->begin(), input->end(), input->begin(), asciitolower);
-}
-
-ConsoleInputManager::ConsoleInputManager(bool* masterSwitch) : masterSwitch_(masterSwitch) {}
 
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
     //! @todo(shibohan) Detect composed commands, use runner in this case
@@ -54,11 +50,11 @@ bool ConsoleInputManager::splitModuleCommand(std::string cmd) {
     std::istringstream tokenStream(cmd);
 
     while (std::getline(tokenStream, token, ConsoleDelimiter)) {
+        GeneralUtility::toLowerCaseStr(&token);
         if (currentCommand_.first == "INVALID") {
             currentCommand_.first = token;
             continue;
         }
-        toLowerCaseStr(&token);
         currentCommand_.second.push_back(token);
     }
 
@@ -69,10 +65,24 @@ bool ConsoleInputManager::splitModuleCommand(std::string cmd) {
 }
 
 bool ConsoleInputManager::commandDispatch() {
-    if (currentCommand_.first == "CNC") {
+    if (currentCommand_.first == "cnc") {
         return handleCNCCommands();
-    } else if (currentCommand_.first == "OAC") {
+    } else if (currentCommand_.first == "oac") {
         return handleOACCommands();
+    } else if (currentCommand_.first == "rsc") {
+        if (!ENABLE_RSC) {
+            ROS_WARN("This module [RSC] is not enabled !!!");
+            return false;
+        }
+        return handleRSCCommands();
+    } else if (currentCommand_.first == "lidar") {
+        if (!ENABLE_LIDAR) {
+            ROS_WARN("This module [LIDAR] is not enabled !!!");
+            return false;
+        }
+        return handleLIDARCommands();
+    } else if (currentCommand_.first == "!") {
+        return handleQuickCommands();
     } else {
         ROS_WARN("Unknown Module Name: %s", currentCommand_.first.c_str());
         printModuleHelper();
@@ -84,12 +94,59 @@ bool ConsoleInputManager::handleCNCCommands() {
     try {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "arm") {
-            ROS_WARN("ARM::");
+            ROS_WARN("::ARM::");
+            cnc_->setMode(FLT_MODE_GUIDED);
+            cnc_->armVehicle();
         } else if (cmdType == "takeoff") {
-            ROS_WARN("TAKEOFF::");
+            ROS_WARN("::TAKEOFF::");
+            if (!cnc_->isArmed()) {
+                ROS_WARN("VEHICLE NOT ARMED !!!");
+                return false;
+            }
+            float targetAltitude = std::stof(currentCommand_.second.at(1));
+            cnc_->takeoff(targetAltitude);
+        } else if (cmdType == "chmod") {
+            std::string currentMode = cnc_->getMode();
+            std::string newMode = currentCommand_.second.at(1);
+            if (!cnc_->checkFModeExist(newMode)) {
+                ROS_WARN("Flight Mode Does Not Exist !!!");
+                return false;
+            }
+            ROS_WARN("::ChangeMode %s -> %s::", currentMode.c_str(), newMode.c_str());
+            cnc_->setMode(newMode);
+        } else if (cmdType == "land") {
+            ROS_WARN("::LAND::");
+            cnc_->land(1);
+        } else if (cmdType == "rtl") {
+            ROS_WARN("::RTL::");
+            cnc_->setMode(FLT_MODE_RTL);
+        } else if (cmdType == "velocity") {
+            float vel = std::stof(currentCommand_.second.at(1));
+            ROS_WARN("::SET MAX VELOCITY -> %f::", vel);
+            if (vel == 0.0) {
+                ROS_WARN("Invalid Speed Setting");
+                return false;
+            }
+            cnc_->setMaxSpeed(1, vel, 0);
+        } else if (cmdType == "yaw") {
+            float yawAngle = std::stof(currentCommand_.second.at(1));
+            ROS_WARN("::SET YAW -> %f::", yawAngle);
+            cnc_->setYaw(yawAngle);
+            if (currentCommand_.second.size() >= 3) {
+                float dist = std::stof(currentCommand_.second.at(2));
+                float alt = cnc_->getTargetAltitude();
+                if (currentCommand_.second.size() >= 4) {
+                    alt = std::stof(currentCommand_.second.at(3));
+                }
+                ROS_WARN("::GOTO YAW -> yaw:%f dist:%f alt:%f::", yawAngle, dist, alt);
+                cnc_->gotoHeading(yawAngle, dist, alt);
+            }
         } else if (cmdType == "quit") {
-            ROS_WARN("QUIT::");
+            ROS_WARN("::QUIT::");
+            oac_->masterSwitch(false);
             *masterSwitch_ = false;
+        } else {
+            ROS_WARN("Unknown CNC command");
         }
     } catch (...) {
         ROS_WARN("ERROR happened while processing CNC command");
@@ -98,6 +155,77 @@ bool ConsoleInputManager::handleCNCCommands() {
 }
 
 bool ConsoleInputManager::handleOACCommands() {
+    try {
+        std::string cmdType = currentCommand_.second.at(0);
+        if (cmdType == "on") {
+            ROS_WARN("::OAC->ON::");
+            oac_->masterSwitch(true);
+        } else if (cmdType == "off") {
+            ROS_WARN("::OAC->OFF::");
+            oac_->masterSwitch(false);
+        } else {
+            ROS_WARN("Unknown OAC command");
+        }
+    } catch (...) {
+        ROS_WARN("ERROR happened while processing OAC command");
+    }
+    return true;
+}
+
+//! @note Keep this handler small !!!
+bool ConsoleInputManager::handleQuickCommands() {
+    try {
+        std::string cmdType = currentCommand_.second.at(0);
+        if (cmdType == "w") {
+            ROS_WARN("::GO NORTH::");
+            float dist = std::stof(currentCommand_.second.at(1));
+            float alt = cnc_->getTargetAltitude();
+            if (currentCommand_.second.size() >= 3) {
+                alt = std::stof(currentCommand_.second.at(2));
+            }
+            cnc_->gotoRelative(dist, 0, alt);
+            cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
+        } else if (cmdType == "s") {
+            ROS_WARN("::GO SOUTH::");
+            float dist = std::stof(currentCommand_.second.at(1));
+            float alt = cnc_->getTargetAltitude();
+            if (currentCommand_.second.size() >= 3) {
+                alt = std::stof(currentCommand_.second.at(2));
+            }
+            cnc_->gotoRelative(-dist, 0, alt);
+            cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
+        } else if (cmdType == "a") {
+            ROS_WARN("::GO WEST::");
+            float dist = std::stof(currentCommand_.second.at(1));
+            float alt = cnc_->getTargetAltitude();
+            if (currentCommand_.second.size() >= 3) {
+                alt = std::stof(currentCommand_.second.at(2));
+            }
+            cnc_->gotoRelative(0, -dist, alt);
+            cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
+        } else if (cmdType == "d") {
+            ROS_WARN("::GO EAST::");
+            float dist = std::stof(currentCommand_.second.at(1));
+            float alt = cnc_->getTargetAltitude();
+            if (currentCommand_.second.size() >= 3) {
+                alt = std::stof(currentCommand_.second.at(2));
+            }
+            cnc_->gotoRelative(0, dist, alt);
+            cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
+        } else {
+            ROS_WARN("Unknown Quick command");
+        }
+    } catch (...) {
+        ROS_WARN("ERROR happened while processing OAC command");
+    }
+    return true;
+}
+
+bool ConsoleInputManager::handleRSCCommands() {
+    return true;
+}
+
+bool ConsoleInputManager::handleLIDARCommands() {
     return true;
 }
 
@@ -110,4 +238,7 @@ void ConsoleInputManager::printModuleHelper() {
     ROS_WARN("Module Names:");
     ROS_WARN("    CNC:    Command And Control Module");
     ROS_WARN("    OAC:    Obstacle Avoidance Algorithm Controller");
+    ROS_WARN("    RSC:    Realsense Camera HS Interface");
+    ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
+    ROS_WARN("    !:      Quick Commands");
 }

@@ -66,6 +66,19 @@ class GeneralUtility {
     static T scale(T target, T rmin, T rmax, T tmin, T tmax) {
         return ((target-rmin)*(tmax-tmin))/(rmax-rmin)+tmin;
     }
+
+    /**
+     * @brief Convert any ascii char to lower case
+     * @param in input char
+     * @return char lower case char
+     */
+    static char asciitolower(char in);
+
+    /**
+     * @brief Convert any string to lower case
+     * @param input string, used for output
+     */
+    static void toLowerCaseStr(std::string* input);
 };
 
 

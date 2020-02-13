@@ -24,15 +24,28 @@
 #include <string>
 #include <utility>
 
+#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/RSCInterface.hpp>
+#include <droneoa_ros/OAController.hpp>
+#include <droneoa_ros/LidarInterface.hpp>
+
 static const char ConsoleDelimiter = ' ';
 
 class ConsoleInputManager {
  public:
     explicit ConsoleInputManager(bool* masterSwitch);
+    bool init(CNCInterface* cnc, RSCInterface *rsc, OAController *oac, LidarInterface *lidar);
     bool parseAndExecuteConsole(std::string cmd);
+
  private:
     std::pair<std::string, std::vector<std::string>> currentCommand_;
     bool* masterSwitch_;
+
+    // Pointer to controller
+    CNCInterface *cnc_;
+    RSCInterface *rsc_;
+    OAController *oac_;
+    LidarInterface *lidar_;
 
     // Private Handlers
     bool splitModuleCommand(std::string cmd);
@@ -41,6 +54,9 @@ class ConsoleInputManager {
     // Module Handlers
     bool handleCNCCommands();
     bool handleOACCommands();
+    bool handleRSCCommands();
+    bool handleLIDARCommands();
+    bool handleQuickCommands();
 
     // Helper
     void printFormatHelper();

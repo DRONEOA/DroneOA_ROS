@@ -76,72 +76,14 @@ int main(int argc, char **argv) {
     std::string commandIn;
     bool masterSW = true;
     ConsoleInputManager consoleInputManager(&masterSW);
+    consoleInputManager.init(&cnc, &rsc, &oac, &lidar);
     while (std::getline(std::cin, commandIn)) {
         consoleInputManager.parseAndExecuteConsole(commandIn);
         if (!masterSW) {
             oac.masterSwitch(false);
             break;
         }
-    //     std::stringstream ss;
-    //     ss << commandIn;
-    //     std::string cmdType;
-    //     ss >> cmdType;
-
-    //     if (cmdType == "quit") {
-    //         oac.masterSwitch(false);
-    //         break;
-    //     } else if (cmdType == "arm") {
-    //         cnc.setMode(FLT_MODE_GUIDED);
-    //         cnc.armVehicle();
-    //     } else if (cmdType == "takeoff") {
-    //         if (!cnc.isArmed()) {
-    //             std::cerr << "VEHICLE NOT ARMED !!!" << std::endl;
-    //             continue;
-    //         }
-    //         cnc.takeoff(getFloatCmdArg(ss));
-    //         sleep(10);
-    //     } else if (cmdType == "oac") {
-    //         float switchPosition = getFloatCmdArg(ss);
-    //         switchPosition == 0 ? oac.masterSwitch(false) : oac.masterSwitch(true);
-    //     } else if (cmdType == "w") {
-    //         float dist = getFloatCmdArg(ss);
-    //         float alt = getFloatCmdArg(ss);
-    //         if (alt == 0.0) {
-    //             alt = cnc.getTargetAltitude();
-    //         }
-    //         cnc.gotoRelative(dist, 0, alt);
-    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-    //     } else if (cmdType == "s") {
-    //         float dist = getFloatCmdArg(ss);
-    //         float alt = getFloatCmdArg(ss);
-    //         if (alt == 0.0) {
-    //             alt = cnc.getTargetAltitude();
-    //         }
-    //         cnc.gotoRelative(-dist, 0, alt);
-    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-    //     } else if (cmdType == "a") {
-    //         float dist = getFloatCmdArg(ss);
-    //         float alt = getFloatCmdArg(ss);
-    //         if (alt == 0.0) {
-    //             alt = cnc.getTargetAltitude();
-    //         }
-    //         cnc.gotoRelative(0, -dist, alt);
-    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-    //     } else if (cmdType == "d") {
-    //         float dist = getFloatCmdArg(ss);
-    //         float alt = getFloatCmdArg(ss);
-    //         if (alt == 0.0) {
-    //             alt = cnc.getTargetAltitude();
-    //         }
-    //         cnc.gotoRelative(0, dist, alt);
-    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-    //     } else if (cmdType == "rtl") {
-    //         cnc.setMode(FLT_MODE_RTL);
-    //     } else if (cmdType == "land") {
-    //         cnc.land(1);
-    //     } else if (cmdType == "guided") {
-    //         cnc.setMode(FLT_MODE_GUIDED);
-    //     } else if (cmdType == "info") {
+// } else if (cmdType == "info") {
     //         GPSPoint tmpGPSPoint = cnc.getCurrentGPSPoint();
     //         std::cout << ">>>>>>>>>> INFO START <<<<<<<<<<" << std::endl;
     //         std::cout << "[DISPLAY] gps: " << std::fixed << std::setprecision(6) << tmpGPSPoint.latitude_<< " "
@@ -165,25 +107,6 @@ int main(int argc, char **argv) {
     //             lidar.printLidarInfo();
     //         }
     //         std::cout << ">>>>>>>>>> INFO END  <<<<<<<<<<" << std::endl;
-    //     } else if (cmdType == "yaw") {
-    //         float yawAngle = getFloatCmdArg(ss);
-    //         float dist = getFloatCmdArg(ss);
-    //         if (dist == 0.0) {
-    //             dist = 1000;
-    //         }
-    //         float alt = getFloatCmdArg(ss);
-    //         if (alt == 0.0) {
-    //             alt = cnc.getTargetAltitude();
-    //         }
-    //         cnc.gotoHeading(yawAngle, dist, alt);
-    //         cnc.setYaw(CNCUtility::getBearing(cnc.getCurrentGPSPoint(), cnc.getTargetWaypoint()));
-    //     } else if (cmdType == "velocity") {
-    //         float vel = getFloatCmdArg(ss);
-    //         if (vel == 0.0) {
-    //             std::cerr << "Invalid Speed Setting" << std::endl;
-    //             continue;
-    //         }
-    //         cnc.setMaxSpeed(1, vel, 0);
     //     } else if (cmdType == "runnerstate") {
     //         ROS_INFO("Runner State: %s", RUNNER_STATE_STR[runner.getRunnerState()]);
     //     } else if (cmdType == "runner") {

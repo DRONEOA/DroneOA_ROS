@@ -53,6 +53,25 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     ROS_INFO("[CNC] init");
 }
 
+bool CNCInterface::checkFModeExist(std::string modeName) {
+    if (FLT_MODE_STABILIZE == modeName) return true;
+    if (FLT_MODE_ACRO == modeName) return true;
+    if (FLT_MODE_ALT_HOLD == modeName) return true;
+    if (FLT_MODE_AUTO == modeName) return true;
+    if (FLT_MODE_GUIDED == modeName) return true;
+    if (FLT_MODE_LOITER == modeName) return true;
+    if (FLT_MODE_RTL == modeName) return true;
+    if (FLT_MODE_CIRCLE == modeName) return true;
+    if (FLT_MODE_LAND == modeName) return true;
+    if (FLT_MODE_OF_LOITER == modeName) return true;
+    if (FLT_MODE_AUTOTUNE == modeName) return true;
+    if (FLT_MODE_POSHOLD == modeName) return true;
+    if (FLT_MODE_BRAKE == modeName) return true;
+    if (FLT_MODE_AVOID_ADSB == modeName) return true;
+    if (FLT_MODE_GUIDED_NOGPS == modeName) return true;
+    return false;
+}
+
 /*****************************************************
  * Mode Control
  */
