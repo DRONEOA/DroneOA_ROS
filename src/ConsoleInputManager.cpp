@@ -250,6 +250,27 @@ bool ConsoleInputManager::handleRSCCommands() {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "info") {
             rsc_->printImgInfo();
+        } else if (cmdType == "chsrc") {
+            if (currentCommand_.second.size() >= 2) {
+                std::string srcName = currentCommand_.second.at(1);
+                if (srcName == "rsc") {
+                    ROS_WARN("::RSC SRC -> RSC::");
+                    rsc_->changeDepthSource(DEPTH_SOURCE_RSC);
+                    rsc_->changePC2Source(PC_SOURCE_RSC);
+                } else if (srcName == "ue4") {
+                    ROS_WARN("::RSC SRC -> UE4::");
+                    rsc_->changeDepthSource(DEPTH_SOURCE_UE4);
+                    rsc_->changePC2Source(PC_SOURCE_UE4);
+                } else {
+                    ROS_WARN("Unknown New Source Name");
+                    ROS_WARN("    rsc:      use real realsense camera data");
+                    ROS_WARN("    ue4:      use simulated data from UE4 SIM");
+                }
+            } else {
+                ROS_WARN("Unknown New Source Name");
+                ROS_WARN("    rsc:      use real realsense camera data");
+                ROS_WARN("    ue4:      use simulated data from UE4 SIM");
+            }
         } else {
             ROS_WARN("Unknown RSC command");
             printRSCHelper();
@@ -311,6 +332,7 @@ void ConsoleInputManager::printCNCHelper() {
 void ConsoleInputManager::printRSCHelper() {
     ROS_WARN("RSC Commands: [required] <optional>");
     ROS_WARN("    info:                                 Print information");
+    ROS_WARN("    chsrc:                                Change data source");
 }
 
 void ConsoleInputManager::printOACHelper() {
