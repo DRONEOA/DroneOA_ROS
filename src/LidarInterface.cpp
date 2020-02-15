@@ -76,6 +76,9 @@ void LidarInterface::watchLidarThread() {
 void LidarInterface::changeLidarSource(std::string lidarSource) {
     currentLidarSource_ = lidarSource;
     lidar_sub_.shutdown();
+    lidar_sub_ =
+        n_.subscribe<sensor_msgs::LaserScan>(lidarSource, 1000,
+            boost::bind(&LidarInterface::lidar_callback, this, _1));
 }
 
 /* Accesser */
@@ -123,7 +126,7 @@ std::pair<float, float> LidarInterface::getClosestSectorData() {
 void LidarInterface::generateDataMap() {
     scannerDataMap_.clear();
     // @todo Is this safe ?
-    unsigned int count = scannerData_.scan_time / scannerData_.time_increment;
+    unsigned int count = (scannerData_.angle_max - scannerData_.angle_min) / scannerData_.angle_increment;
     for (unsigned int i = 0; i < count; i++) {
         if (i >= scannerData_.ranges.size()) {
             ROS_WARN("+LidarInterface::generateDataMap: Missing Data, expect: %u actual: %zu",
@@ -166,7 +169,7 @@ void LidarInterface::printLidarInfo() {
 }
 
 void drawLidarPoint(const cv::Mat &img, const cv::Point &center, float angle, float range, bool isLine = false) {
-    range *= 10;  // zoom up to draw better radar map
+    range *= LIDAR_POPUP_SCALE;  // zoom up to draw better radar map
     double angleradians = angle * M_PI / 180.0f;
     double x = range * std::sin(angleradians);
     double y = range * std::cos(angleradians);

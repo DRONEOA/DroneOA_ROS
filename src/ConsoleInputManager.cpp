@@ -266,6 +266,25 @@ bool ConsoleInputManager::handleLIDARCommands() {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "info") {
             lidar_->printLidarInfo();
+        } else if (cmdType == "chsrc") {
+            if (currentCommand_.second.size() >= 2) {
+                std::string srcName = currentCommand_.second.at(1);
+                if (srcName == "ydlidar") {
+                    ROS_WARN("::LIDAR SRC -> YDLIDAR::");
+                    lidar_->changeLidarSource(LIDAR_SOURCE_YDLIDAR);
+                } else if (srcName == "ue4") {
+                    ROS_WARN("::LIDAR SRC -> UE4::");
+                    lidar_->changeLidarSource(LIDAR_SOURCE_UE4);
+                } else {
+                    ROS_WARN("Unknown New Source Name");
+                    ROS_WARN("    ydlidar:  use real YDLidar data");
+                    ROS_WARN("    ue4:      use simulated data from UE4 SIM");
+                }
+            } else {
+                ROS_WARN("Missing New Source Name");
+                ROS_WARN("    ydlidar:  use real YDLidar data");
+                ROS_WARN("    ue4:      use simulated data from UE4 SIM");
+            }
         } else {
             ROS_WARN("Unknown LIDAR command");
             printLIDARHelper();
@@ -303,6 +322,7 @@ void ConsoleInputManager::printOACHelper() {
 void ConsoleInputManager::printLIDARHelper() {
     ROS_WARN("LIDAR Commands: [required] <optional>");
     ROS_WARN("    info:                                 Print information");
+    ROS_WARN("    chsrc:                                Change data source");
 }
 
 void ConsoleInputManager::printQuickHelper() {
