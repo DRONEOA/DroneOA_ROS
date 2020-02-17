@@ -40,6 +40,7 @@ OAController::~OAController() {
         delete thread_oac_master_;
         ROS_WARN("[OAC] MASTER THREAD ENDED");
     }
+    ROS_INFO("Destroy OAController");
 }
 
 // Init OA Controller (for restart)

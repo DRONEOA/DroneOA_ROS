@@ -153,6 +153,10 @@ add_library(droneoa_ros_liblidar
   src/LidarInterface.cpp
 )
 
+add_library(droneoa_ros_libinput
+  src/ConsoleInputManager.cpp
+)
+
 add_library(droneoa_ros_liboa
   src/OAC/BaseAlg.cpp
   src/OAC/CAAlgLidar.cpp
@@ -192,6 +196,7 @@ target_link_libraries(droneoa_ros
   droneoa_ros_librsc
   droneoa_ros_liboa
   droneoa_ros_liblidar
+  droneoa_ros_libinput
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${PCL_LIBRARIES}

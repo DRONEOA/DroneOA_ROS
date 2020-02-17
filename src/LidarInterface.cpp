@@ -36,11 +36,13 @@ LidarInterface::~LidarInterface() {
     cv::destroyWindow(OPENCV_WINDOW_LIDAR);
 #endif
     delete thread_watch_lidar_;
+    ROS_INFO("Destroy LidarInterface");
 }
 
 void LidarInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n_ = nh;
     r_ = r;
+    currentLidarSource_ = LIDAR_SOURCE_YDLIDAR;
     thread_watch_lidar_ = new boost::thread(boost::bind(&LidarInterface::watchLidarThread, this));
 #ifdef DEBUG_LIDAR_POPUP
     cv::startWindowThread();  // DEBUG
@@ -61,20 +63,22 @@ void LidarInterface::lidar_callback(const sensor_msgs::LaserScanConstPtr& msg) {
 
 /* Thread */
 void LidarInterface::watchLidarThread() {
-#if defined(UE4_SITL)
-    auto lidar_sub =
-        n_.subscribe<sensor_msgs::LaserScan>("/sitl_lidar_test", 1000,
+    lidar_sub_ =
+        n_.subscribe<sensor_msgs::LaserScan>(currentLidarSource_, 1000,
             boost::bind(&LidarInterface::lidar_callback, this, _1));
-#else
-    auto lidar_sub =
-        n_.subscribe<sensor_msgs::LaserScan>("/scan", 1000,
-            boost::bind(&LidarInterface::lidar_callback, this, _1));
-#endif
 
     while (ros::ok()) {
         ros::spinOnce();
         r_.sleep();
     }
+}
+
+void LidarInterface::changeLidarSource(std::string lidarSource) {
+    currentLidarSource_ = lidarSource;
+    lidar_sub_.shutdown();
+    lidar_sub_ =
+        n_.subscribe<sensor_msgs::LaserScan>(lidarSource, 1000,
+            boost::bind(&LidarInterface::lidar_callback, this, _1));
 }
 
 /* Accesser */
@@ -122,7 +126,7 @@ std::pair<float, float> LidarInterface::getClosestSectorData() {
 void LidarInterface::generateDataMap() {
     scannerDataMap_.clear();
     // @todo Is this safe ?
-    unsigned int count = scannerData_.scan_time / scannerData_.time_increment;
+    unsigned int count = (scannerData_.angle_max - scannerData_.angle_min) / scannerData_.angle_increment;
     for (unsigned int i = 0; i < count; i++) {
         if (i >= scannerData_.ranges.size()) {
             ROS_WARN("+LidarInterface::generateDataMap: Missing Data, expect: %u actual: %zu",
@@ -165,7 +169,7 @@ void LidarInterface::printLidarInfo() {
 }
 
 void drawLidarPoint(const cv::Mat &img, const cv::Point &center, float angle, float range, bool isLine = false) {
-    range *= 10;  // zoom up to draw better radar map
+    range *= LIDAR_POPUP_SCALE;  // zoom up to draw better radar map
     double angleradians = angle * M_PI / 180.0f;
     double x = range * std::sin(angleradians);
     double y = range * std::cos(angleradians);
