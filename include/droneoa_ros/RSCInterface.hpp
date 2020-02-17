@@ -27,6 +27,7 @@
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/common/transforms.h>
+#include <string>
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <droneoa_ros/PDN.hpp>
@@ -39,6 +40,11 @@
 // #define PCL_DEBUG_VIEWER
 // #define IMG_DEBUG_POPUP
 
+static const char* DEPTH_SOURCE_RSC = "/d435/depth/image_rect_raw";
+static const char* DEPTH_SOURCE_UE4 = "/unreal_ros/image_depth";
+static const char* PC_SOURCE_RSC = "/d435/depth/color/points";
+static const char* PC_SOURCE_UE4 = "/depth_registered/points";
+
 class RSCInterface {
  public:
     RSCInterface();
@@ -48,6 +54,18 @@ class RSCInterface {
     cv::Mat depthImgForDesiredDistanceRange(float min, float max, cv::Mat input);
     void setRangeSwitch(bool status);
     void setRange(float min, float max);
+
+    /**
+     * @brief Change depth data source [USE WITH CAUTION]
+     * @param depthSource string of the new depth data source
+     */
+    void changeDepthSource(std::string depthSource);
+
+        /**
+     * @brief Change pointcloud2 data source [USE WITH CAUTION]
+     * @param pc2Source string of the new pointcloud2 data source
+     */
+    void changePC2Source(std::string pc2Source);
 
     //! @todo(Xiao Zhou): The minimum distance, left for possibility calculation in the future
     std::vector<float> pointCloudZCoordsInRange(
@@ -70,6 +88,8 @@ class RSCInterface {
     bool rangeSwitch = false;
 
     // Data
+    std::string currentDepthSource_;
+    std::string currentPCSource_;
     sensor_msgs::Image depthImage_;
     sensor_msgs::PointCloud2 pointCloud_;
     pcl::PointCloud<pcl::PointXYZRGB> pcl_pointCloud_;
@@ -84,6 +104,10 @@ class RSCInterface {
     void watchPointCloudThread();
     boost::shared_mutex depth_img_mutex;
     boost::shared_mutex pointcloud_mutex;
+
+    // Subscriber
+    ros::Subscriber depth_sub_;
+    ros::Subscriber pc2_sub_;
 
     // Debug
     void drawDebugOverlay();

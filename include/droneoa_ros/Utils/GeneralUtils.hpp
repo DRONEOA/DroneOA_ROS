@@ -66,8 +66,18 @@ class GeneralUtility {
     static T scale(T target, T rmin, T rmax, T tmin, T tmax) {
         return ((target-rmin)*(tmax-tmin))/(rmax-rmin)+tmin;
     }
+
+    /**
+     * @brief Convert any string to lower case
+     * @param input string, used for output
+     */
+    static void toLowerCaseStr(std::string* input);
+
+    /**
+     * @brief Convert any string to upper case
+     * @param input string, used for output
+     */
+    static void toUpperCaseStr(std::string* input);
 };
-
-
 
 #endif  // INCLUDE_DRONEOA_ROS_UTILS_GENERALUTILS_HPP_  // NOLINT

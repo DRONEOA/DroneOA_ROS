@@ -40,7 +40,11 @@ RSCInterface::RSCInterface() {
 }
 
 RSCInterface::~RSCInterface() {
-    cv::destroyWindow(OPENCV_WINDOW);
+    try {
+        cv::destroyWindow(OPENCV_WINDOW);
+    } catch(...) {
+        ROS_INFO("cv::destroyWindow warn");
+    }
     if (thread_watch_depth_img_) {
         delete thread_watch_depth_img_;
     }
@@ -52,11 +56,14 @@ RSCInterface::~RSCInterface() {
         delete viewer;
     }
 #endif
+    ROS_INFO("Destroy RSCInterface");
 }
 
 void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n = nh;
     r_ = r;
+    currentDepthSource_ = DEPTH_SOURCE_RSC;
+    currentPCSource_ = PC_SOURCE_RSC;
 #ifdef IMG_DEBUG_POPUP
     cv::startWindowThread();  // DEBUG
     cv::setMouseCallback(OPENCV_WINDOW, RSCInterface::mouseCallback, NULL);  // DEBUG
@@ -66,6 +73,24 @@ void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     thread_watch_pointcloud_ = new boost::thread(boost::bind(&RSCInterface::watchPointCloudThread, this));
 #endif
     ROS_INFO("[RSC] init");
+}
+
+void RSCInterface::changeDepthSource(std::string depthSource) {
+    currentDepthSource_ = depthSource;
+    depth_sub_.shutdown();
+    auto node = boost::make_shared<ros::NodeHandle>();
+    depth_sub_ =
+        node->subscribe<sensor_msgs::Image>(currentDepthSource_, 1,
+                boost::bind(&RSCInterface::depthImg_callback, this, _1));
+}
+
+void RSCInterface::changePC2Source(std::string pc2Source) {
+    currentPCSource_ = pc2Source;
+    pc2_sub_.shutdown();
+    auto node = boost::make_shared<ros::NodeHandle>();
+    pc2_sub_ =
+        node->subscribe<sensor_msgs::PointCloud2>(currentPCSource_, 1,
+                boost::bind(&RSCInterface::pointcloud_callback, this, _1));
 }
 
 /* Callback */
@@ -82,14 +107,17 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
     }
 
     depthFrame_ = cv_ptr->image;
-#ifdef UE4_SITL
-    for (int i = 0; i < depthFrame_.rows; i++) {
-        float* Mi = depthFrame_.ptr<float>(i);
-        for (int j = 0; j < depthFrame_.cols; j++) {
-            Mi[j] *= UE4_SITL_SCALE;
+
+    // Scale Depth Data For UE4
+    if (currentDepthSource_ == DEPTH_SOURCE_UE4) {
+        for (int i = 0; i < depthFrame_.rows; i++) {
+            float* Mi = depthFrame_.ptr<float>(i);
+            for (int j = 0; j < depthFrame_.cols; j++) {
+                Mi[j] *= UE4_SITL_SCALE;
+            }
         }
     }
-#endif
+
 #ifdef IMG_DEBUG_POPUP
     drawDebugOverlay();
 #endif
@@ -115,15 +143,9 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
 /* Threads */
 void RSCInterface::watchDepthImgThread() {
     auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
-#if defined(UE4_SITL)
-    auto relative_pos_sub =
-        node->subscribe<sensor_msgs::Image>("/unreal_ros/image_depth", 1,
+    depth_sub_ =
+        node->subscribe<sensor_msgs::Image>(currentDepthSource_, 1,
                 boost::bind(&RSCInterface::depthImg_callback, this, _1));
-#else
-    auto relative_pos_sub =
-        node->subscribe<sensor_msgs::Image>("/d435/depth/image_rect_raw", 1,
-                boost::bind(&RSCInterface::depthImg_callback, this, _1));
-#endif
 
     while (ros::ok()) {
         ros::spinOnce();
@@ -133,15 +155,9 @@ void RSCInterface::watchDepthImgThread() {
 
 void RSCInterface::watchPointCloudThread() {
     auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
-#if defined(UE4_SITL)
-    auto relative_pos_sub =
-        node->subscribe<sensor_msgs::PointCloud2>("/depth_registered/points", 1,
+    pc2_sub_ =
+        node->subscribe<sensor_msgs::PointCloud2>(currentPCSource_, 1,
                 boost::bind(&RSCInterface::pointcloud_callback, this, _1));
-#else
-    auto relative_pos_sub =
-        node->subscribe<sensor_msgs::PointCloud2>("/d435/depth/color/points", 1,
-                boost::bind(&RSCInterface::pointcloud_callback, this, _1));
-#endif
 
     while (ros::ok()) {
 #ifdef PCL_DEBUG_VIEWER

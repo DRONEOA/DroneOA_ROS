@@ -31,6 +31,7 @@
 
 #include <droneoa_ros/CNCInterface.hpp>
 #include <droneoa_ros/Utils/CNCUtils.hpp>
+#include <droneoa_ros/Utils/GeneralUtils.hpp>
 
 CNCInterface::CNCInterface() {
     watchHomePosThread();
@@ -40,6 +41,7 @@ CNCInterface::~CNCInterface() {
     delete thread_watch_Altitude_;
     delete thread_watch_GPSFix_;
     delete thread_watch_state_;
+    ROS_INFO("Destroy CNCInterface");
 }
 
 void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
@@ -50,6 +52,26 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     thread_watch_Altitude_ = new boost::thread(boost::bind(&CNCInterface::watchAltitudeThread, this));
     thread_watch_IMU_ = new boost::thread(boost::bind(&CNCInterface::watchIMUThread, this));
     ROS_INFO("[CNC] init");
+}
+
+bool CNCInterface::checkFModeExist(std::string modeName) {
+    GeneralUtility::toUpperCaseStr(&modeName);
+    if (FLT_MODE_STABILIZE == modeName) return true;
+    if (FLT_MODE_ACRO == modeName) return true;
+    if (FLT_MODE_ALT_HOLD == modeName) return true;
+    if (FLT_MODE_AUTO == modeName) return true;
+    if (FLT_MODE_GUIDED == modeName) return true;
+    if (FLT_MODE_LOITER == modeName) return true;
+    if (FLT_MODE_RTL == modeName) return true;
+    if (FLT_MODE_CIRCLE == modeName) return true;
+    if (FLT_MODE_LAND == modeName) return true;
+    if (FLT_MODE_OF_LOITER == modeName) return true;
+    if (FLT_MODE_AUTOTUNE == modeName) return true;
+    if (FLT_MODE_POSHOLD == modeName) return true;
+    if (FLT_MODE_BRAKE == modeName) return true;
+    if (FLT_MODE_AVOID_ADSB == modeName) return true;
+    if (FLT_MODE_GUIDED_NOGPS == modeName) return true;
+    return false;
 }
 
 /*****************************************************

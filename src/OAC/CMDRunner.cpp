@@ -119,4 +119,5 @@ CMDRunner::~CMDRunner() {
         boost::unique_lock<boost::shared_mutex> uniqueLock(shutdown_mutex);
         shutdown = true;
     }
+    ROS_INFO("Destroy CMDRunner");
 }

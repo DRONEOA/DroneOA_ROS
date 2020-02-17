@@ -44,9 +44,6 @@ static const char* FLT_MODE_BRAKE = "BRAKE";
 static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
-// SITL
-// #define UE4_SITL
-
 /**
  * @brief Whether to check GPS fix before initialize
  */
