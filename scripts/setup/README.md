@@ -4,7 +4,7 @@
 ```shell
 cd droneoa_ros/scripts/setup
 chmod +x *
-./test_script.sh
+./ENV_script.sh
 ./SITL_setup.sh
 ```
 
