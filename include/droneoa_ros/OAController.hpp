@@ -45,7 +45,19 @@ enum SYS_State {
     SYS_EVALUATED,
     SYS_PLANNED,
     SYS_EXEC,
-    SYS_ABORT
+    SYS_ABORT,
+};
+
+/**
+ * @brief Obstacle Avoidance Controller System states' name
+ */
+static const char* SYS_STATE_NAME[] {
+    "SYS_IDLE",
+    "SYS_SAFE",
+    "SYS_EVALUATED",
+    "SYS_PLANNED",
+    "SYS_EXEC",
+    "SYS_ABORT",
 };
 
 /**
@@ -98,6 +110,11 @@ class OAController {
      * @param isOn new switch state (true = on)
      */
     void masterSwitch(bool isOn);  // Pause / Resume OA Controller
+    /**
+     * @brief Get current state of the OAController
+     * @return a string of the status
+     */
+    std::string getStatus();
 
  private:
     bool evaluate();  // Collect and Evaluate data from sensors
@@ -116,7 +133,7 @@ class OAController {
     // Thread
     bool isOn_ = false;
     void masterThread();
-    boost::thread thread_oac_master_;
+    boost::thread *thread_oac_master_;
 
     ros::Rate r_ = ros::Rate(OAC_REFRESH_FREQ);
     CNCInterface *cnc_;

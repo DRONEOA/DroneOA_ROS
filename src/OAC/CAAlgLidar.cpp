@@ -45,9 +45,7 @@ bool CAAlgLidar::collect() {
     }
     float gSpeed = cnc_->getHUDData().groundspeed;
     lidarThreshold_ = ((gSpeed * gSpeed) / (2 * VEHICLE_MAX_ACCELEATION));  // unit: m
-    if (lidarThreshold_ < 0.2f) {
-        lidarThreshold_ = 0.2f;
-    }
+    lidarThreshold_ = lidarThreshold_ < VEHICLE_MIN_SAFE_DISTANCE ? VEHICLE_MIN_SAFE_DISTANCE : lidarThreshold_;
     // Compute Collision Possibility
     std::pair<float, float> closeSector = lidar_->getClosestSectorData();
     if (lidarThreshold_ > closeSector.second) {

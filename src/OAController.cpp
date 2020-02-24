@@ -25,16 +25,20 @@ OAController::OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterfac
     theRunner_ = runner;
     r_ = r;
     init(cnc, lidar, rsc);
+
+    thread_oac_master_ = new boost::thread(boost::bind(&OAController::masterThread, this));
 }
 
 OAController::~OAController() {
-    isTerminated = true;
-    thread_oac_master_.join();
     if (parserExecuter_) delete parserExecuter_;
     for (const auto& elem : algorithmInstances_) {
         if (elem.second) {
             delete elem.second;
         }
+    }
+    if (thread_oac_master_) {
+        delete thread_oac_master_;
+        ROS_WARN("[OAC] MASTER THREAD ENDED");
     }
     ROS_INFO("Destroy OAController");
 }
@@ -58,10 +62,14 @@ void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *
     algorithmInstances_[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(cnc_, rsc_);
     algorithmInstances_[SYS_Algs::ALG_FGM] = new OAAlgFGM(cnc_, lidar_);
     //! @todo create new alg instance here
-    // create thread
-    boost::thread newThread(boost::bind(&OAController::masterThread, this));
-    thread_oac_master_.swap(newThread);
     ROS_INFO("[OAC] init is DONE");
+}
+
+std::string OAController::getStatus() {
+    if (!isOn_) {
+        return "PAUSED";
+    }
+    return SYS_STATE_NAME[currState_];
 }
 
 // Switch on/off the tick event
@@ -113,9 +121,6 @@ void OAController::masterThread() {
     while (ros::ok()) {
         if (isOn_) {
             tick();
-        }
-        if (isTerminated) {
-            break;
         }
         ros::spinOnce();
         r_.sleep();
