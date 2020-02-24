@@ -54,9 +54,12 @@ static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz */
 
 static const char* ALG_STR_BUG = "ALG_BUG";
 static const char* ALG_STR_VFF = "ALG_VFF";
+static const char* ALG_STR_FGM = "ALG_FGM";
+static const char* ALG_STR_VISION = "ALG_VISION";
 static const char* ALG_STR_COLLISION_LIDAR = "ALG_CA_LIDAR";
 static const char* ALG_STR_COLLISION_DEPTH = "ALG_CA_DEPTH";
-static const char* ALG_STR_COLLISION_AI = "ALG_CA_AI";
+static const char* ALG_STR_AI = "ALG_AI";
+static const char* ALG_STR_SLAM = "ALG_SLAM";
 
 /**
  * @brief Enabled feature stage 1-3
