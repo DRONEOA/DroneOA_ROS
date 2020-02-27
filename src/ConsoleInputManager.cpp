@@ -271,6 +271,23 @@ bool ConsoleInputManager::handleRSCCommands() {
                 ROS_WARN("    rsc:      use real realsense camera data");
                 ROS_WARN("    ue4:      use simulated data from UE4 SIM");
             }
+        } else if (cmdType == "range") {
+            std::string cancel = currentCommand_.second.at(1);
+            if (currentCommand_.second.size() == 3) {
+                float max = std::stof(currentCommand_.second.at(1));
+                float min = std::stof(currentCommand_.second.at(2));
+                if (max < min) {
+                    throw 1;
+                }
+                rsc_->setRange(min, max);
+                rsc_->setRangeSwitch(true);
+            } else if (currentCommand_.second.size() == 2 && cancel == "cancel") {
+                rsc_->setRangeSwitch(false);
+            } else {
+                ROS_WARN("Unknown Range Operation");
+                ROS_WARN("    [max(mm)] [min(mm)]       Set range");
+                ROS_WARN("    cancel                    Cancel range");
+            }
         } else {
             ROS_WARN("Unknown RSC command");
             printRSCHelper();
@@ -345,6 +362,8 @@ void ConsoleInputManager::printLIDARHelper() {
     ROS_WARN("LIDAR Commands: [required] <optional>");
     ROS_WARN("    info:                                 Print information");
     ROS_WARN("    chsrc:                                Change data source");
+    ROS_WARN("    range [max(mm)] [min(mm)]             Set range");
+    ROS_WARN("    range cancel                          Cancel range");
 }
 
 void ConsoleInputManager::printQuickHelper() {
