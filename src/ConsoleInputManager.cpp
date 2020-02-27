@@ -350,6 +350,8 @@ void ConsoleInputManager::printRSCHelper() {
     ROS_WARN("RSC Commands: [required] <optional>");
     ROS_WARN("    info:                                 Print information");
     ROS_WARN("    chsrc:                                Change data source");
+    ROS_WARN("    range [max(mm)] [min(mm)]             Set range");
+    ROS_WARN("    range cancel                          Cancel range");
 }
 
 void ConsoleInputManager::printOACHelper() {
@@ -362,8 +364,6 @@ void ConsoleInputManager::printLIDARHelper() {
     ROS_WARN("LIDAR Commands: [required] <optional>");
     ROS_WARN("    info:                                 Print information");
     ROS_WARN("    chsrc:                                Change data source");
-    ROS_WARN("    range [max(mm)] [min(mm)]             Set range");
-    ROS_WARN("    range cancel                          Cancel range");
 }
 
 void ConsoleInputManager::printQuickHelper() {
