@@ -183,6 +183,10 @@ bool ConsoleInputManager::handleOACCommands() {
         } else if (cmdType == "off") {
             ROS_WARN("::OAC->OFF::");
             oac_->masterSwitch(false);
+        } else if (cmdType == "info") {
+            ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
+            ROS_INFO("[OAC] status: %s", oac_->getStatus().c_str());
+            ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else {
             ROS_WARN("Unknown OAC command");
             printOACHelper();
@@ -249,7 +253,9 @@ bool ConsoleInputManager::handleRSCCommands() {
     try {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "info") {
+            ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
             rsc_->printImgInfo();
+            ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else if (cmdType == "chsrc") {
             if (currentCommand_.second.size() >= 2) {
                 std::string srcName = currentCommand_.second.at(1);
@@ -286,7 +292,9 @@ bool ConsoleInputManager::handleLIDARCommands() {
     try {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "info") {
+            ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
             lidar_->printLidarInfo();
+            ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else if (cmdType == "chsrc") {
             if (currentCommand_.second.size() >= 2) {
                 std::string srcName = currentCommand_.second.at(1);
@@ -339,6 +347,7 @@ void ConsoleInputManager::printOACHelper() {
     ROS_WARN("OAC Commands: [required] <optional>");
     ROS_WARN("    on:           Resume OAC");
     ROS_WARN("    off:          Pause OAC");
+    ROS_WARN("    info:         Print information");
 }
 
 void ConsoleInputManager::printLIDARHelper() {

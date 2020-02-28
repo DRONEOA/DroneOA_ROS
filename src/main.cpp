@@ -64,21 +64,9 @@ int main(int argc, char **argv) {
     consoleInputManager.init(&cnc, &rsc, &oac, &lidar);
     while (std::getline(std::cin, commandIn)) {
         consoleInputManager.parseAndExecuteConsole(commandIn);
-        if (!masterSW) {
-            oac.masterSwitch(false);
+        if (!masterSW) {  // Quit Signal
             break;
         }
-        // Runner Tips::
-        //     } else if (cmdType == "runnerstate") {
-        //         ROS_INFO("Runner State: %s", RUNNER_STATE_STR[runner.getRunnerState()]);
-        //     } else if (cmdType == "runner") {
-        //         //! @todo(shibohan) add console support for string command queue input
-        //         CommandQueue testQueue;
-        //         testQueue.push_back({CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_LAND});
-        //         testQueue.push_back({CMD_QUEUE_TYPES::CMD_DELAY_MSEC, "5000"});
-        //         testQueue.push_back({CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_STABILIZE});
-        //         runner.setupRunner(testQueue);
-        //     }
     }
 
     while (n.ok() && masterSW) {

@@ -31,7 +31,10 @@
 #include <droneoa_ros/OAC/BaseAlg.hpp>
 #include <droneoa_ros/OAC/CAAlgLidar.hpp>
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
+#include <droneoa_ros/OAC/OAAlgFGM.hpp>
 #include <droneoa_ros/OAC/CMDParser.hpp>
+
+// #define DEBUG_OAC
 
 /**
  * @brief Obstacle Avoidance Controller System states
@@ -42,18 +45,33 @@ enum SYS_State {
     SYS_EVALUATED,
     SYS_PLANNED,
     SYS_EXEC,
-    SYS_ABORT
+    SYS_ABORT,
+};
+
+/**
+ * @brief Obstacle Avoidance Controller System states' name
+ */
+static const char* SYS_STATE_NAME[] {
+    "SYS_IDLE",
+    "SYS_SAFE",
+    "SYS_EVALUATED",
+    "SYS_PLANNED",
+    "SYS_EXEC",
+    "SYS_ABORT",
 };
 
 /**
  * @brief Supported Algorithms
  */
 enum SYS_Algs {
-    ALG_BUG,
-    ALG_VFF,
-    ALG_COLLISION_LIDAR,
-    ALG_COLLISION_DEPTH,
-    ALG_COLLISION_AI
+    ALG_BUG,  // S2 If time allows
+    ALG_VFF,  // S2 If time allows
+    ALG_FGM,  // S2
+    ALG_VISION,  // S2
+    ALG_COLLISION_LIDAR,  // S1
+    ALG_COLLISION_DEPTH,  // S1
+    ALG_AI,  // S3
+    ALG_SLAM  // Wishlist :)
 };
 
 /**
@@ -66,8 +84,6 @@ enum SYS_SelectedDetermineFun {
     DET_STAGE3,
     DET_INVALID
 };
-
-// #define DEBUG_OAC
 
 class OAController {
     CMDParser *parserExecuter_ = nullptr;
@@ -94,19 +110,30 @@ class OAController {
      * @param isOn new switch state (true = on)
      */
     void masterSwitch(bool isOn);  // Pause / Resume OA Controller
+    /**
+     * @brief Get current state of the OAController
+     * @return a string of the status
+     */
+    std::string getStatus();
 
  private:
     bool evaluate();  // Collect and Evaluate data from sensors
     bool plan();  // Plan next waypoint use selected algorithm(s)
     bool execute();  // Execute next waypoint use CNC Interface
     bool abort();  // About execution and "Brake"
+    bool popAlgorithmFromSelected(SYS_Algs algName);
     std::vector<SYS_Algs> selectAlgorithm();  // Determine which algorithm to use
     SYS_SelectedDetermineFun selectDetermineFunction();  // Determine which determine function to use
+
+    // Execution Determination
+    void determineFunStage1();
+    void determineFunStage2();
+    void determineFunStage3();
 
     // Thread
     bool isOn_ = false;
     void masterThread();
-    boost::thread* thread_oac_master_;
+    boost::thread *thread_oac_master_;
 
     ros::Rate r_ = ros::Rate(OAC_REFRESH_FREQ);
     CNCInterface *cnc_;
