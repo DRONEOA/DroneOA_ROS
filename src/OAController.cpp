@@ -46,13 +46,14 @@ OAController::~OAController() {
 // Init OA Controller (for restart)
 // - Input: CNCInterface *, LidarInterface *, RSCInterface *
 void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc) {
-    ROS_INFO("[OAC] init");
     cnc_ = cnc;
     lidar_ = lidar;
     rsc_ = rsc;
     currState_ = SYS_State::SYS_IDLE;
     // init parser
-    if (parserExecuter_) delete parserExecuter_;
+    if (parserExecuter_) {
+        delete parserExecuter_;
+    }
     parserExecuter_ = new CMDParser(cnc_, theRunner_);
     // create algorithm instances
     for (auto tmp : algorithmInstances_) {
@@ -62,7 +63,7 @@ void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *
     algorithmInstances_[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(cnc_, rsc_);
     algorithmInstances_[SYS_Algs::ALG_FGM] = new OAAlgFGM(cnc_, lidar_);
     //! @todo create new alg instance here
-    ROS_INFO("[OAC] init is DONE");
+    ROS_INFO("[OAC] init");
 }
 
 std::string OAController::getStatus() {
