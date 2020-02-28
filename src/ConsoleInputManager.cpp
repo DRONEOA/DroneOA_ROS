@@ -276,7 +276,7 @@ bool ConsoleInputManager::handleRSCCommands() {
             if (currentCommand_.second.size() == 3) {
                 float max = std::stof(currentCommand_.second.at(1));
                 float min = std::stof(currentCommand_.second.at(2));
-                if (max < min) {
+                if (max < min || min < 0) {
                     throw 1;
                 }
                 rsc_->setRange(min, max);
