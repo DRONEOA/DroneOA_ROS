@@ -54,9 +54,12 @@ static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz */
 
 static const char* ALG_STR_BUG = "ALG_BUG";
 static const char* ALG_STR_VFF = "ALG_VFF";
+static const char* ALG_STR_FGM = "ALG_FGM";
+static const char* ALG_STR_VISION = "ALG_VISION";
 static const char* ALG_STR_COLLISION_LIDAR = "ALG_CA_LIDAR";
 static const char* ALG_STR_COLLISION_DEPTH = "ALG_CA_DEPTH";
-static const char* ALG_STR_COLLISION_AI = "ALG_CA_AI";
+static const char* ALG_STR_AI = "ALG_AI";
+static const char* ALG_STR_SLAM = "ALG_SLAM";
 
 /**
  * @brief Enabled feature stage 1-3
@@ -70,7 +73,7 @@ static const int VEHICLE_BOUNDBOX_HEIGHT = 1000;  /**< @brief unit: mm */
 static const int VEHICLE_MAX_SPEED_HORIZONTAL = 12;  /**< @brief unit: m/s */
 static const float VEHICLE_MAX_ALTITUDE_RELATIVE = 10;  /**< @brief unit: m */
 static const float VEHICLE_MAX_ACCELEATION = 0.4f;  /**< @brief unit: m/s^2 */
-static const float VEHICLE_MIN_SAFE_DISTANCE = 0.5f;
+static const float VEHICLE_MIN_SAFE_DISTANCE = 1.0f;  /**< @brief unit: m */
 
 // Module Enable
 static const bool ENABLE_RSC = true;  /**< @brief enable realsense camera */

@@ -17,6 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
+#include <limits>
+
 #include <droneoa_ros/LidarInterface.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 #include <droneoa_ros/PDN.hpp>
@@ -111,7 +113,7 @@ float LidarInterface::getIncreament() {
 }
 
 std::pair<float, float> LidarInterface::getClosestSectorData() {
-    float minRange = 100000;
+    float minRange = std::numeric_limits<float>::infinity();
     float minAngle = 0;
     for (auto it = scannerDataMap_.begin(); it != scannerDataMap_.end(); it++) {
         if ((it->second)[0] < minRange) {
