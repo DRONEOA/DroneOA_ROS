@@ -1,6 +1,6 @@
 # Purposed Algorithm Pipeline:
 
-[@shibohan Note to Self Review]
+[@DanielXu Note to Self Review]
 
 ## Class Structure:
 - Create skeleton Class structure
