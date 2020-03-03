@@ -5,7 +5,7 @@
 ## Class Structure
 
 - Create skeleton Class structure
-  - Class interaction: Use composition for class interaction. Probably use inheritance for different levels of pure algorithmic classes. i.e. My algo class -> base AFP class
+  - Class interaction: Use composition for class interaction. Planning on using inheritance for different levels of pure algorithmic classes. i.e. My algo class -> base AFP class
   - Public interface/fields [WIP]
   - Runner thread: Planning to use runner thread. Will see how it goes
 
@@ -30,7 +30,7 @@
     - Basic form: <https://www.sciencedirect.com/science/article/abs/pii/S0921889012000838>
     - An improved FGM can be found at <https://www.computer.org/csdl/proceedings-article/irc/2017/07926547/12OmNAXxXdZ.> Specifically, this method provides angular and linear velocity in addition to heading angle given by FGM
     - Another improved FGM is presented at <https://ieeexplore.ieee.org/abstract/document/8014220.> This method eliminates two drawbacks from the original FGM: extension of the path which sometimes happens unnecessarily, and small differences between the gap sizes
-  - Possible parallel development: (e.g. maybe fake out some data using unittest) Probably no
+  - Possible parallel development: (e.g. maybe fake out some data using unittest) Hard to do
   - Convert algo. results to instruction for drone
     - Possible PID utility
     - Perhaps using gain/weight?
@@ -40,7 +40,7 @@
   - Possible delay commands: The only use case I can think of for now to use Delay command would be when flying directly to target position(when there're no obstacles)
 - Generate Data Queue:
   - Rules for confidence: closest obstacle distance(physical restriction of lidar), speed(timing), margin of error for GAP
-  - Additional data for OAC: (e.g. in the future: display a msg on debugging overlay) Probably in future
+  - Additional data for OAC: (e.g. in the future: display a msg on debugging overlay) Low priority, might reconsider in future
 - Feed results back to OAController
 
 ### Execution
