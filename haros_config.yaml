@@ -1,0 +1,11 @@
+%YAML 1.1
+---
+project: droneoa_ros
+packages:
+    - droneoa_ros
+plugin_blacklist: [
+    "haros_plugin_cpplint",
+    "haros_plugin_pylint",
+    "haros_plugin_ccd",
+    "haros_plugin_lizard",
+]

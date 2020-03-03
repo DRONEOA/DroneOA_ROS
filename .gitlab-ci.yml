@@ -1,7 +1,8 @@
 stages:
-  - cpplint
-  - build
-  - unittest
+  - Style
+  - StaticAnalysis
+  - Build
+  - Unittest
 
 image: ros:melodic-perception
 
@@ -16,53 +17,62 @@ before_script:
   - apt-get update
   - git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
   - source ros_gitlab_ci/gitlab-ci.bash >/dev/null
-  - echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
-  - apt-key add ./src/droneoa_ros/scripts/realsenseKey
-  - apt-get update
-  - apt-get install librealsense2-dkms --allow-unauthenticated -y
-  - apt-get install librealsense2-dev --allow-unauthenticated -y
-  - apt-get install ros-melodic-cv-bridge -y
-  - apt-get install ros-melodic-image-transport
-  - apt-get install ros-melodic-tf -y
-  - apt-get install ros-melodic-diagnostic-updater -y
-  - apt-get install ros-melodic-ddynamic-reconfigure -y
-  - apt-get install ros-melodic-nodelet -y
-  - apt-get install ros-melodic-perception -y
-  - apt-get install ros-melodic-pcl-ros -y
-  - apt-get install ros-melodic-pcl-conversions -y
-  - cd src
-  - git clone https://github.com/IntelRealSense/realsense-ros.git
-  - git clone http://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
-  - cd realsense-ros/
-  - git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
-  - cd ..
-  - cd ..
 
 cpplint:
-  stage: cpplint
+  stage: Style
   script:
     - pip install cpplint --quiet
     - cd ./src/droneoa_ros
     - cpplint --linelength=120 ./test/*.cpp ./src/*.cpp ./include/droneoa_ros/*.hpp ./src/OAC/*.cpp ./include/droneoa_ros/OAC/*.hpp ./src/Utils/*.cpp ./include/droneoa_ros/Utils/*.hpp
     - cd ..
     - cd ..
-  retry: 2
+
+catkinlint:
+  stage: StaticAnalysis
+  script:
+    - apt-get install python-catkin-lint -y
+    - catkin_lint -W0 .
+  allow_failure: true
+
+haros:
+  stage: StaticAnalysis
+  script:
+    - pip install haros
+    - pip install ply nose
+    - pip install -e git+https://github.com/timtadh/pyflwor.git#egg=pyflwor
+    - pip install radon
+    - apt-get install cppcheck -y
+    - sudo apt-get install cccc -y
+    - cd ./src/droneoa_ros
+    - mkdir ../../../report
+    - haros --config ./haros_config.yaml analyse -d ../../../report
+    - cd ..
+    - cd ..
+  artifacts:
+    name: "$CI_JOB_NAME_${CI_COMMIT_REF_NAME}_static_report"
+    paths:
+      - ./report/
+    expire_in: 1 week
+  allow_failure: true
 
 catkin_make:
-  stage: build
+  stage: Build
   script:
+    - sh ./src/droneoa_ros/scripts/ci/prescript.sh
     - catkin_make
   retry: 2
 
 catkin tools:
-  stage: build
+  stage: Build
   script:
+    - sh ./src/droneoa_ros/scripts/ci/prescript.sh
     - catkin build --summarize --no-status --force-color
   retry: 2
 
 Unittest:
-  stage: unittest
+  stage: Unittest
   script:
+    - sh ./src/droneoa_ros/scripts/ci/prescript.sh
     - catkin_make
     - source ./devel/setup.sh
     - rosrun droneoa_ros droneoa_ros_utiltest

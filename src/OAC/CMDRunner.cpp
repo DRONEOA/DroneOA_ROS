@@ -72,7 +72,7 @@ RUNNER_STATE CMDRunner::getRunnerState() {
  */
 
 void CMDRunner::runnerRoutine() {
-    unsigned int internalTimmer = 0;
+    uint32_t internalTimmer = 0;
     while (true) {
         boost::this_thread::sleep(boost::posix_time::milliseconds(RUNNER_TICK_TIME));
         // Terminate Thread On Shutdown Request

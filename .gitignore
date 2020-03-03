@@ -1,3 +1,5 @@
+src/pyflwor/*
+report/*
 .vscode/*
 launch/*
 !launch/*.launch

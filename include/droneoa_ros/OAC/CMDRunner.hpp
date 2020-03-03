@@ -46,7 +46,7 @@ static const char* RUNNER_STATE_STR[] = {
 /**
  * @brief Interval between runner ticks (usually 50 ~ 250)
  */
-static const int RUNNER_TICK_TIME = 100;
+static const int32_t RUNNER_TICK_TIME = 100;
 
 class CMDRunner {
     void runnerRoutine();

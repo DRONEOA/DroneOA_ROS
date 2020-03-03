@@ -116,7 +116,7 @@ find_package( PCL REQUIRED )
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES droneoa_ros
+#  LIBRARIES droneoa_ros
   CATKIN_DEPENDS nodelet mavros roscpp rospy std_msgs sensor_msgs cv_bridge
 #  DEPENDS system_lib
 )
@@ -218,18 +218,18 @@ target_link_libraries(droneoa_ros
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
+# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_lib
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+  PATTERN ".svn" EXCLUDE
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -239,7 +239,7 @@ target_link_libraries(droneoa_ros
 # )
 
 install(
-	TARGETS droneoa_ros
+	TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_librsc ${PROJECT_NAME}_libcnc ${PROJECT_NAME}_liboa ${PROJECT_NAME}_libinput ${PROJECT_NAME}_liblidar
 	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
