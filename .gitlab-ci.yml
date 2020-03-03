@@ -49,7 +49,7 @@ haros:
     - cd ..
     - cd ..
   artifacts:
-    name: "$CI_JOB_NAME_${CI_COMMIT_REF_NAME}_static_report"
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-static_report"
     paths:
       - ./report/
     expire_in: 1 week
