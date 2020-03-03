@@ -110,9 +110,9 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
 
     // Scale Depth Data For UE4
     if (currentDepthSource_ == DEPTH_SOURCE_UE4) {
-        for (int i = 0; i < depthFrame_.rows; i++) {
+        for (int32_t i = 0; i < depthFrame_.rows; i++) {
             float* Mi = depthFrame_.ptr<float>(i);
-            for (int j = 0; j < depthFrame_.cols; j++) {
+            for (int32_t j = 0; j < depthFrame_.cols; j++) {
                 Mi[j] *= UE4_SITL_SCALE;
             }
         }
@@ -191,16 +191,16 @@ void RSCInterface::printImgInfo() {
 #ifdef ENABLE_POINTCLOUD
     ROS_INFO("[Pointcloud] frameID: %s", pointCloud_.header.frame_id.c_str());
     ROS_INFO("[Pointcloud] field size: %zd", pointCloud_.fields.size());
-    for (unsigned int i = 0; i < pointCloud_.fields.size(); ++i) {
+    for (uint32_t i = 0; i < pointCloud_.fields.size(); ++i) {
         ROS_INFO("      field: %s", pointCloud_.fields[i].name.c_str());
     }
     ROS_INFO("[Pointcloud] pcl data size: %zd", pcl_pointCloud_.size());
 #endif
 }
 
-void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1, int thickness = 1) {
-    int font_face = cv::FONT_HERSHEY_COMPLEX;
-    int baseline;
+void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1, int32_t thickness = 1) {
+    int32_t font_face = cv::FONT_HERSHEY_COMPLEX;
+    int32_t baseline;
     cv::Size text_size = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
     cv::Point originTop;
     originTop.x = origin.x;
@@ -248,7 +248,7 @@ void RSCInterface::drawDebugOverlay() {
     cv::imshow(OPENCV_WINDOW, debugImage255);
 }
 
-void RSCInterface::mouseCallback(int event, int x, int y, int flags, void* userdata) {
+void RSCInterface::mouseCallback(int32_t event, int32_t x, int32_t y, int32_t flags, void* userdata) {
     if (event == cv::EVENT_LBUTTONDOWN) {
         // std::cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << std::endl;
     } else if (event == cv::EVENT_RBUTTONDOWN) {
@@ -267,8 +267,8 @@ void RSCInterface::mouseCallback(int event, int x, int y, int flags, void* userd
 
 cv::Mat RSCInterface::depthImgForDesiredDistanceRange(float min, float max, cv::Mat input) {
     cv::Mat adjMap = input.clone();
-    for (int y=0; y < adjMap.rows; y++) {
-        for (int x=0; x < adjMap.cols; x++) {
+    for (int32_t y=0; y < adjMap.rows; y++) {
+        for (int32_t x=0; x < adjMap.cols; x++) {
             if (adjMap.at<float>(cv::Point(x, y)) < min || adjMap.at<float>(cv::Point(x, y)) > max) {
                 adjMap.at<float>(cv::Point(x, y)) = 0;
             }

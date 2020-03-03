@@ -72,7 +72,7 @@ class CNCInterface {
 
     // Guided Flight Control
     bool takeoff(float targetAltitude);
-    bool land(int minAboutAltitude);
+    bool land(int32_t minAboutAltitude);
     /**
      * @brief Set Yaw Command
      * @param targetYaw in degree

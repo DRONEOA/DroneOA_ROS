@@ -28,6 +28,8 @@
 #ifndef INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT
 #define INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT
 
+#include <cstdint>
+
 static const char* FLT_MODE_STABILIZE = "STABILIZE";
 static const char* FLT_MODE_ACRO = "ACRO";
 static const char* FLT_MODE_ALT_HOLD = "ALT_HOLD";
@@ -64,13 +66,13 @@ static const char* ALG_STR_SLAM = "ALG_SLAM";
 /**
  * @brief Enabled feature stage 1-3
  */
-static const int OAC_STAGE_SETTING = 1;
+static const int32_t OAC_STAGE_SETTING = 1;
 
 // Vehicle Data
-static const int VEHICLE_BOUNDBOX_WIDTH = 1200;  /**< @brief unit: mm */
-static const int VEHICLE_BOUNDBOX_LENGTH = 1200;  /**< @brief unit: mm */
-static const int VEHICLE_BOUNDBOX_HEIGHT = 1000;  /**< @brief unit: mm */
-static const int VEHICLE_MAX_SPEED_HORIZONTAL = 12;  /**< @brief unit: m/s */
+static const int32_t VEHICLE_BOUNDBOX_WIDTH = 1200;  /**< @brief unit: mm */
+static const int32_t VEHICLE_BOUNDBOX_LENGTH = 1200;  /**< @brief unit: mm */
+static const int32_t VEHICLE_BOUNDBOX_HEIGHT = 1000;  /**< @brief unit: mm */
+static const int32_t VEHICLE_MAX_SPEED_HORIZONTAL = 12;  /**< @brief unit: m/s */
 static const float VEHICLE_MAX_ALTITUDE_RELATIVE = 10;  /**< @brief unit: m */
 static const float VEHICLE_MAX_ACCELEATION = 0.4f;  /**< @brief unit: m/s^2 */
 static const float VEHICLE_MIN_SAFE_DISTANCE = 1.0f;  /**< @brief unit: m */

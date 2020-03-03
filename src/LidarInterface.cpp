@@ -128,8 +128,8 @@ std::pair<float, float> LidarInterface::getClosestSectorData() {
 void LidarInterface::generateDataMap() {
     scannerDataMap_.clear();
     // @todo Is this safe ?
-    unsigned int count = (scannerData_.angle_max - scannerData_.angle_min) / scannerData_.angle_increment;
-    for (unsigned int i = 0; i < count; i++) {
+    uint32_t count = (scannerData_.angle_max - scannerData_.angle_min) / scannerData_.angle_increment;
+    for (uint32_t i = 0; i < count; i++) {
         if (i >= scannerData_.ranges.size()) {
             ROS_WARN("+LidarInterface::generateDataMap: Missing Data, expect: %u actual: %zu",
                 count, scannerData_.ranges.size());
@@ -137,7 +137,7 @@ void LidarInterface::generateDataMap() {
         }
         float degree = GeneralUtility::radToDeg(getMinAngle() + getIncreament() * i);
         degree = 0 - degree;  // Fix YDLidar's strange coordinate system
-        degree = static_cast<int>(degree + LIDAR_ORIENTATION_CW) % 360;
+        degree = static_cast<int32_t>(degree + LIDAR_ORIENTATION_CW) % 360;
         if (!std::isinf(scannerData_.ranges[i]) &&
                 scannerData_.ranges[i] >= LIDAR_FILTER_LOW &&
                 scannerData_.ranges[i] <= LIDAR_FILTER_HIGH) {
@@ -185,8 +185,8 @@ void drawLidarPoint(const cv::Mat &img, const cv::Point &center, float angle, fl
 }
 
 void LidarInterface::drawLidarData() {
-    int winWidth = 800;
-    int winHeight = 800;
+    int32_t winWidth = 800;
+    int32_t winHeight = 800;
     cv::Point center(winWidth / 2, winHeight / 2);
     cv::Mat lidarDisk(winWidth, winHeight, CV_8UC3, cv::Scalar(0, 0, 0));
     // Draw center

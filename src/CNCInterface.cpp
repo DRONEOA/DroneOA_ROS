@@ -179,7 +179,7 @@ bool CNCInterface::takeoff(float targetAltitude) {
 // Landing Command
 // - Input: float minAboutAltitude
 // - Return: client send response
-bool CNCInterface::land(int minAboutAltitude) {
+bool CNCInterface::land(int32_t minAboutAltitude) {
     ros::ServiceClient land_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/land");
     mavros_msgs::CommandTOL srv_land;
     srv_land.request.altitude = minAboutAltitude;

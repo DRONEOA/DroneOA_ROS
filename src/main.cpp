@@ -32,7 +32,7 @@
 
 int main(int argc, char **argv) {
     // Setup Refresh Rate
-    int rate = 10;
+    int32_t rate = 10;
 
     ros::init(argc, argv, "mavros_takeoff");
     ros::NodeHandle n;

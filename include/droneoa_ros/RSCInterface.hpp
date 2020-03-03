@@ -79,7 +79,7 @@ class RSCInterface {
 
     // Debug Print
     void printImgInfo();
-    static void mouseCallback(int event, int x, int y, int flags, void* userdata);
+    static void mouseCallback(int32_t event, int32_t x, int32_t y, int32_t flags, void* userdata);
     pcl::PointCloud<pcl::PointXYZRGB> getPointCloud();
 
  private:

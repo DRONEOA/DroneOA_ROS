@@ -32,7 +32,7 @@
 #include <opencv2/highgui/highgui.hpp>
 
 // #define DEBUG_LIDAR_POPUP
-const int LIDAR_POPUP_SCALE = 100;
+const int32_t LIDAR_POPUP_SCALE = 100;
 
 typedef std::vector<float> degreeSector;
 
