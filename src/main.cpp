@@ -17,6 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
+#include <signal.h>
 #include <ros/ros.h>
 
 #include <cstdlib>
@@ -30,6 +31,12 @@
 #include <droneoa_ros/Utils/CNCUtils.hpp>
 #include <droneoa_ros/ConsoleInputManager.hpp>
 
+void sysSignalhandler(int signum) {
+    ROS_WARN("Caught signal %d", signum);
+    // Terminate program
+    exit(signum);
+}
+
 int main(int argc, char **argv) {
     // Setup Refresh Rate
     int32_t rate = 10;
@@ -38,6 +45,9 @@ int main(int argc, char **argv) {
     ros::NodeHandle n;
 
     ros::Rate r(rate);
+
+    // Register exit signal
+    signal(SIGINT, sysSignalhandler);
 
     // Interface Instance
     CNCInterface cnc;
