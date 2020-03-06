@@ -259,3 +259,6 @@ install(
 
 add_executable(droneoa_ros_utiltest test/utils_unittest.cpp src/Utils/GeneralUtils.cpp src/Utils/CNCUtils.cpp src/GPSPoint.cpp)
 target_link_libraries(droneoa_ros_utiltest ${catkin_LIBRARIES} gtest)
+
+add_executable(droneoa_ros_cnctest test/cnc_unittest.cpp src/CNCInterface.cpp src/GPSPoint.cpp src/Utils/GeneralUtils.cpp src/Utils/CNCUtils.cpp)
+target_link_libraries(droneoa_ros_cnctest ${catkin_LIBRARIES} gtest)
