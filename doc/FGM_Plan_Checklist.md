@@ -14,13 +14,13 @@
 ### Collect & Evaluation
 
 - Process lidar data:
-  - Sector data v. raw data: Sector data would be prefered. But this would depends on the precision/range we can get from lidar raw data and the accuracy needed from the algorithm
-  - Speed correction(data inaccuracies caused by speed of drone): Yes. Speed correction should compensate the time difference between when distance is measured and when data is relayed to this algorithm. There are two types of correction that I can think of: 1) When our lidar are doing scanning, 1 cycle of scan from 0 degree to 360 degree would give `speed_of_drone/scanning_frequency` of error. 2) Latency of lidar data, `speed_of_drone*latency` is the error, a simple translation should be able to fix this
-  - Orientation correction(data inaccuracies caused by angular speed of drone): ^same as above (I'm not expecting high level of accuracy, use models as simple as possible to do data correction)
+  - Sector data v. raw data: Sector data would be prefered as it allows easier processing for the algorithm. Considering the precision/range of our current lidar, (~10m range, ~3600Hz , ~600/scan data points collected) sector data of 1 degree per division would be used
+  - Speed correction(data inaccuracies caused by speed of drone): We will used some speed correction. Speed correction should compensate the time difference between when distance is measured and when data is relayed to this algorithm. There are two types of correction that I can think of: 1) When our lidar are doing scanning, 1 cycle of scan from 0 degree to 360 degree would give `speed_of_drone/scanning_frequency` of error. 2) Latency of lidar data, `speed_of_drone*latency` is the error, we should do some timing on hardware to determine this latency and compensate the delay
+  - Orientation correction(data inaccuracies caused by angular speed of drone): ^same as above (I'm not expecting high level of accuracy as processing speed is more important, use models as simple as possible to do data correction)
   - Unit for data: Using metic standard (i.e. m) would be helpful
   - Data cleansing: (Not needed if getting sector data from lidar interface.)
-  - Intermediate data storage
-- CNC Data (e.g. vehicle speed, altitude): Yes. These may not be needed for initial implementaion, but further development with more sophisticated algorithm would need these.
+  - Intermediate data storage: cirular queue for multiple packages for scan data (scan data is delivered per scan cycle (360 degrees))
+- CNC Data (e.g. vehicle speed, altitude): Yes. Initial implementation do need these data for data correction (speed correction, inclination correction) but not for algorithm, further development with more sophisticated algorithm would need these.
 - Preconditions location, speed, **lidar scan data**
 
 ### Planning
@@ -30,16 +30,25 @@
     - Basic form: <https://www.sciencedirect.com/science/article/abs/pii/S0921889012000838>
     - An improved FGM can be found at <https://www.computer.org/csdl/proceedings-article/irc/2017/07926547/12OmNAXxXdZ.> Specifically, this method provides angular and linear velocity in addition to heading angle given by FGM
     - Another improved FGM is presented at <https://ieeexplore.ieee.org/abstract/document/8014220.> This method eliminates two drawbacks from the original FGM: extension of the path which sometimes happens unnecessarily, and small differences between the gap sizes
-  - Possible parallel development: (e.g. maybe fake out some data using unittest) Hard to do
+  - Possible parallel development: (e.g. maybe fake out some data using unittest)
+    - Debug visualization for visualize gaps and result vector
+    - Find gap
+    - Calculate possible turning angle and visualize
+    
   - Convert algo. results to instruction for drone
     - Possible PID utility
     - Perhaps using gain/weight?
+      - alg_result * a + diff_current_wp_new_wp * b + angle_between_target_wp * c
     - Algorithm specific
 - Generate Command Queue:
-  - Commands required: (e.g. Something simple like: goto relative position, change altitude. Something complex like: wait until arrive at) (go to relative/absolute position, change altitude, heading angle)
+  - Commands required: (e.g. Something simple like: goto relative position, change altitude. Something complex like: wait until arrive at) 
+    - go to relative/absolute position
+    - change altitude
+    - heading angle
+    - set maximum speed (the algorithm may require to reduce/increase max_speed in accordance to surrounding obsttacles)
   - Possible delay commands: The only use case I can think of for now to use Delay command would be when flying directly to target position(when there're no obstacles)
 - Generate Data Queue:
-  - Rules for confidence: closest obstacle distance(physical restriction of lidar), speed(timing), margin of error for GAP
+  - Rules for confidence: Consider these factors: closest obstacle distance(physical restriction of lidar), speed(timing), margin of error for GAP
   - Additional data for OAC: (e.g. in the future: display a msg on debugging overlay) Low priority, might reconsider in future
 - Feed results back to OAController
 
