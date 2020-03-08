@@ -31,6 +31,11 @@ sudo apt install python-rosinstall python-rosinstall-generator python-wstool bui
 
 sudo apt install git gitk -y
 cd ~
+echo "Please pick you workspace root directory(absolute path): press ENTER to continue"
+echo ""
+read absolutePath
+mkdir $absolutePath || true
+cd $absolutePath
 mkdir ardupilot_ws
 cd ardupilot_ws
 mkdir src
@@ -66,6 +71,7 @@ sudo ./install_geographiclib_datasets.sh
 
 
 cd ~
+cd $absolutePath
 git clone https://github.com/ArduPilot/ardupilot
 cd ardupilot
 git submodule update --init --recursive
