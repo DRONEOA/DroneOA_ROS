@@ -20,9 +20,18 @@
 #include <gtest/gtest.h>
 #include <../include/droneoa_ros/CNCInterface.hpp>
 #include "ros/ros.h"
+#include "gmock/gmock.h"
 // #include "mock_objects/"
-TEST(UtilTestSuite, takeoffSuccess) {
+
+class MockCNCInterface: public CNCInterface {
+    public:
+        MOCK_METHOD(bool, takeoff, (float targetAltitude), (override));
+};
+
+
+TEST(CNCTestSuite, takeoffSuccess) {
     // TODO mock the call() method of ServiceClient
+    MockCNCInterface CNCInterface;
     // gmock
     
 }
