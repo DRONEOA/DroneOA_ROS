@@ -31,6 +31,25 @@ bool ConsoleInputManager::init(CNCInterface* cnc, RSCInterface *rsc, OAControlle
     rsc_ = rsc;
     oac_ = oac;
     lidar_ = lidar;
+    thread_watch_command_ = new boost::thread(boost::bind(&ConsoleInputManager::watchCommandThread, this));
+}
+
+void ConsoleInputManager::command_callback(const std_msgs::String::ConstPtr& msg) {
+    std_msgs::String inputCMD = *msg;
+    parseAndExecuteConsole(inputCMD.data);
+}
+
+void ConsoleInputManager::watchCommandThread() {
+    auto rate = ros::Rate(OAC_REFRESH_FREQ);
+    auto node = boost::make_shared<ros::NodeHandle>();
+    auto gpsFix_sub =
+        node->subscribe<std_msgs::String>("droneoa/input_command", 1,
+            boost::bind(&ConsoleInputManager::command_callback, this, _1));
+
+    while (ros::ok()) {
+        ros::spinOnce();
+        rate.sleep();
+    }
 }
 
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
@@ -345,7 +364,7 @@ bool ConsoleInputManager::handleLIDARCommands() {
 void ConsoleInputManager::printCNCHelper() {
     ROS_WARN("CNC Commands: [required] <optional>");
     ROS_WARN("    arm:                                  Arm the vehicle motor");
-    ROS_WARN("    takeoff:                              Takeoff");
+    ROS_WARN("    takeoff [altitude]:                   Takeoff");
     ROS_WARN("    chmod [mode name]:                    Change flight mode");
     ROS_WARN("    rtl:                                  Return to land");
     ROS_WARN("    velocity [Speed]:                     Set max velocity");

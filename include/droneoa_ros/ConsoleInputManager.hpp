@@ -20,6 +20,8 @@
 #ifndef INCLUDE_DRONEOA_ROS_CONSOLEINPUTMANAGER_HPP_  // NOLINT
 #define INCLUDE_DRONEOA_ROS_CONSOLEINPUTMANAGER_HPP_  // NOLINT
 
+#include <std_msgs/String.h>
+
 #include <vector>
 #include <string>
 #include <utility>
@@ -43,6 +45,8 @@ class ConsoleInputManager {
      */
     bool parseAndExecuteConsole(std::string cmd);
 
+    void command_callback(const std_msgs::String::ConstPtr& msg);
+
  private:
     std::pair<std::string, std::vector<std::string>> currentCommand_;
     bool* masterSwitch_;
@@ -52,6 +56,10 @@ class ConsoleInputManager {
     RSCInterface *rsc_;
     OAController *oac_;
     LidarInterface *lidar_;
+
+    // Listen to command from topic
+    boost::thread* thread_watch_command_ = nullptr;
+    void watchCommandThread();
 
     // Private Handlers
     bool splitModuleCommand(std::string cmd);
