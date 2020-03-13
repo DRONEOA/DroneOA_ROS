@@ -206,6 +206,9 @@ class CNCInterface {
     void watchAltitudeThread();
     void watchIMUThread();
 
+    // GUI Data Publisher
+    ros::Publisher gui_info_pub_;
+
     // Private CNC
     bool generalLongCommand(mavros_msgs::CommandLong commandMessage);
 

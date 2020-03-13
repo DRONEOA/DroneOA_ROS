@@ -51,6 +51,7 @@ void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
     thread_watch_Altitude_ = new boost::thread(boost::bind(&CNCInterface::watchAltitudeThread, this));
     thread_watch_IMU_ = new boost::thread(boost::bind(&CNCInterface::watchIMUThread, this));
+    gui_info_pub_ = n.advertise<std_msgs::String>("droneoa/gui_data", 1000);
     ROS_INFO("[CNC] init");
 }
 
@@ -335,6 +336,13 @@ void CNCInterface::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
 
 void CNCInterface::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
     current_hud_data_ = *msg;
+    // Post Infomation Package For GUI
+    std_msgs::String guiMsg;
+    std::stringstream ss;
+    ss << getMode() << " " << getRelativeAltitude() << " " << getBatteryVoltage() << " " << getHUDData().climb << " "
+        << getHUDData().heading << " " << getHUDData().groundspeed << " " << getHUDData().throttle;
+    guiMsg.data = ss.str();
+    gui_info_pub_.publish(guiMsg);
 }
 
 /*****************************************************
