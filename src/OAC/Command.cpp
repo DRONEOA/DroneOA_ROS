@@ -18,6 +18,20 @@
  */
 
 #include <droneoa_ros/OAC/Command.hpp>
+#include <droneoa_ros/Utils/GeneralUtils.hpp>
+
+std::vector<std::string> getDataListFromString(std::string data) {
+    std::string token;
+    std::istringstream tokenStream(data);
+    std::vector<std::string> dataList;
+
+    while (std::getline(tokenStream, token, CommandDataDelimiter)) {
+        GeneralUtility::toLowerCaseStr(&token);
+        dataList.push_back(token);
+    }
+
+    return dataList;
+}
 
 bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline) {
     try {
@@ -32,6 +46,24 @@ bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline) {
                 float targetSpeed = std::stof(cmdline.second);
                 targetSpeed = targetSpeed >= 0 ? targetSpeed : 0;
                 return cnc->setMaxSpeed(1, targetSpeed, 0);
+            }
+            case CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE:
+            {
+                std::vector<std::string> dataList = getDataListFromString(cmdline.second);
+                if (dataList.size() != 3) throw 1;
+                float northAxis = std::stof(dataList.at(0));
+                float eastAxis = std::stof(dataList.at(1));
+                float alt = std::stof(dataList.at(2));
+                return cnc->gotoRelative(northAxis, eastAxis, alt);
+            }
+            case CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL:
+            {
+                std::vector<std::string> dataList = getDataListFromString(cmdline.second);
+                if (dataList.size() != 3) throw 1;
+                float latPos = std::stof(dataList.at(0));
+                float longPos = std::stof(dataList.at(1));
+                float alt = std::stof(dataList.at(2));
+                return cnc->gotoGlobal(latPos, longPos, alt);
             }
             default:
                 throw 1;

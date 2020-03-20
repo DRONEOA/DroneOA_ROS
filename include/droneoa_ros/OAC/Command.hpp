@@ -33,6 +33,10 @@
 #include <string>
 #include <droneoa_ros/CNCInterface.hpp>
 
+//! @todo Make this a Utility class
+
+constexpr char CommandDataDelimiter = ' ';
+
 /**
  * @brief ENUM of supported COMMAND types
  */
@@ -40,6 +44,8 @@ enum CMD_QUEUE_TYPES {
     CMD_CHMOD = 0,  /*!< DATA: mod name */
     CMD_SET_MAX_VELOCITY,  /*!< DATA: float speed */
     CMD_DELAY_MSEC,  /*!< DATA: uint32 time in ms */
+    CMD_GOTO_RELATIVE,  /*!< DATA: float North axis dist, float East axis dist, float Altitude */
+    CMD_GOTO_GLOBAL,  /*!< DATA: float Latitude, float Longitude, float Altitude */
 };
 
 /**
@@ -49,6 +55,8 @@ static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_CHMOD",
     "CMD_SET_MAX_VELOCITY",
     "CMD_DELAY_MSEC",
+    "CMD_GOTO_RELATIVE",
+    "CMD_GOTO_GLOBAL",
 };
 
 /**
