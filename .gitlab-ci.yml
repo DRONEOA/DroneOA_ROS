@@ -42,7 +42,8 @@ haros:
     - pip install -e git+https://github.com/timtadh/pyflwor.git#egg=pyflwor
     - pip install radon
     - apt-get install cppcheck -y
-    - sudo apt-get install cccc -y
+    - apt-get install cccc -y
+    - apt-get install cloc -y
     - cd ./src/droneoa_ros
     - mkdir ../../../report
     - haros --config ./haros_config.yaml analyse -d ../../../report
