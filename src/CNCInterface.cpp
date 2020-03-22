@@ -33,9 +33,7 @@
 #include <droneoa_ros/Utils/CNCUtils.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 
-CNCInterface::CNCInterface() {
-    watchHomePosThread();
-}
+CNCInterface::CNCInterface() {}
 
 CNCInterface::~CNCInterface() {
     delete thread_watch_Altitude_;
@@ -47,6 +45,7 @@ CNCInterface::~CNCInterface() {
 void CNCInterface::init(ros::NodeHandle nh, ros::Rate r) {
     n = nh;
     r_ = r;
+    watchHomePosThread();
     thread_watch_state_ = new boost::thread(boost::bind(&CNCInterface::watchStateThread, this));
     thread_watch_GPSFix_ = new boost::thread(boost::bind(&CNCInterface::watchGPSFixThread, this));
     thread_watch_Altitude_ = new boost::thread(boost::bind(&CNCInterface::watchAltitudeThread, this));
@@ -374,8 +373,9 @@ void CNCInterface::watchGPSFixThread() {
 }
 /* Home Position */
 void CNCInterface::watchHomePosThread() {
+    auto node = boost::make_shared<ros::NodeHandle>();
     auto home_sub =
-        n.subscribe<mavros_msgs::HomePosition>("mavros/home_position/home", 1,
+        node->subscribe<mavros_msgs::HomePosition>("mavros/home_position/home", 1,
             boost::bind(&CNCInterface::homePos_callback, this, _1));
 
     ROS_WARN("Waiting For 3D Fix ...");
@@ -386,7 +386,7 @@ void CNCInterface::watchHomePosThread() {
 }
 /* Altitude */
 void CNCInterface::watchAltitudeThread() {
-    auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
+    auto node = boost::make_shared<ros::NodeHandle>();
     auto relative_pos_sub =
         node->subscribe<std_msgs::Float64>("mavros/global_position/rel_alt", 1,
                 boost::bind(&CNCInterface::altitude_callback, this, _1));
@@ -398,7 +398,7 @@ void CNCInterface::watchAltitudeThread() {
 }
 /* IMU */
 void CNCInterface::watchIMUThread() {
-    auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
+    auto node = boost::make_shared<ros::NodeHandle>();
     auto IMU_data_sub =
         node->subscribe<sensor_msgs::Imu>("mavros/imu/data", 1,
                 boost::bind(&CNCInterface::IMU_callback, this, _1));
