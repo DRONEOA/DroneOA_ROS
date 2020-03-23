@@ -49,6 +49,7 @@ sudo apt-get update
 sudo apt-get install librealsense2-dkms --allow-unauthenticated -y
 sudo apt-get install librealsense2-dev --allow-unauthenticated -y
 sudo apt-get install librealsense2-utils -y
+sudo apt-get install libreadline7 libreadline-dev -y
 sudo apt-get install ros-melodic-cv-bridge -y
 sudo apt-get install ros-melodic-image-transport
 sudo apt-get install ros-melodic-tf -y

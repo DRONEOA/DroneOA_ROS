@@ -3,6 +3,7 @@ apt-key add ./src/droneoa_ros/scripts/realsenseKey
 apt-get update
 apt-get install librealsense2-dkms --allow-unauthenticated -y
 apt-get install librealsense2-dev --allow-unauthenticated -y
+apt-get install libreadline7 libreadline-dev -y
 apt-get install ros-melodic-cv-bridge -y
 apt-get install ros-melodic-image-transport
 apt-get install ros-melodic-tf -y
