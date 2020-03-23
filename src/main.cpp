@@ -19,6 +19,8 @@
 
 #include <signal.h>
 #include <ros/ros.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include <cstdlib>
 #include <iomanip>
@@ -68,12 +70,17 @@ int main(int argc, char **argv) {
     OAController oac(&cnc, &lidar, &rsc, &runner, ros::Rate(OAC_REFRESH_FREQ));
 
     // Process Console Commands
-    std::string commandIn;
+    char *commandIn;
     bool masterSW = true;
     ConsoleInputManager consoleInputManager(&masterSW);
     consoleInputManager.init(&cnc, &rsc, &oac, &lidar);
-    while (std::getline(std::cin, commandIn)) {
-        consoleInputManager.parseAndExecuteConsole(commandIn);
+    while ((commandIn = readline("")) != nullptr) {
+        if (*commandIn) {
+            add_history(commandIn);
+            std::string sCommandIn(commandIn);
+            consoleInputManager.parseAndExecuteConsole(sCommandIn);
+        }
+        free(commandIn);
         if (!masterSW) {  // Quit Signal
             break;
         }
