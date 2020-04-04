@@ -33,7 +33,7 @@
 #include <string>
 #include <droneoa_ros/CNCInterface.hpp>
 
-//! @todo Make this a Utility class
+namespace Command {
 
 constexpr char CommandDataDelimiter = ' ';
 
@@ -43,9 +43,11 @@ constexpr char CommandDataDelimiter = ' ';
 enum CMD_QUEUE_TYPES {
     CMD_CHMOD = 0,  /*!< DATA: mod name */
     CMD_SET_MAX_VELOCITY,  /*!< DATA: float speed */
+    CMD_SET_YAW,  /*!< DATA: float heading */
     CMD_DELAY_MSEC,  /*!< DATA: uint32 time in ms */
     CMD_GOTO_RELATIVE,  /*!< DATA: float North axis dist, float East axis dist, float Altitude */
     CMD_GOTO_GLOBAL,  /*!< DATA: float Latitude, float Longitude, float Altitude */
+    CMD_GOTO_HEADING,  /*!< DATA: float heading, float distance, float Altitude */
 };
 
 /**
@@ -54,9 +56,11 @@ enum CMD_QUEUE_TYPES {
 static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_CHMOD",
     "CMD_SET_MAX_VELOCITY",
+    "CMD_SET_YAW",
     "CMD_DELAY_MSEC",
     "CMD_GOTO_RELATIVE",
     "CMD_GOTO_GLOBAL",
+    "CMD_GOTO_HEADING",
 };
 
 /**
@@ -106,5 +110,7 @@ typedef std::vector<DataLine> DataQueue;
  * @return whether the operation is successful
  */
 bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline);
+
+}  // namespace Command
 
 #endif  // INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT

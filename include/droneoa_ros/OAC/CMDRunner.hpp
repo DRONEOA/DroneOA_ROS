@@ -53,7 +53,7 @@ class CMDRunner {
     boost::thread *runnerThread;
     CNCInterface *cnc_;
 
-    CommandQueue theCMDQueue;
+    Command::CommandQueue theCMDQueue;
     RUNNER_STATE runnerState;
     bool shutdown;
     boost::shared_mutex queue_mutex;
@@ -61,7 +61,7 @@ class CMDRunner {
     boost::shared_mutex shutdown_mutex;
 
     void clearCMDQueue();
-    bool populateCMDQueue(CommandQueue commands);
+    bool populateCMDQueue(Command::CommandQueue commands);
     bool toggleState(RUNNER_STATE newState);
     bool isShutDownRequested();
 
@@ -75,7 +75,7 @@ class CMDRunner {
      * @return true operation is successful
      * @return false condition unsatisfied or command queue contains error
      */
-    bool setupRunner(CommandQueue commands);
+    bool setupRunner(Command::CommandQueue commands);
     bool startRunner();
     //! @todo(shibohan) interrupt and management
 

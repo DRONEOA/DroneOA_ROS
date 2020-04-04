@@ -40,7 +40,7 @@ class CMDParser {
      * @param isInstant true if all command can be executed at the same time, false will use the runner
      * @return whether the operation is successful
      */
-    bool parseCMDQueue(const CommandQueue& cmdqueue, bool isInstant = true);
+    bool parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isInstant = true);
 };
 
 #endif  // INCLUDE_DRONEOA_ROS_OAC_CMDPARSER_HPP_  // NOLINT

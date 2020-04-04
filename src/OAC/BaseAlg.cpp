@@ -31,10 +31,10 @@ BaseAlg::~BaseAlg() {
     ROS_INFO("Destroy BaseAlg");
 }
 
-CommandQueue BaseAlg::getCommandQueue() {
+Command::CommandQueue BaseAlg::getCommandQueue() {
     return CMDQueue_;
 }
 
-DataQueue BaseAlg::getDataQueue() {
+Command::DataQueue BaseAlg::getDataQueue() {
     return DATAQueue_;
 }

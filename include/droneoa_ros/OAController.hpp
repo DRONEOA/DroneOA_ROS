@@ -146,8 +146,8 @@ class OAController {
     SYS_State currState_ = SYS_State::SYS_IDLE;
     std::vector<SYS_Algs> selectedAlgorithm_;
     SYS_SelectedDetermineFun selectedDetermineFun_;
-    std::map<SYS_Algs, CommandQueue> algCMDmap_;
-    std::map<SYS_Algs, DataQueue> algDATAmap_;
+    std::map<SYS_Algs, Command::CommandQueue> algCMDmap_;
+    std::map<SYS_Algs, Command::DataQueue> algDATAmap_;
 };
 
 #endif  // INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT

@@ -56,19 +56,19 @@ class BaseAlg {
      */
     virtual bool plan() = 0;
 
-    virtual CommandQueue getCommandQueue();
-    virtual DataQueue getDataQueue();
+    virtual Command::CommandQueue getCommandQueue();
+    virtual Command::DataQueue getDataQueue();
 
  protected:
     CNCInterface *cnc_;
     /**
      * @brief A vector of CommandLine which is a pair of CMD_QUEUE_TYPES and std::string
      */
-    CommandQueue CMDQueue_;
+    Command::CommandQueue CMDQueue_;
     /**
      * @brief A vector of DataLine which is a pair of DATA_QUEUE_TYPES and std::string
      */
-    DataQueue DATAQueue_;
+    Command::DataQueue DATAQueue_;
 };
 
 #endif  // INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT
