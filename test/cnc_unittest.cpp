@@ -14,31 +14,69 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Zhiqing Hu <clair.hu.1@edu.uwaterloo.ca>, March 2020
  */
 
 #include <gtest/gtest.h>
 #include <../include/droneoa_ros/CNCInterface.hpp>
 #include "ros/ros.h"
-#include "gmock/gmock.h"
-// #include "mock_objects/"
+#include <mavros_msgs/CommandTOL.h>
+#include <iostream>
 
-class MockCNCInterface: public CNCInterface {
+#include "gmock/gmock.h"
+
+// bool takeoff(float);
+
+class MockNodeHandle: public ros::NodeHandle {
     public:
-        MOCK_METHOD(bool, takeoff, (float targetAltitude), (override));
+        MockNodeHandle() {}
+        MOCK_METHOD1(call, bool(mavros_msgs::CommandTOL srv_takeoff));
 };
+
+// class MockServiceClient: public ros::ServiceClient {
+//     public:
+
+// }
+
+// TODO not working
+class MockRate {
+    int32_t rate;
+    public:
+        MockRate(int32_t rate) : rate(rate) {}
+};
+
+// class MockRos 
 
 
 TEST(CNCTestSuite, takeoffSuccess) {
     // TODO mock the call() method of ServiceClient
-    MockCNCInterface CNCInterface;
+    // MockCNCInterface CNCInterface;
     // gmock
-    
+    // CNCInterface 
+
+    // ros::init(b, a, "mavros_takeoff");
+    // std::cout << "..asdfadsf" << std::endl;
+    // MockNodeHandle n;
+    // EXPECT_CALL(n, call).Times(1);
+    std::cout << ",,asdfadsf" << std::endl;
+    MockRate r(10);
+    std::cout << "//asdfadsf" << std::endl;
+
+    // CNCInterface cnc;
+    // std::cout << "--asdfadsf" << std::endl;
+    // cnc.init(n, r);
+    // std::cout << "==asdfadsf" << std::endl;
+
+    // need to mock n.serviceClient
+    // ros::ServiceClient takeoff_cl = n.serviceClient<mavros_msgs::CommandTOL>("/mavros/cmd/takeoff");
+
+
+    // bool result = cnc.takeoff(40.0);
+    // EXPECT_TRUE(result); 
 }
 
 
 // Run all the tests that were declared with TEST()
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
-    // return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }
