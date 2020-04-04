@@ -31,10 +31,10 @@ CMDParser::~CMDParser() {
  * - Output: whether operation is succesuful
  * - TODO: support timed commands (currently all commands are sent with no delay or complete check)
  */
-bool CMDParser::parseCMDQueue(const CommandQueue& cmdqueue, bool isInstant) {
+bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isInstant) {
     if (isInstant) {
         for (auto cmdline : cmdqueue) {
-            if (!parseCMD(cnc_, cmdline)) {
+            if (!Command::parseCMD(cnc_, cmdline)) {
                 ROS_ERROR("[CMD PARSER] Queue Parser Terminated With ERROR !!!");
                 return false;
             }

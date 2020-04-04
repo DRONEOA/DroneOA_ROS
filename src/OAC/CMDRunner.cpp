@@ -30,7 +30,7 @@ void CMDRunner::clearCMDQueue() {
     theCMDQueue.clear();
 }
 
-bool CMDRunner::populateCMDQueue(CommandQueue commands) {
+bool CMDRunner::populateCMDQueue(Command::CommandQueue commands) {
     //! @todo(shibohan) pre-check commands here
     ROS_DEBUG("[CMDRunner] %s", __func__);
     boost::unique_lock<boost::shared_mutex> uniqueLock(queue_mutex);
@@ -54,7 +54,7 @@ bool CMDRunner::isShutDownRequested() {
     return shutdown;
 }
 
-bool CMDRunner::setupRunner(CommandQueue commands) {
+bool CMDRunner::setupRunner(Command::CommandQueue commands) {
     populateCMDQueue(commands);
 }
 
@@ -96,7 +96,7 @@ void CMDRunner::runnerRoutine() {
                 internalTimmer = 0;
             }
         }
-        if (theCMDQueue.front().first == CMD_QUEUE_TYPES::CMD_DELAY_MSEC) {
+        if (theCMDQueue.front().first == Command::CMD_QUEUE_TYPES::CMD_DELAY_MSEC) {
             // Handle Delay
             try {
                 internalTimmer = std::stoi(theCMDQueue.front().second);
@@ -108,7 +108,7 @@ void CMDRunner::runnerRoutine() {
             }
         } else {
             // Common Instant Commands
-            parseCMD(cnc_, theCMDQueue.front());
+            Command::parseCMD(cnc_, theCMDQueue.front());
             theCMDQueue.erase(theCMDQueue.begin());
         }
     }

@@ -208,7 +208,7 @@ void OAController::determineFunStage1() {
     try {
         algDATAmap_.at(SYS_Algs::ALG_COLLISION_LIDAR);
         for (auto dataline : algDATAmap_[SYS_Algs::ALG_COLLISION_LIDAR]) {
-            if (dataline.first == DATA_QUEUE_TYPES::DATA_CONFIDENCE) {
+            if (dataline.first == Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE) {
                 lidarConf = std::stof(dataline.second);
             }
         }
@@ -218,7 +218,7 @@ void OAController::determineFunStage1() {
     try {
         algDATAmap_.at(SYS_Algs::ALG_COLLISION_DEPTH);
         for (auto dataline : algDATAmap_[SYS_Algs::ALG_COLLISION_DEPTH]) {
-            if (dataline.first == DATA_QUEUE_TYPES::DATA_CONFIDENCE) {
+            if (dataline.first == Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE) {
                 depthConf = std::stof(dataline.second);
             }
         }

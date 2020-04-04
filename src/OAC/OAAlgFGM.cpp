@@ -49,8 +49,8 @@ bool OAAlgFGM::collect() {
 bool OAAlgFGM::plan() {
     CMDQueue_.clear();
     DATAQueue_.clear();
-    DATAQueue_.push_back(DataLine(DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_FGM));
-    DATAQueue_.push_back(DataLine(DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(0.0f)));
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_FGM));
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(0.0f)));
     //! @todo remain false until implemented
     return false;
 }
