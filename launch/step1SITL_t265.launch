@@ -1,7 +1,0 @@
-<launch>
-    <include file="./apmSITL.launch" />
-    <include file="./rs_camera_t265_d435.launch" />
-    <include file="./lidar.launch" />
-    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch" /> -->
-    <!-- <include file="$(find ydlidar)/launch/lidar.launch" /> -->
-</launch>
