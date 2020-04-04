@@ -1,0 +1,8 @@
+<launch>
+    <include file="../components/apm.launch" />
+    <include file="../components/rs_camera_t265_d435.launch" />
+    <include file="../components/lidar.launch" />
+    <include file="../components/t265_tf_to_mavros.launch"/>
+    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch" /> -->
+    <!-- <include file="$(find ydlidar)/launch/lidar.launch" /> -->
+</launch>

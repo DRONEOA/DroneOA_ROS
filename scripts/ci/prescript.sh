@@ -1,5 +1,5 @@
 echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
-apt-key add ./src/droneoa_ros/scripts/realsenseKey
+apt-key add ./src/droneoa_ros/scripts/ci/realsenseKey
 apt-get update
 apt-get install librealsense2-dkms --allow-unauthenticated -y
 apt-get install librealsense2-dev --allow-unauthenticated -y
