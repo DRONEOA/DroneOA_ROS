@@ -17,10 +17,12 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <droneoa_ros/OAController.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
 #include <string>
 
-OAController::OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc,
+namespace OAC {
+
+OAController::OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc,
         CMDRunner *runner, ros::Rate r) {
     theRunner_ = runner;
     r_ = r;
@@ -45,7 +47,7 @@ OAController::~OAController() {
 
 // Init OA Controller (for restart)
 // - Input: CNCInterface *, LidarInterface *, RSCInterface *
-void OAController::init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc) {
+void OAController::init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc) {
     cnc_ = cnc;
     lidar_ = lidar;
     rsc_ = rsc;
@@ -299,3 +301,5 @@ SYS_SelectedDetermineFun OAController::selectDetermineFunction() {
     }
     return selectedDetermineFun_;
 }
+
+}  // namespace OAC

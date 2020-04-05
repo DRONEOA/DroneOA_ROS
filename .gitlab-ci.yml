@@ -23,7 +23,7 @@ cpplint:
   script:
     - pip install cpplint --quiet
     - cd ./src/droneoa_ros
-    - cpplint --linelength=120 ./test/*.cpp ./src/*.cpp ./include/droneoa_ros/*.hpp ./src/OAC/*.cpp ./include/droneoa_ros/OAC/*.hpp ./src/Utils/*.cpp ./include/droneoa_ros/Utils/*.hpp
+    - cpplint --linelength=120 --recursive .
     - cd ..
     - cd ..
 
@@ -76,5 +76,8 @@ Unittest:
     - sh ./src/droneoa_ros/scripts/ci/prescript.sh
     - catkin_make
     - source ./devel/setup.sh
-    - rosrun droneoa_ros droneoa_ros_utiltest
+    # - roscore &
+    - rosrun droneoa_ros droneoa_ros_utiltest || true
+    - rosrun droneoa_ros droneoa_ros_commandtest || true
+    - sh ./src/droneoa_ros/scripts/ci/checkUnittestResult.sh
   retry: 2

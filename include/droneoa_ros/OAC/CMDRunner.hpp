@@ -17,12 +17,14 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT
+#ifndef OAC_CMDRUNNER_HPP_  // NOLINT
+#define OAC_CMDRUNNER_HPP_  // NOLINT
 
 #include <boost/thread.hpp>
 #include <droneoa_ros/OAC/Command.hpp>
-#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+
+namespace OAC {
 
 /**
  * @brief 5 States Of The Runner
@@ -51,7 +53,7 @@ static const int32_t RUNNER_TICK_TIME = 100;
 class CMDRunner {
     void runnerRoutine();
     boost::thread *runnerThread;
-    CNCInterface *cnc_;
+    CNC::CNCInterface *cnc_;
 
     Command::CommandQueue theCMDQueue;
     RUNNER_STATE runnerState;
@@ -66,7 +68,7 @@ class CMDRunner {
     bool isShutDownRequested();
 
  public:
-    explicit CMDRunner(CNCInterface *cnc);
+    explicit CMDRunner(CNC::CNCInterface *cnc);
     virtual ~CMDRunner();
     /**
      * @brief Send a new command queue to the runner
@@ -86,4 +88,6 @@ class CMDRunner {
     RUNNER_STATE getRunnerState();
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT
+}  // namespace OAC
+
+#endif  // OAC_CMDRUNNER_HPP_  // NOLINT

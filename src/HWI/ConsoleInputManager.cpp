@@ -19,14 +19,21 @@
 
 #include <sstream>
 #include <string>
-#include <droneoa_ros/ConsoleInputManager.hpp>
+#include <droneoa_ros/HWI/ConsoleInputManager.hpp>
+#include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
-#include <droneoa_ros/Utils/CNCUtils.hpp>
+
+namespace IO {
 
 ConsoleInputManager::ConsoleInputManager(bool* masterSwitch) : masterSwitch_(masterSwitch),
         cnc_(nullptr), rsc_(nullptr), oac_(nullptr), lidar_(nullptr) {}
 
-bool ConsoleInputManager::init(CNCInterface* cnc, RSCInterface *rsc, OAController *oac, LidarInterface *lidar) {
+ConsoleInputManager::~ConsoleInputManager() {
+    if (thread_watch_command_) delete thread_watch_command_;
+}
+
+bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac,
+        Lidar::LidarGeneric *lidar) {
     cnc_ = cnc;
     rsc_ = rsc;
     oac_ = oac;
@@ -154,7 +161,7 @@ bool ConsoleInputManager::handleCNCCommands() {
             cnc_->setYaw(yawAngle);
             if (currentCommand_.second.size() >= 3) {
                 float dist = std::stof(currentCommand_.second.at(2));
-                float alt = cnc_->getTargetAltitude();
+                float alt = cnc_->getRelativeAltitude();
                 if (currentCommand_.second.size() >= 4) {
                     alt = std::stof(currentCommand_.second.at(3));
                 }
@@ -224,39 +231,39 @@ bool ConsoleInputManager::handleQuickCommands() {
         if (cmdType == "w") {
             ROS_WARN("::GO NORTH::");
             float dist = std::stof(currentCommand_.second.at(1));
-            float alt = cnc_->getTargetAltitude();
+            float alt = cnc_->getRelativeAltitude();
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
             }
             cnc_->gotoRelative(dist, 0, alt);
-            cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
+            cnc_->setYaw(CNC::CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
         } else if (cmdType == "s") {
             ROS_WARN("::GO SOUTH::");
             float dist = std::stof(currentCommand_.second.at(1));
-            float alt = cnc_->getTargetAltitude();
+            float alt = cnc_->getRelativeAltitude();
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
             }
             cnc_->gotoRelative(-dist, 0, alt);
-            cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
+            cnc_->setYaw(CNC::CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
         } else if (cmdType == "a") {
             ROS_WARN("::GO WEST::");
             float dist = std::stof(currentCommand_.second.at(1));
-            float alt = cnc_->getTargetAltitude();
+            float alt = cnc_->getRelativeAltitude();
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
             }
             cnc_->gotoRelative(0, -dist, alt);
-            cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
+            cnc_->setYaw(CNC::CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
         } else if (cmdType == "d") {
             ROS_WARN("::GO EAST::");
             float dist = std::stof(currentCommand_.second.at(1));
-            float alt = cnc_->getTargetAltitude();
+            float alt = cnc_->getRelativeAltitude();
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
             }
             cnc_->gotoRelative(0, dist, alt);
-            cnc_->setYaw(CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
+            cnc_->setYaw(CNC::CNCUtility::getBearing(cnc_->getCurrentGPSPoint(), cnc_->getTargetWaypoint()));
         } else {
             ROS_WARN("Unknown Quick command");
             printQuickHelper();
@@ -415,3 +422,5 @@ void ConsoleInputManager::printModuleHelper() {
     ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
     ROS_WARN("    !:      Quick Commands");
 }
+
+}  // namespace IO

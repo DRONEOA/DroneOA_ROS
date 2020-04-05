@@ -19,11 +19,13 @@
 
 #include <droneoa_ros/OAC/CAAlgLidar.hpp>
 
-CAAlgLidar::CAAlgLidar(CNCInterface *cnc, LidarInterface *lidar) : BaseAlg(cnc) {
+namespace OAC {
+
+CAAlgLidar::CAAlgLidar(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar) : BaseAlg(cnc) {
     init(lidar);
 }
 
-void CAAlgLidar::init(LidarInterface *lidar) {
+void CAAlgLidar::init(Lidar::LidarGeneric *lidar) {
     lidar_ = lidar;
     lidarPossibility_ = 0.0;
 }
@@ -73,3 +75,5 @@ bool CAAlgLidar::plan() {
     }
     return true;
 }
+
+}  // namespace OAC

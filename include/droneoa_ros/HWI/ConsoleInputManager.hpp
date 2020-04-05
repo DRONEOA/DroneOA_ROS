@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, Feb. 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_CONSOLEINPUTMANAGER_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_CONSOLEINPUTMANAGER_HPP_  // NOLINT
+#ifndef HWI_CONSOLEINPUTMANAGER_HPP_  // NOLINT
+#define HWI_CONSOLEINPUTMANAGER_HPP_  // NOLINT
 
 #include <std_msgs/String.h>
 
@@ -26,17 +26,21 @@
 #include <string>
 #include <utility>
 
-#include <droneoa_ros/CNCInterface.hpp>
-#include <droneoa_ros/RSCInterface.hpp>
-#include <droneoa_ros/OAController.hpp>
-#include <droneoa_ros/LidarInterface.hpp>
+#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+#include <droneoa_ros/HWI/base/LidarGeneric.hpp>
+#include <droneoa_ros/HWI/RSC.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
+
+namespace IO {
 
 static const char ConsoleDelimiter = ' ';
 
 class ConsoleInputManager {
  public:
     explicit ConsoleInputManager(bool* masterSwitch);
-    bool init(CNCInterface* cnc, RSCInterface *rsc, OAController *oac, LidarInterface *lidar);
+    virtual ~ConsoleInputManager();
+
+    bool init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac, Lidar::LidarGeneric *lidar);
 
     /**
      * @brief Pass the input console command, and execute if valid
@@ -52,10 +56,10 @@ class ConsoleInputManager {
     bool* masterSwitch_;
 
     // Pointer to controller
-    CNCInterface *cnc_;
-    RSCInterface *rsc_;
-    OAController *oac_;
-    LidarInterface *lidar_;
+    CNC::CNCInterface *cnc_;
+    Depth::RSC *rsc_;
+    OAC::OAController *oac_;
+    Lidar::LidarGeneric *lidar_;
 
     // Listen to command from topic
     boost::thread* thread_watch_command_ = nullptr;
@@ -82,4 +86,6 @@ class ConsoleInputManager {
     void printQuickHelper();
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_CONSOLEINPUTMANAGER_HPP_  // NOLINT
+}  // namespace IO
+
+#endif  // HWI_CONSOLEINPUTMANAGER_HPP_  // NOLINT

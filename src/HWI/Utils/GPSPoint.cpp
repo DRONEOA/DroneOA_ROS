@@ -17,7 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <droneoa_ros/GPSPoint.hpp>
+#include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
 
 GPSPoint::GPSPoint() {
     latitude_ = 0;

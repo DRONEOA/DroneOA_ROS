@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 DroneOA Group - All Rights Reserved
+/* Copyright (C) 2020 DroneOA Group - All Rights Reserved
  * This file is part of DroneOA_ROS.
  *
  * DroneOA_ROS is free software: you can redistribute it and/or 
@@ -13,34 +13,18 @@
  * You should have received a copy of the GNU Affero General Public
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
- *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <ros/ros.h>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
-#include <droneoa_ros/OAC/BaseAlg.hpp>
+#include "./test_suite.hpp"
 
-namespace OAC {
+using ::testing::_;
+using ::testing::Return;
 
-void BaseAlg::init(CNC::CNCInterface *cnc) {
-    cnc_ = cnc;
+TEST_F(CommandTest, ChmodCommand) {
+    EXPECT_CALL(cnc, getMode()).WillOnce(Return(FLT_MODE_GUIDED));
+    EXPECT_CALL(cnc, setMode(FLT_MODE_BRAKE)).WillOnce(Return(true));
+    Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
 }
-
-BaseAlg::BaseAlg(CNC::CNCInterface *cnc) {
-    init(cnc);
-}
-
-BaseAlg::~BaseAlg() {
-    ROS_INFO("Destroy BaseAlg");
-}
-
-Command::CommandQueue BaseAlg::getCommandQueue() {
-    return CMDQueue_;
-}
-
-Command::DataQueue BaseAlg::getDataQueue() {
-    return DATAQueue_;
-}
-
-}  // namespace OAC

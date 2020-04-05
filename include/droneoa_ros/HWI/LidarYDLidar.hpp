@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 DroneOA Group - All Rights Reserved
+/* Copyright (C) 2020 DroneOA Group - All Rights Reserved
  * This file is part of DroneOA_ROS.
  *
  * DroneOA_ROS is free software: you can redistribute it and/or 
@@ -14,27 +14,31 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, Feb 2020
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef OAC_OAALGFGM_HPP_  // NOLINT
-#define OAC_OAALGFGM_HPP_  // NOLINT
+#ifndef HWI_LIDARYDLIDAR_HPP_  // NOLINT
+#define HWI_LIDARYDLIDAR_HPP_  // NOLINT
 
-#include <droneoa_ros/OAC/BaseAlg.hpp>
 #include <droneoa_ros/HWI/base/LidarGeneric.hpp>
 
-namespace OAC {
+namespace Lidar {
 
-class OAAlgFGM : public BaseAlg {
-    Lidar::LidarGeneric *lidar_;
+class LidarYDLidar : public LidarGeneric {
  public:
-    OAAlgFGM(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar);
-    ~OAAlgFGM() override;
-    void init(Lidar::LidarGeneric *lidar);  // For restart
-    bool collect() override;  // Collect required sensor data
-    bool plan() override;  // Return false when get around is impossible
+    LidarYDLidar(ros::NodeHandle node, ros::Rate rate);
+
+    /***************************************************************************
+     * Debug
+     */
+    void printLidarInfo() override;
+
+    /***************************************************************************
+     * Init
+     */
+    void initWatcherThread() override;
 };
 
-}  // namespace OAC
+}  // namespace Lidar
 
-#endif  // OAC_OAALGFGM_HPP_  // NOLINT
+#endif  // HWI_LIDARYDLIDAR_HPP_  // NOLINT

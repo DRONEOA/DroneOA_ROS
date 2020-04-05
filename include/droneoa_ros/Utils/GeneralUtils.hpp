@@ -17,8 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, Feb. 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_UTILS_GENERALUTILS_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_UTILS_GENERALUTILS_HPP_  // NOLINT
+#ifndef UTILS_GENERALUTILS_HPP_  // NOLINT
+#define UTILS_GENERALUTILS_HPP_  // NOLINT
 
 #include <string>
 #include <vector>
@@ -80,4 +80,4 @@ class GeneralUtility {
     static void toUpperCaseStr(std::string* input);
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_UTILS_GENERALUTILS_HPP_  // NOLINT
+#endif  // UTILS_GENERALUTILS_HPP_  // NOLINT
