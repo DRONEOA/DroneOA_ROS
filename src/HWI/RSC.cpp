@@ -118,7 +118,7 @@ void RSC::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
 }
 
 void RSC::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
-    boost::unique_lock<boost::shared_mutex> uniqueLock(mPointcloudMutex);
+    // boost::unique_lock<boost::shared_mutex> uniqueLock(mPointcloudMutex);
     mPointCloud = *msg;
     // Convert to pointcloud
     pcl::PCLPointCloud2 pcl_pc2;
@@ -165,7 +165,7 @@ void RSC::watchPointCloudThread() {
 
 #ifdef PCL_DEBUG_VIEWER
 void RSC::updatePointCloudViewerThread() {
-    boost::shared_lock<boost::shared_mutex> lock(mPointcloudMutex);
+    // boost::shared_lock<boost::shared_mutex> lock(mPointcloudMutex);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(&mPclPointCloud);
     pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
     // PCL Viewer
@@ -283,7 +283,7 @@ void RSC::setRange(float min, float max) {
  */
 
 std::vector<float> RSC::pointCloudZCoordsInRange(float width, float height, float dist) {
-    boost::shared_lock<boost::shared_mutex> lock(mPointcloudMutex);
+    // boost::shared_lock<boost::shared_mutex> lock(mPointcloudMutex);
     float x = width/2;
     float y = width/2;
     if (dist < 200.0f) {
