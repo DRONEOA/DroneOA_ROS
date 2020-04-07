@@ -17,6 +17,8 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
+#include <ros/ros.h>
+
 #include <droneoa_ros/OAC/Command.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 
@@ -35,7 +37,7 @@ std::vector<std::string> getDataListFromString(std::string data) {
     return dataList;
 }
 
-bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline) {
+bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
     try {
         switch (cmdline.first) {
             case CMD_QUEUE_TYPES::CMD_CHMOD:

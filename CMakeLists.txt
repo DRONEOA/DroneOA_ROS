@@ -135,29 +135,9 @@ include_directories(include
 ## Declare a C++ library
 add_library(droneoa_ros_libutils
   src/Utils/GeneralUtils.cpp
-  src/Utils/CNCUtils.cpp
 )
 
-add_library(droneoa_ros_libcnc
-  src/CNCInterface.cpp
-  src/GPSPoint.cpp
-  src/Utils/CNCUtils.cpp
-)
-
-add_library(droneoa_ros_librsc
-  src/RSCInterface.cpp
-  src/Utils/GeneralUtils.cpp
-)
-
-add_library(droneoa_ros_liblidar
-  src/LidarInterface.cpp
-)
-
-add_library(droneoa_ros_libinput
-  src/ConsoleInputManager.cpp
-)
-
-add_library(droneoa_ros_liboa
+add_library(droneoa_ros_liboac
   src/OAC/BaseAlg.cpp
   src/OAC/CAAlgLidar.cpp
   src/OAC/CAAlgDepthCam.cpp
@@ -165,7 +145,18 @@ add_library(droneoa_ros_liboa
   src/OAC/CMDParser.cpp
   src/OAC/CMDRunner.cpp
   src/OAC/Command.cpp
-  src/OAController.cpp
+  src/OAC/OAC.cpp
+)
+
+add_library(droneoa_ros_libhwi
+  src/HWI/base/CNCGeneric.cpp
+  src/HWI/base/LidarGeneric.cpp
+  src/HWI/CNCArdupilot.cpp
+  src/HWI/LidarYDLidar.cpp
+  src/HWI/RSC.cpp
+  src/HWI/Utils/CNCUtils.cpp
+  src/HWI/Utils/GPSPoint.cpp
+  src/HWI/ConsoleInputManager.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -193,11 +184,9 @@ add_executable(droneoa_ros
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(droneoa_ros
-  droneoa_ros_libcnc
-  droneoa_ros_librsc
-  droneoa_ros_liboa
-  droneoa_ros_liblidar
-  droneoa_ros_libinput
+  droneoa_ros_libhwi
+  droneoa_ros_libutils
+  droneoa_ros_liboac
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${PCL_LIBRARIES}
@@ -240,7 +229,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # )
 
 install(
-	TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_librsc ${PROJECT_NAME}_libcnc ${PROJECT_NAME}_liboa ${PROJECT_NAME}_libinput ${PROJECT_NAME}_liblidar
+	TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_libhwi ${PROJECT_NAME}_libutils ${PROJECT_NAME}_liboac
 	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
@@ -258,5 +247,28 @@ install(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(droneoa_ros_utiltest test/utils_unittest.cpp src/Utils/GeneralUtils.cpp src/Utils/CNCUtils.cpp src/GPSPoint.cpp)
+# Utils Unittests
+add_executable(droneoa_ros_utiltest
+  test/utils_unittest/utils_unittest.cpp
+  src/Utils/GeneralUtils.cpp
+  src/HWI/Utils/CNCUtils.cpp
+  src/HWI/Utils/GPSPoint.cpp
+)
+
 target_link_libraries(droneoa_ros_utiltest ${catkin_LIBRARIES} gtest)
+
+# Command Unittests
+add_executable(droneoa_ros_commandtest
+  test/command_unittest/test_main.cpp
+  test/command_unittest/command_tests.cpp
+  test/command_unittest/test_suite.cpp
+  src/OAC/Command.cpp
+  src/Utils/GeneralUtils.cpp
+  src/HWI/Utils/GPSPoint.cpp
+)
+
+target_link_libraries(droneoa_ros_commandtest
+  ${catkin_LIBRARIES}
+  gtest
+  gmock
+)

@@ -19,43 +19,46 @@
 
 #include <limits>
 
-#include <droneoa_ros/LidarInterface.hpp>
+#include <droneoa_ros/HWI/base/LidarGeneric.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
-#include <droneoa_ros/PDN.hpp>
 
 #include <opencv2/imgproc/imgproc.hpp>
 
+namespace Lidar {
+
 static const char* OPENCV_WINDOW_LIDAR = "Lidar Debug window";
 
-LidarInterface::LidarInterface() {
+LidarGeneric::LidarGeneric(ros::NodeHandle node, ros::Rate rate) : mNodeHandle(node), mRate(rate) {
+    mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
 #ifdef DEBUG_LIDAR_POPUP
     cv::namedWindow(OPENCV_WINDOW_LIDAR);
 #endif
 }
 
-LidarInterface::~LidarInterface() {
+LidarGeneric::~LidarGeneric() {
 #ifdef DEBUG_LIDAR_POPUP
     cv::destroyWindow(OPENCV_WINDOW_LIDAR);
 #endif
-    delete thread_watch_lidar_;
-    ROS_INFO("Destroy LidarInterface");
+    if (mpThreadWatchLidar) {
+        mpThreadWatchLidar->join();
+        delete mpThreadWatchLidar;
+    }
+    ROS_INFO("Destroy LidarGeneric");
 }
 
-void LidarInterface::init(ros::NodeHandle nh, ros::Rate r) {
-    n_ = nh;
-    r_ = r;
-    currentLidarSource_ = LIDAR_SOURCE_YDLIDAR;
-    thread_watch_lidar_ = new boost::thread(boost::bind(&LidarInterface::watchLidarThread, this));
+void LidarGeneric::initWatcherThread() {
+    mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
+    mpThreadWatchLidar = new boost::thread(boost::bind(&LidarGeneric::watchLidarThread, this));
 #ifdef DEBUG_LIDAR_POPUP
     cv::startWindowThread();  // DEBUG
     drawLidarData();
 #endif
-    ROS_INFO("[LIDAR] init");
+    ROS_INFO("[LIDAR Generic] init");
 }
 
 /* Callback */
-void LidarInterface::lidar_callback(const sensor_msgs::LaserScanConstPtr& msg) {
-    scannerData_ = *msg;
+void LidarGeneric::lidar_callback(const sensor_msgs::LaserScanConstPtr& msg) {
+    mScannerData = *msg;
     // Pre-processing
     generateDataMap();
 #ifdef DEBUG_LIDAR_POPUP
@@ -64,58 +67,70 @@ void LidarInterface::lidar_callback(const sensor_msgs::LaserScanConstPtr& msg) {
 }
 
 /* Thread */
-void LidarInterface::watchLidarThread() {
-    lidar_sub_ =
-        n_.subscribe<sensor_msgs::LaserScan>(currentLidarSource_, 1000,
-            boost::bind(&LidarInterface::lidar_callback, this, _1));
+void LidarGeneric::watchLidarThread() {
+    mLidarSub =
+        mNodeHandle.subscribe<sensor_msgs::LaserScan>(mCurrentLidarSource, 1000,
+            boost::bind(&LidarGeneric::lidar_callback, this, _1));
 
     while (ros::ok()) {
         ros::spinOnce();
-        r_.sleep();
+        mRate.sleep();
     }
 }
 
-void LidarInterface::changeLidarSource(std::string lidarSource) {
-    currentLidarSource_ = lidarSource;
-    lidar_sub_.shutdown();
-    lidar_sub_ =
-        n_.subscribe<sensor_msgs::LaserScan>(lidarSource, 1000,
-            boost::bind(&LidarInterface::lidar_callback, this, _1));
+void LidarGeneric::changeLidarSource(std::string lidarSource) {
+    mCurrentLidarSource = lidarSource;
+    mLidarSub.shutdown();
+    mLidarSub =
+        mNodeHandle.subscribe<sensor_msgs::LaserScan>(lidarSource, 1000,
+            boost::bind(&LidarGeneric::lidar_callback, this, _1));
 }
 
 /* Accesser */
-float LidarInterface::getMaxAngle() {
-    return scannerData_.angle_max;
+float LidarGeneric::getMaxAngle() {
+    return mScannerData.angle_max;
 }
 
-float LidarInterface::getMinAngle() {
-    return scannerData_.angle_min;
+float LidarGeneric::getMinAngle() {
+    return mScannerData.angle_min;
 }
 
-float LidarInterface::getMaxRange() {
+float LidarGeneric::getMaxRange() {
     return LIDAR_FILTER_HIGH;
 }
 
-float LidarInterface::getMinRnage() {
+float LidarGeneric::getMinRnage() {
     return LIDAR_FILTER_LOW;
 }
 
-std::map<float, degreeSector> LidarInterface::getScannerDataMap() {
-    if (scannerDataMap_.size() <= 0) {
+float LidarGeneric::getScanTime() {
+    return mScannerData.scan_time;
+}
+
+float LidarGeneric::getTimeIncreament() {
+    return mScannerData.time_increment;
+}
+
+float LidarGeneric::getAngleIncreament() {
+    return mScannerData.angle_increment;
+}
+
+sensor_msgs::LaserScan LidarGeneric::getRawDataMap() {
+    return mScannerData;
+}
+
+std::map<float, degreeSector> LidarGeneric::getSectorDataMap() {
+    if (mSectorDataMap.size() <= 0) {
         ROS_WARN("Imcomplete Lidar Data Map !!!");
         // @todo should we try to regenerate OR populate with "safe" data set ?
     }
-    return scannerDataMap_;
+    return mSectorDataMap;
 }
 
-float LidarInterface::getIncreament() {
-    return scannerData_.angle_increment;
-}
-
-std::pair<float, float> LidarInterface::getClosestSectorData() {
+std::pair<float, float> LidarGeneric::getClosestSectorData() {
     float minRange = std::numeric_limits<float>::infinity();
     float minAngle = 0;
-    for (auto it = scannerDataMap_.begin(); it != scannerDataMap_.end(); it++) {
+    for (auto it = mSectorDataMap.begin(); it != mSectorDataMap.end(); it++) {
         if ((it->second)[0] < minRange) {
             minRange = (it->second)[0];
             minAngle = it->first;
@@ -125,30 +140,30 @@ std::pair<float, float> LidarInterface::getClosestSectorData() {
 }
 
 /* Processing Functions */
-void LidarInterface::generateDataMap() {
-    scannerDataMap_.clear();
+void LidarGeneric::generateDataMap() {
+    mSectorDataMap.clear();
     // @todo Is this safe ?
-    uint32_t count = (scannerData_.angle_max - scannerData_.angle_min) / scannerData_.angle_increment;
+    uint32_t count = (mScannerData.angle_max - mScannerData.angle_min) / mScannerData.angle_increment;
     for (uint32_t i = 0; i < count; i++) {
-        if (i >= scannerData_.ranges.size()) {
-            ROS_WARN("+LidarInterface::generateDataMap: Missing Data, expect: %u actual: %zu",
-                count, scannerData_.ranges.size());
+        if (i >= mScannerData.ranges.size()) {
+            ROS_WARN("+LidarGeneric::generateDataMap: Missing Data, expect: %u actual: %zu",
+                count, mScannerData.ranges.size());
             break;
         }
-        float degree = GeneralUtility::radToDeg(getMinAngle() + getIncreament() * i);
+        float degree = GeneralUtility::radToDeg(getMinAngle() + getAngleIncreament() * i);
         degree = 0 - degree;  // Fix YDLidar's strange coordinate system
         degree = static_cast<int32_t>(degree + LIDAR_ORIENTATION_CW) % 360;
-        if (!std::isinf(scannerData_.ranges[i]) &&
-                scannerData_.ranges[i] >= LIDAR_FILTER_LOW &&
-                scannerData_.ranges[i] <= LIDAR_FILTER_HIGH) {
-            scannerDataMap_[degree].push_back(scannerData_.ranges[i]);
+        if (!std::isinf(mScannerData.ranges[i]) &&
+                mScannerData.ranges[i] >= LIDAR_FILTER_LOW &&
+                mScannerData.ranges[i] <= LIDAR_FILTER_HIGH) {
+            mSectorDataMap[degree].push_back(mScannerData.ranges[i]);
         }
     }
     generateDegreeSector();
 }
 
-void LidarInterface::generateDegreeSector() {
-    for (auto it = scannerDataMap_.begin(); it != scannerDataMap_.end(); it++) {
+void LidarGeneric::generateDegreeSector() {
+    for (auto it = mSectorDataMap.begin(); it != mSectorDataMap.end(); it++) {
         if ((it->second).size() > 1) {
             // Use average for now
             float sum = 0.0;
@@ -161,13 +176,13 @@ void LidarInterface::generateDegreeSector() {
 }
 
 /* Debug */
-void LidarInterface::printLidarInfo() {
-    ROS_INFO("[LIDAR] MaxRange: %f, MinRange: %f",
+void LidarGeneric::printLidarInfo() {
+    ROS_INFO("[LIDAR GENERIC] MaxRange: %f, MinRange: %f",
         getMaxRange(), getMinRnage());
-    ROS_INFO("[LIDAR] RAW MaxAngle: %f, MinAngle: %f, Increment: %f",
-        getMaxAngle(), getMinAngle(), getIncreament());
-    ROS_INFO("[LIDAR] time_increment: %f, scan_time: %f",
-        scannerData_.time_increment, scannerData_.scan_time);
+    ROS_INFO("[LIDAR GENERIC] RAW MaxAngle: %f, MinAngle: %f, Increment: %f",
+        getMaxAngle(), getMinAngle(), getAngleIncreament());
+    ROS_INFO("[LIDAR GENERIC] time_increment: %f, scan_time: %f",
+        getTimeIncreament(), getScanTime());
 }
 
 void drawLidarPoint(const cv::Mat &img, const cv::Point &center, float angle, float range, bool isLine = false) {
@@ -184,7 +199,7 @@ void drawLidarPoint(const cv::Mat &img, const cv::Point &center, float angle, fl
     }
 }
 
-void LidarInterface::drawLidarData() {
+void LidarGeneric::drawLidarData() {
     int32_t winWidth = 800;
     int32_t winHeight = 800;
     cv::Point center(winWidth / 2, winHeight / 2);
@@ -192,7 +207,7 @@ void LidarInterface::drawLidarData() {
     // Draw center
     cv::circle(lidarDisk, center, 4, cv::Scalar(200, 0, 0), 2);
     // Draw lidar points
-    for (auto it = scannerDataMap_.begin(); it != scannerDataMap_.end(); it++) {
+    for (auto it = mSectorDataMap.begin(); it != mSectorDataMap.end(); it++) {
         drawLidarPoint(lidarDisk, center, it->first, (it->second)[0]);
     }
     // Draw closest
@@ -201,3 +216,5 @@ void LidarInterface::drawLidarData() {
 
     cv::imshow(OPENCV_WINDOW_LIDAR, lidarDisk);
 }
+
+}  // namespace Lidar

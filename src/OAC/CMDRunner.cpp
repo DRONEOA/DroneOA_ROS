@@ -17,9 +17,12 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
+#include <ros/ros.h>
 #include <droneoa_ros/OAC/CMDRunner.hpp>
 
-CMDRunner::CMDRunner(CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), cnc_(cnc) {
+namespace OAC {
+
+CMDRunner::CMDRunner(CNC::CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), cnc_(cnc) {
     toggleState(RUNNER_STATE::INIT);
     runnerThread = new boost::thread(boost::bind(&CMDRunner::runnerRoutine, this));
 }
@@ -50,7 +53,6 @@ bool CMDRunner::toggleState(RUNNER_STATE newState) {
 }
 
 bool CMDRunner::isShutDownRequested() {
-    boost::shared_lock<boost::shared_mutex> lock(shutdown_mutex);
     return shutdown;
 }
 
@@ -116,8 +118,11 @@ void CMDRunner::runnerRoutine() {
 
 CMDRunner::~CMDRunner() {
     if (runnerThread) {
-        boost::unique_lock<boost::shared_mutex> uniqueLock(shutdown_mutex);
         shutdown = true;
+        runnerThread->join();
+        delete runnerThread;
     }
     ROS_INFO("Destroy CMDRunner");
 }
+
+}  // namespace OAC

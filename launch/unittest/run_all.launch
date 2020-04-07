@@ -1,0 +1,8 @@
+<launch>
+    <node name="droneoa_ros_command_unittest"
+        pkg="droneoa_ros"
+        type="droneoa_ros_commandtest"
+        output="screen"
+        respawn="false"
+        launch-prefix="valgrind" />
+</launch>

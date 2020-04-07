@@ -14,27 +14,21 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, Feb 2020
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef OAC_OAALGFGM_HPP_  // NOLINT
-#define OAC_OAALGFGM_HPP_  // NOLINT
+#ifndef HWI_GPSPOINT_HPP_  // NOLINT
+#define HWI_GPSPOINT_HPP_  // NOLINT
 
-#include <droneoa_ros/OAC/BaseAlg.hpp>
-#include <droneoa_ros/HWI/base/LidarGeneric.hpp>
-
-namespace OAC {
-
-class OAAlgFGM : public BaseAlg {
-    Lidar::LidarGeneric *lidar_;
+class GPSPoint {
  public:
-    OAAlgFGM(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar);
-    ~OAAlgFGM() override;
-    void init(Lidar::LidarGeneric *lidar);  // For restart
-    bool collect() override;  // Collect required sensor data
-    bool plan() override;  // Return false when get around is impossible
+    GPSPoint();
+    GPSPoint(float latitude, float longitude, float altitude);
+    virtual ~GPSPoint() = default;
+
+    float latitude_;
+    float longitude_;
+    float altitude_;
 };
 
-}  // namespace OAC
-
-#endif  // OAC_OAALGFGM_HPP_  // NOLINT
+#endif  // HWI_GPSPOINT_HPP_  // NOLINT

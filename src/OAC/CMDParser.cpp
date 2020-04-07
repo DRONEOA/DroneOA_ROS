@@ -17,9 +17,12 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, November 2019
  */
 
+#include <ros/ros.h>
 #include <droneoa_ros/OAC/CMDParser.hpp>
 
-CMDParser::CMDParser(CNCInterface *cnc, CMDRunner *runner) : cnc_(cnc), cmdRunner_(runner) {}
+namespace OAC {
+
+CMDParser::CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner) : cnc_(cnc), cmdRunner_(runner) {}
 
 CMDParser::~CMDParser() {
     ROS_INFO("Destroy CMDParser");
@@ -45,3 +48,5 @@ bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isInst
     }
     return true;
 }
+
+}  // namespace OAC

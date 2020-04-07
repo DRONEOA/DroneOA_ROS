@@ -20,8 +20,10 @@
 
 #include <math.h>
 #include <ros/ros.h>
-#include <droneoa_ros/Utils/CNCUtils.hpp>
+#include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
 #include <droneoa_ros/PDN.hpp>
+
+namespace CNC {
 
 GPSPoint CNCUtility::getLocationMeter(GPSPoint originLoc, float dNorth, float dEast) {
     // Reference: http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
@@ -74,3 +76,5 @@ float CNCUtility::validSpeedCMD(float targetSpeed) {
     }
     return targetSpeed;
 }
+
+}  // namespace CNC

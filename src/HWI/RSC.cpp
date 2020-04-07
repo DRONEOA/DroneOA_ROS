@@ -13,11 +13,8 @@
  * You should have received a copy of the GNU Affero General Public
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
- *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <droneoa_ros/RSCInterface.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <pcl/PCLPointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -27,29 +24,34 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <droneoa_ros/HWI/RSC.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 
-static const char* OPENCV_WINDOW = "Debug window";
-cv::Point RSCInterface::debugMousePos = cv::Point(0, 0);
+namespace Depth {
 
-RSCInterface::RSCInterface() {
+static const char* OPENCV_WINDOW = "Debug window";
+cv::Point RSC::mDebugMousePos = cv::Point(0, 0);
+
+RSC::RSC(ros::NodeHandle node, ros::Rate rate) : mNodeHandle(node), mRate(rate) {
     cv::namedWindow(OPENCV_WINDOW);
 #ifdef PCL_DEBUG_VIEWER
     viewer = new pcl::visualization::CloudViewer("Depth Cloud Viewer");
 #endif
 }
 
-RSCInterface::~RSCInterface() {
+RSC::~RSC() {
     try {
         cv::destroyWindow(OPENCV_WINDOW);
     } catch(...) {
         ROS_INFO("cv::destroyWindow warn");
     }
-    if (thread_watch_depth_img_) {
-        delete thread_watch_depth_img_;
+    if (mpThreadWatchDepthImg) {
+        mpThreadWatchDepthImg->join();
+        delete mpThreadWatchDepthImg;
     }
-    if (thread_watch_pointcloud_) {
-        delete thread_watch_pointcloud_;
+    if (mpThreadWatchPointcloud) {
+        mpThreadWatchPointcloud->join();
+        delete mpThreadWatchPointcloud;
     }
 #ifdef PCL_DEBUG_VIEWER
     if (viewer) {
@@ -59,60 +61,56 @@ RSCInterface::~RSCInterface() {
     ROS_INFO("Destroy RSCInterface");
 }
 
-void RSCInterface::init(ros::NodeHandle nh, ros::Rate r) {
-    n = nh;
-    r_ = r;
-    currentDepthSource_ = DEPTH_SOURCE_RSC;
-    currentPCSource_ = PC_SOURCE_RSC;
+void RSC::initWatcherThread() {
+    mCurrentDepthSource = DEPTH_SOURCE_RSC;
+    mCurrentPCSource = PC_SOURCE_RSC;
 #ifdef IMG_DEBUG_POPUP
     cv::startWindowThread();  // DEBUG
-    cv::setMouseCallback(OPENCV_WINDOW, RSCInterface::mouseCallback, NULL);  // DEBUG
+    cv::setMouseCallback(OPENCV_WINDOW, RSC::mouseCallback, NULL);  // DEBUG
 #endif
-    thread_watch_depth_img_ = new boost::thread(boost::bind(&RSCInterface::watchDepthImgThread, this));
+    mpThreadWatchDepthImg = new boost::thread(boost::bind(&RSC::watchDepthImgThread, this));
 #ifdef ENABLE_POINTCLOUD
-    thread_watch_pointcloud_ = new boost::thread(boost::bind(&RSCInterface::watchPointCloudThread, this));
+    mpThreadWatchPointcloud = new boost::thread(boost::bind(&RSC::watchPointCloudThread, this));
 #endif
     ROS_INFO("[RSC] init");
 }
 
-void RSCInterface::changeDepthSource(std::string depthSource) {
-    currentDepthSource_ = depthSource;
-    depth_sub_.shutdown();
-    auto node = boost::make_shared<ros::NodeHandle>();
-    depth_sub_ =
-        node->subscribe<sensor_msgs::Image>(currentDepthSource_, 1,
-                boost::bind(&RSCInterface::depthImg_callback, this, _1));
+void RSC::changeDepthSource(std::string depthSource) {
+    mCurrentDepthSource = depthSource;
+    mDepthSub.shutdown();
+    mDepthSub =
+        mNodeHandle.subscribe<sensor_msgs::Image>(mCurrentDepthSource, 1,
+                boost::bind(&RSC::depthImg_callback, this, _1));
 }
 
-void RSCInterface::changePC2Source(std::string pc2Source) {
-    currentPCSource_ = pc2Source;
-    pc2_sub_.shutdown();
-    auto node = boost::make_shared<ros::NodeHandle>();
-    pc2_sub_ =
-        node->subscribe<sensor_msgs::PointCloud2>(currentPCSource_, 1,
-                boost::bind(&RSCInterface::pointcloud_callback, this, _1));
+void RSC::changePC2Source(std::string pc2Source) {
+    mCurrentPCSource = pc2Source;
+    mPC2Sub.shutdown();
+    mPC2Sub =
+        mNodeHandle.subscribe<sensor_msgs::PointCloud2>(mCurrentPCSource, 1,
+                boost::bind(&RSC::pointcloud_callback, this, _1));
 }
 
 /* Callback */
-void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
-    boost::unique_lock<boost::shared_mutex> uniqueLock(depth_img_mutex);
-    depthImage_ = *msg;
+void RSC::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
+    boost::unique_lock<boost::shared_mutex> uniqueLock(mDepthImgMutex);
+    mDepthImage = *msg;
 
     cv_bridge::CvImagePtr cv_ptr;
     try {
-      cv_ptr = cv_bridge::toCvCopy(depthImage_, sensor_msgs::image_encodings::TYPE_32FC1);
+      cv_ptr = cv_bridge::toCvCopy(mDepthImage, sensor_msgs::image_encodings::TYPE_32FC1);
     } catch (cv_bridge::Exception& e) {
       ROS_ERROR("cv_bridge exception: %s", e.what());
       return;
     }
 
-    depthFrame_ = cv_ptr->image;
+    mDepthFrame = cv_ptr->image;
 
     // Scale Depth Data For UE4
-    if (currentDepthSource_ == DEPTH_SOURCE_UE4) {
-        for (int32_t i = 0; i < depthFrame_.rows; i++) {
-            float* Mi = depthFrame_.ptr<float>(i);
-            for (int32_t j = 0; j < depthFrame_.cols; j++) {
+    if (mCurrentDepthSource == DEPTH_SOURCE_UE4) {
+        for (int32_t i = 0; i < mDepthFrame.rows; i++) {
+            float* Mi = mDepthFrame.ptr<float>(i);
+            for (int32_t j = 0; j < mDepthFrame.cols; j++) {
                 Mi[j] *= UE4_SITL_SCALE;
             }
         }
@@ -123,13 +121,13 @@ void RSCInterface::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
 #endif
 }
 
-void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
-    boost::unique_lock<boost::shared_mutex> uniqueLock(pointcloud_mutex);
-    pointCloud_ = *msg;
+void RSC::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
+    // boost::unique_lock<boost::shared_mutex> uniqueLock(mPointcloudMutex);
+    mPointCloud = *msg;
     // Convert to pointcloud
     pcl::PCLPointCloud2 pcl_pc2;
-    pcl_conversions::toPCL(pointCloud_, pcl_pc2);
-    pcl::fromPCLPointCloud2(pcl_pc2, pcl_pointCloud_);
+    pcl_conversions::toPCL(mPointCloud, pcl_pc2);
+    pcl::fromPCLPointCloud2(pcl_pc2, mPclPointCloud);
 
     // @TODO need to change coordinates if needed
     /***
@@ -141,40 +139,38 @@ void RSCInterface::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& m
 }
 
 /* Threads */
-void RSCInterface::watchDepthImgThread() {
-    auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
-    depth_sub_ =
-        node->subscribe<sensor_msgs::Image>(currentDepthSource_, 1,
-                boost::bind(&RSCInterface::depthImg_callback, this, _1));
+void RSC::watchDepthImgThread() {
+    mDepthSub =
+        mNodeHandle.subscribe<sensor_msgs::Image>(mCurrentDepthSource, 1,
+                boost::bind(&RSC::depthImg_callback, this, _1));
 
     while (ros::ok()) {
         ros::spinOnce();
-        r_.sleep();
+        mRate.sleep();
     }
 }
 
-void RSCInterface::watchPointCloudThread() {
-    auto node = boost::make_shared<ros::NodeHandle>();  // @TODO: can we remove this ?
-    pc2_sub_ =
-        node->subscribe<sensor_msgs::PointCloud2>(currentPCSource_, 1,
-                boost::bind(&RSCInterface::pointcloud_callback, this, _1));
+void RSC::watchPointCloudThread() {
+    mPC2Sub =
+        mNodeHandle.subscribe<sensor_msgs::PointCloud2>(mCurrentPCSource, 1,
+                boost::bind(&RSC::pointcloud_callback, this, _1));
 
     while (ros::ok()) {
 #ifdef PCL_DEBUG_VIEWER
         if (!thread_pointcloud_viewer_) {
             thread_pointcloud_viewer_ =
-                new boost::thread(boost::bind(&RSCInterface::updatePointCloudViewerThread, this));
+                new boost::thread(boost::bind(&RSC::updatePointCloudViewerThread, this));
         }
 #endif
         ros::spinOnce();
-        r_.sleep();
+        mRate.sleep();
     }
 }
 
 #ifdef PCL_DEBUG_VIEWER
-void RSCInterface::updatePointCloudViewerThread() {
-    boost::shared_lock<boost::shared_mutex> lock(pointcloud_mutex);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(&pcl_pointCloud_);
+void RSC::updatePointCloudViewerThread() {
+    // boost::shared_lock<boost::shared_mutex> lock(mPointcloudMutex);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(&mPclPointCloud);
     pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
     // PCL Viewer
     while (!viewer->wasStopped()) {
@@ -185,16 +181,16 @@ void RSCInterface::updatePointCloudViewerThread() {
 #endif
 
 /* Debug */
-void RSCInterface::printImgInfo() {
-    ROS_INFO("[IMG] height: %d width: %d", depthImage_.height, depthImage_.width);
-    ROS_INFO("[IMG] encoding: %s", depthImage_.encoding.c_str());
+void RSC::printImgInfo() {
+    ROS_INFO("[IMG] height: %d width: %d", mDepthImage.height, mDepthImage.width);
+    ROS_INFO("[IMG] encoding: %s", mDepthImage.encoding.c_str());
 #ifdef ENABLE_POINTCLOUD
-    ROS_INFO("[Pointcloud] frameID: %s", pointCloud_.header.frame_id.c_str());
-    ROS_INFO("[Pointcloud] field size: %zd", pointCloud_.fields.size());
-    for (uint32_t i = 0; i < pointCloud_.fields.size(); ++i) {
-        ROS_INFO("      field: %s", pointCloud_.fields[i].name.c_str());
+    ROS_INFO("[Pointcloud] frameID: %s", mPointCloud.header.frame_id.c_str());
+    ROS_INFO("[Pointcloud] field size: %zd", mPointCloud.fields.size());
+    for (uint32_t i = 0; i < mPointCloud.fields.size(); ++i) {
+        ROS_INFO("      field: %s", mPointCloud.fields[i].name.c_str());
     }
-    ROS_INFO("[Pointcloud] pcl data size: %zd", pcl_pointCloud_.size());
+    ROS_INFO("[Pointcloud] pcl data size: %zd", mPclPointCloud.size());
 #endif
 }
 
@@ -222,33 +218,33 @@ cv::Mat getBetterImageDebug(cv::Mat input) {
     return adjMap;
 }
 
-void RSCInterface::drawDebugOverlay() {
-    if (cv::countNonZero(depthFrame_) < 1) {
+void RSC::drawDebugOverlay() {
+    if (cv::countNonZero(mDepthFrame) < 1) {
         ROS_WARN("Empty Image Ignored");
         return;
     }
 
-    float centerDist = depthFrame_.at<float>(debugMousePos.y, debugMousePos.x);  // Note: row, col order
+    float centerDist = mDepthFrame.at<float>(mDebugMousePos.y, mDebugMousePos.x);  // Note: row, col order
     std::string centerDistStr = std::to_string(centerDist) + " mm";
 
     cv::Mat debugImage255;
-    if (rangeSwitch) {
-        cv::Mat rangedDebugImage = depthImgForDesiredDistanceRange(rangeMin, rangeMax, depthFrame_);
+    if (mRangeSwitch) {
+        cv::Mat rangedDebugImage = depthImgForDesiredDistanceRange(mRangeMin, mRangeMax, mDepthFrame);
         debugImage255 = getBetterImageDebug(rangedDebugImage);
     } else {
-        debugImage255 = getBetterImageDebug(depthFrame_);
+        debugImage255 = getBetterImageDebug(mDepthFrame);
     }
 
     drawText(debugImage255, cv::Point(20, 20), "Debug Overlay:", 0.5, 1);
     drawText(debugImage255, cv::Point(20, 40), centerDistStr, 0.5, 1);
-    cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y - 7),
-            cv::Point(debugMousePos.x + 7, debugMousePos.y + 7), cv::Scalar(0xffff), 2);
-    cv::line(debugImage255, cv::Point(debugMousePos.x - 7, debugMousePos.y + 7),
-            cv::Point(debugMousePos.x + 7, debugMousePos.y - 7), cv::Scalar(0xffff), 2);
+    cv::line(debugImage255, cv::Point(mDebugMousePos.x - 7, mDebugMousePos.y - 7),
+            cv::Point(mDebugMousePos.x + 7, mDebugMousePos.y + 7), cv::Scalar(0xffff), 2);
+    cv::line(debugImage255, cv::Point(mDebugMousePos.x - 7, mDebugMousePos.y + 7),
+            cv::Point(mDebugMousePos.x + 7, mDebugMousePos.y - 7), cv::Scalar(0xffff), 2);
     cv::imshow(OPENCV_WINDOW, debugImage255);
 }
 
-void RSCInterface::mouseCallback(int32_t event, int32_t x, int32_t y, int32_t flags, void* userdata) {
+void RSC::mouseCallback(int32_t event, int32_t x, int32_t y, int32_t flags, void* userdata) {
     if (event == cv::EVENT_LBUTTONDOWN) {
         // std::cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << std::endl;
     } else if (event == cv::EVENT_RBUTTONDOWN) {
@@ -256,8 +252,8 @@ void RSCInterface::mouseCallback(int32_t event, int32_t x, int32_t y, int32_t fl
     } else if (event == cv::EVENT_MBUTTONDOWN) {
         // std::cout << "Middle button of the mouse is clicked - position (" << x << ", " << y << ")" << std::endl;
     } else if (event == cv::EVENT_MOUSEMOVE) {
-        debugMousePos.x = x;
-        debugMousePos.y = y;
+        mDebugMousePos.x = x;
+        mDebugMousePos.y = y;
     }
 }
 
@@ -265,7 +261,7 @@ void RSCInterface::mouseCallback(int32_t event, int32_t x, int32_t y, int32_t fl
  * Range Filter
  */
 
-cv::Mat RSCInterface::depthImgForDesiredDistanceRange(float min, float max, cv::Mat input) {
+cv::Mat RSC::depthImgForDesiredDistanceRange(float min, float max, cv::Mat input) {
     cv::Mat adjMap = input.clone();
     for (int32_t y=0; y < adjMap.rows; y++) {
         for (int32_t x=0; x < adjMap.cols; x++) {
@@ -277,32 +273,60 @@ cv::Mat RSCInterface::depthImgForDesiredDistanceRange(float min, float max, cv::
     return adjMap;
 }
 
-void RSCInterface::setRangeSwitch(bool status) {
-    rangeSwitch = status;
+void RSC::setRangeSwitch(bool status) {
+    mRangeSwitch = status;
 }
 
-void RSCInterface::setRange(float min, float max) {
-    rangeMin = min;
-    rangeMax = max;
+void RSC::setRange(float min, float max) {
+    mRangeMin = min;
+    mRangeMax = max;
 }
 
 /*****************************************************
  * Hit Pencentage
  */
 
-std::vector<float> RSCInterface::pointCloudZCoordsInRange(float width, float height, float dist) {
-    boost::shared_lock<boost::shared_mutex> lock(pointcloud_mutex);
+std::vector<float> RSC::pointCloudZCoordsInRange(float width, float height, float dist) {
+    // boost::shared_lock<boost::shared_mutex> lock(mPointcloudMutex);
     float x = width/2;
     float y = width/2;
     if (dist < 200.0f) {
         dist = 200.0f;
     }  // Reserved for range filter
     std::vector<float> zCoords;
-    for ( auto i = 0; i < pcl_pointCloud_.points.size(); i++ ) {
-        pcl::PointXYZRGB pt = pcl_pointCloud_.points.at(i);
+    for ( auto i = 0; i < mPclPointCloud.points.size(); i++ ) {
+        pcl::PointXYZRGB pt = mPclPointCloud.points.at(i);
         if ( GeneralUtility::inRange<float>(-x, x, pt.x*1000) && GeneralUtility::inRange<float>(-y, y, pt.y*1000) ) {
             zCoords.push_back(pt.z*1000);
         }
     }
     return zCoords;
 }
+
+/*****************************************************
+ * Accessor
+ */
+
+float RSC::getMaxRange() {
+    if (mRangeSwitch && mRangeMax < DEPTH_MAX_RANGE) {
+        return mRangeMax;
+    }
+    return DEPTH_MAX_RANGE;
+}
+
+float RSC::getMinRange() {
+    if (mRangeSwitch && mRangeMin > DEPTH_MIN_RANGE) {
+        return mRangeMin;
+    }
+    return DEPTH_MIN_RANGE;
+}
+
+sensor_msgs::Image RSC::getDepthImage() {
+    return mDepthImage;
+}
+
+sensor_msgs::PointCloud2 RSC::getPC2Cloud() {
+    return mPointCloud;
+}
+
+}  // namespace Depth

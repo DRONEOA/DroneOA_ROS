@@ -17,55 +17,51 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT
+#ifndef HWI_RSC_HPP_  // NOLINT
+#define HWI_RSC_HPP_  // NOLINT
 
 #include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/common/transforms.h>
 #include <string>
 #include <vector>
-#include <opencv2/core/core.hpp>
-#include <droneoa_ros/PDN.hpp>
-
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
+#include <opencv2/core/core.hpp>
 
+#include <droneoa_ros/PDN.hpp>
+#include <droneoa_ros/HWI/interface/DepthCamInterface.hpp>
 
-#define ENABLE_POINTCLOUD
-// #define PCL_DEBUG_VIEWER
-// #define IMG_DEBUG_POPUP
+namespace Depth {
 
-static const char* DEPTH_SOURCE_RSC = "/d435/depth/image_rect_raw";
-static const char* DEPTH_SOURCE_UE4 = "/unreal_ros/image_depth";
-static const char* PC_SOURCE_RSC = "/d435/depth/color/points";
-static const char* PC_SOURCE_UE4 = "/depth_registered/points";
-
-class RSCInterface {
+class RSC : public DepthCamInterface {
  public:
-    RSCInterface();
-    virtual ~RSCInterface();
-    void init(ros::NodeHandle nh, ros::Rate r);
+    RSC(ros::NodeHandle node, ros::Rate rate);
+    virtual ~RSC();
 
-    cv::Mat depthImgForDesiredDistanceRange(float min, float max, cv::Mat input);
-    void setRangeSwitch(bool status);
-    void setRange(float min, float max);
-
+    /***************************************************************************
+     * Init
+     */
+    void initWatcherThread() override;
     /**
      * @brief Change depth data source [USE WITH CAUTION]
      * @param depthSource string of the new depth data source
      */
     void changeDepthSource(std::string depthSource);
-
-        /**
+    /**
      * @brief Change pointcloud2 data source [USE WITH CAUTION]
      * @param pc2Source string of the new pointcloud2 data source
      */
     void changePC2Source(std::string pc2Source);
+
+    /***************************************************************************
+     * Range operation
+     */
+    cv::Mat depthImgForDesiredDistanceRange(float min, float max, cv::Mat input);
+    void setRangeSwitch(bool status);
+    void setRange(float min, float max);
 
     //! @todo(Xiao Zhou): The minimum distance, left for possibility calculation in the future
     std::vector<float> pointCloudZCoordsInRange(
@@ -73,45 +69,61 @@ class RSCInterface {
         float height = VEHICLE_BOUNDBOX_HEIGHT,
         float dist = 200.0f);
 
-    // Callback
+    /***************************************************************************
+     * Accessor
+     */
+    float getMaxRange() override;  /*!< Unit: m */
+    float getMinRange() override;  /*!< Unit: m */
+    sensor_msgs::Image getDepthImage() override;
+    sensor_msgs::PointCloud2 getPC2Cloud() override;
+
+    /***************************************************************************
+     * Callback
+     */
     void depthImg_callback(const sensor_msgs::ImageConstPtr& msg);
     void pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg);
 
-    // Debug Print
-    void printImgInfo();
+    /***************************************************************************
+     * Debug
+     */
+    void printImgInfo() override;
     static void mouseCallback(int32_t event, int32_t x, int32_t y, int32_t flags, void* userdata);
     pcl::PointCloud<pcl::PointXYZRGB> getPointCloud();
 
  private:
-    ros::NodeHandle n;
-    ros::Rate r_ = ros::Rate(10.0);
-    bool rangeSwitch = false;
+    ros::NodeHandle mNodeHandle;
+    ros::Rate mRate = ros::Rate(GLOBAL_ROS_RATE);
+    bool mRangeSwitch = false;
 
-    // Data
-    std::string currentDepthSource_;
-    std::string currentPCSource_;
-    sensor_msgs::Image depthImage_;
-    sensor_msgs::PointCloud2 pointCloud_;
-    pcl::PointCloud<pcl::PointXYZRGB> pcl_pointCloud_;
-    cv::Mat depthFrame_;
-    float rangeMin;
-    float rangeMax;
+    /***************************************************************************
+     * Data
+     */
+    std::string mCurrentDepthSource;
+    std::string mCurrentPCSource;
+    sensor_msgs::Image mDepthImage;
+    sensor_msgs::PointCloud2 mPointCloud;
+    pcl::PointCloud<pcl::PointXYZRGB> mPclPointCloud;
+    cv::Mat mDepthFrame;
+    float mRangeMin;
+    float mRangeMax;
 
-    // Threads
-    boost::thread* thread_watch_depth_img_ = nullptr;
-    boost::thread* thread_watch_pointcloud_ = nullptr;
+    /***************************************************************************
+     * Threads
+     */
+    boost::thread* mpThreadWatchDepthImg = nullptr;
+    boost::thread* mpThreadWatchPointcloud = nullptr;
     void watchDepthImgThread();
     void watchPointCloudThread();
-    boost::shared_mutex depth_img_mutex;
-    boost::shared_mutex pointcloud_mutex;
+    boost::shared_mutex mDepthImgMutex;
+    boost::shared_mutex mPointcloudMutex;
 
     // Subscriber
-    ros::Subscriber depth_sub_;
-    ros::Subscriber pc2_sub_;
+    ros::Subscriber mDepthSub;
+    ros::Subscriber mPC2Sub;
 
     // Debug
     void drawDebugOverlay();
-    static cv::Point debugMousePos;
+    static cv::Point mDebugMousePos;
 #ifdef PCL_DEBUG_VIEWER
     pcl::visualization::CloudViewer *viewer;
     void updatePointCloudViewerThread();
@@ -119,4 +131,6 @@ class RSCInterface {
 #endif
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_RSCINTERFACE_HPP_  // NOLINT
+}  // namespace Depth
+
+#endif  // HWI_RSC_HPP_  // NOLINT

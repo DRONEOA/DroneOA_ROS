@@ -17,24 +17,26 @@
  * Written by Xiao Zhou <x258zhou@edu.uwaterloo.ca>, Nov. 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAC_CAALGDEPTHCAM_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAC_CAALGDEPTHCAM_HPP_  // NOLINT
+#ifndef OAC_CAALGDEPTHCAM_HPP_  // NOLINT
+#define OAC_CAALGDEPTHCAM_HPP_  // NOLINT
 
 #include <droneoa_ros/OAC/BaseAlg.hpp>
-#include <droneoa_ros/RSCInterface.hpp>
+#include <droneoa_ros/HWI/RSC.hpp>
 
-// #define DEBUG_ALG_COLLISION_DEPTH
+namespace OAC {
 
 class CAAlgDepthCam : public BaseAlg {
-    RSCInterface *rsc_;
+    Depth::RSC *rsc_;
     float camThreshold_;
     float camPossibility_;
  public:
-    CAAlgDepthCam(CNCInterface *cnc, RSCInterface *rsc);
+    CAAlgDepthCam(CNC::CNCInterface *cnc, Depth::RSC *rsc);
     ~CAAlgDepthCam() override;
-    void init(RSCInterface *rsc);  // For restart
+    void init(Depth::RSC *rsc);  // For restart
     bool collect() override;  // Collect required sensor data
     bool plan() override;  // Return false when get around is impossible
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAC_CAALGDEPTHCAM_HPP_  // NOLINT
+}  // namespace OAC
+
+#endif  // OAC_CAALGDEPTHCAM_HPP_  // NOLINT

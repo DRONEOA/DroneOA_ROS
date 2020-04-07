@@ -30,6 +30,14 @@
 
 #include <cstdint>
 
+/**
+ * @brief ROS Rate
+ */
+static const double GLOBAL_ROS_RATE = 10;
+
+/**
+ * @brief List of flight modes
+ */
 static const char* FLT_MODE_STABILIZE = "STABILIZE";
 static const char* FLT_MODE_ACRO = "ACRO";
 static const char* FLT_MODE_ALT_HOLD = "ALT_HOLD";
@@ -52,7 +60,7 @@ static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 static const bool ENABLE_SAFETY_GPS = true;
 
 // OA Controller
-static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz */
+static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz suggest to be same as GLOBAL_ROS_RATE */
 
 static const char* ALG_STR_BUG = "ALG_BUG";
 static const char* ALG_STR_VFF = "ALG_VFF";
@@ -87,7 +95,31 @@ static const bool ENABLE_NGN = true;  /**< @brief enable Non-GPS Navigation */
 static const float LIDAR_ORIENTATION_CW = 180;  /**< @brief unit: degree */
 static const float LIDAR_FILTER_LOW = 0.1;  /**< @brief unit: m */
 static const float LIDAR_FILTER_HIGH = 10;  /**< @brief unit: m */
+static const int32_t LIDAR_POPUP_SCALE = 100;
+// Lidar sources
+static const char* LIDAR_SOURCE_YDLIDAR = "/scan";
+static const char* LIDAR_SOURCE_UE4 = "/sitl_lidar_test";
 
+// Depth setting
+static const float DEPTH_MAX_RANGE = 10.0f;  /**< @brief unit: m */
+static const float DEPTH_MIN_RANGE = 0.1f;  /**< @brief unit: m */
+// Depth sources
+static const char* DEPTH_SOURCE_RSC = "/d435/depth/image_rect_raw";
+static const char* DEPTH_SOURCE_UE4 = "/unreal_ros/image_depth";
+static const char* PC_SOURCE_RSC = "/d435/depth/color/points";
+static const char* PC_SOURCE_UE4 = "/depth_registered/points";
+
+// SITL
 static const float UE4_SITL_SCALE = 1000.0f;
+
+// Defines
+#define ENABLE_POINTCLOUD
+// #define PCL_DEBUG_VIEWER
+// #define IMG_DEBUG_POPUP
+// #define DEBUG_LIDAR_POPUP
+// #define DEBUG_OAC
+// #define DEBUG_ALG_COLLISION_LIDAR
+// #define DEBUG_ALG_COLLISION_DEPTH
+// #define DEBUG_ALG_OBSTACLE_FGM
 
 #endif  // INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT

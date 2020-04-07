@@ -17,24 +17,25 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT
+#ifndef OAC_OACONTROLLER_HPP_  // NOLINT
+#define OAC_OACONTROLLER_HPP_  // NOLINT
 
 #include <string>
 #include <vector>
 #include <map>
 #include <utility>
 
-#include <droneoa_ros/CNCInterface.hpp>
-#include <droneoa_ros/LidarInterface.hpp>
-#include <droneoa_ros/RSCInterface.hpp>
+#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+#include <droneoa_ros/HWI/base/LidarGeneric.hpp>
+#include <droneoa_ros/HWI/RSC.hpp>
 #include <droneoa_ros/OAC/BaseAlg.hpp>
 #include <droneoa_ros/OAC/CAAlgLidar.hpp>
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
 #include <droneoa_ros/OAC/OAAlgFGM.hpp>
 #include <droneoa_ros/OAC/CMDParser.hpp>
+#include <droneoa_ros/PDN.hpp>
 
-// #define DEBUG_OAC
+namespace OAC {
 
 /**
  * @brief Obstacle Avoidance Controller System states
@@ -90,7 +91,7 @@ class OAController {
     CMDRunner *theRunner_ = nullptr;
 
  public:
-    OAController(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc, CMDRunner *runner, ros::Rate r);
+    OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc, CMDRunner *runner, ros::Rate r);
     virtual ~OAController();
 
     /**
@@ -100,7 +101,7 @@ class OAController {
      * @param lidar pointer to lidar interface
      * @param rsc pointer to realsense camera interface
      */
-    void init(CNCInterface *cnc, LidarInterface *lidar, RSCInterface *rsc);
+    void init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc);
     /**
      * @brief Tick event, which stepping the state machine
      */
@@ -136,9 +137,9 @@ class OAController {
     boost::thread *thread_oac_master_;
 
     ros::Rate r_ = ros::Rate(OAC_REFRESH_FREQ);
-    CNCInterface *cnc_;
-    LidarInterface *lidar_;
-    RSCInterface *rsc_;
+    CNC::CNCInterface *cnc_;
+    Lidar::LidarGeneric *lidar_;
+    Depth::RSC *rsc_;
     std::map<SYS_Algs, BaseAlg*> algorithmInstances_;
     bool isTerminated = false;
 
@@ -150,4 +151,6 @@ class OAController {
     std::map<SYS_Algs, Command::DataQueue> algDATAmap_;
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OACONTROLLER_HPP_  // NOLINT
+}  // namespace OAC
+
+#endif  // OAC_OACONTROLLER_HPP_  // NOLINT

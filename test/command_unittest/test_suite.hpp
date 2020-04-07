@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 DroneOA Group - All Rights Reserved
+/* Copyright (C) 2020 DroneOA Group - All Rights Reserved
  * This file is part of DroneOA_ROS.
  *
  * DroneOA_ROS is free software: you can redistribute it and/or 
@@ -14,33 +14,30 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, April 2020
  */
 
-#include <ros/ros.h>
+#ifndef UT_CNCUNITTEST_TEST_SUITE_HPP  // NOLINT
+#define UT_CNCUNITTEST_TEST_SUITE_HPP  // NOLINT
 
-#include <droneoa_ros/OAC/BaseAlg.hpp>
+#include <gtest/gtest.h>
 
-namespace OAC {
+#define private public
+#define protected public
+#include "../../include/droneoa_ros/OAC/Command.hpp"
+#undef protected
+#undef private
 
-void BaseAlg::init(CNC::CNCInterface *cnc) {
-    cnc_ = cnc;
-}
+#include "../mocks/mock_cnc.hpp"
 
-BaseAlg::BaseAlg(CNC::CNCInterface *cnc) {
-    init(cnc);
-}
+class CommandTest: public ::testing::Test {
+ public:
+    CommandTest();
+    void SetUp();
+    void TearDown();
 
-BaseAlg::~BaseAlg() {
-    ROS_INFO("Destroy BaseAlg");
-}
+    // Mock instances
+    CNC::CNCMock cnc;
+};
 
-Command::CommandQueue BaseAlg::getCommandQueue() {
-    return CMDQueue_;
-}
-
-Command::DataQueue BaseAlg::getDataQueue() {
-    return DATAQueue_;
-}
-
-}  // namespace OAC
+#endif  // UT_CNCUNITTEST_TEST_SUITE_HPP  // NOLINT

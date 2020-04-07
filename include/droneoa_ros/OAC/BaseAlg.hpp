@@ -25,18 +25,20 @@
  * @date 2019-08
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT
+#ifndef OAC_BASEALG_HPP_  // NOLINT
+#define OAC_BASEALG_HPP_  // NOLINT
 
 #include <utility>
 #include <string>
 #include <vector>
-#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+#include <droneoa_ros/PDN.hpp>
 #include <droneoa_ros/OAC/Command.hpp>
 
+namespace OAC {
 class BaseAlg {
  public:
-    explicit BaseAlg(CNCInterface *cnc);
+    explicit BaseAlg(CNC::CNCInterface *cnc);
     virtual ~BaseAlg();
 
     /**
@@ -44,7 +46,7 @@ class BaseAlg {
      * Seperated from constructor due to the planned restart feature
      * @param cnc pointer to the Command And Control interface
      */
-    virtual void init(CNCInterface *cnc);  // For restart
+    virtual void init(CNC::CNCInterface *cnc);  // For restart
     /**
      * @brief Collect Data From Sensor And FCU Interface
      * @return false if errorif execute with error or precondition not satisfied
@@ -60,7 +62,7 @@ class BaseAlg {
     virtual Command::DataQueue getDataQueue();
 
  protected:
-    CNCInterface *cnc_;
+    CNC::CNCInterface *cnc_;
     /**
      * @brief A vector of CommandLine which is a pair of CMD_QUEUE_TYPES and std::string
      */
@@ -71,4 +73,6 @@ class BaseAlg {
     Command::DataQueue DATAQueue_;
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAC_BASEALG_HPP_  // NOLINT
+}  // namespace OAC
+
+#endif  // OAC_BASEALG_HPP_  // NOLINT

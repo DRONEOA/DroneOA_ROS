@@ -25,13 +25,14 @@
  * @date 2020-02
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT
+#ifndef OAC_COMMAND_HPP_  // NOLINT
+#define OAC_COMMAND_HPP_  // NOLINT
 
 #include <utility>
 #include <vector>
 #include <string>
-#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+#include <droneoa_ros/PDN.hpp>
 
 namespace Command {
 
@@ -109,8 +110,8 @@ typedef std::vector<DataLine> DataQueue;
  * @param cmdline the source CommandLine
  * @return whether the operation is successful
  */
-bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline);
+bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline);
 
 }  // namespace Command
 
-#endif  // INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT
+#endif  // OAC_COMMAND_HPP_  // NOLINT
