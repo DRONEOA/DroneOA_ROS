@@ -7,11 +7,18 @@ chmod +x *
 ./ENV_script.sh
 ```
 ## How to start an ArduCopter instance
+For the first time:
 ```shell
 cd ~
 cd <Ardupilot_Path>/ArduCopter
 sim_vehicle.py -w
 ```
+After that:
+```shell
+sim_vehicle.py -v ArduCopter
+```
+You can add `--console` for mavproxy console, and `--map` for satellite map view
+
 ## FAQ
 ### sim_vehicle.py command not found:
 Solutions:
