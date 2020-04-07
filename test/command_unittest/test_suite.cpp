@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 DroneOA Group - All Rights Reserved
+/* Copyright (C) 2020 DroneOA Group - All Rights Reserved
  * This file is part of DroneOA_ROS.
  *
  * DroneOA_ROS is free software: you can redistribute it and/or 
@@ -14,21 +14,13 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, April 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_  // NOLINT
+#include "./test_suite.hpp"  // NOLINT
 
-class GPSPoint {
- public:
-    GPSPoint();
-    GPSPoint(float latitude, float longitude, float altitude);
-    virtual ~GPSPoint() = default;
+CommandTest::CommandTest() {}
 
-    float latitude_;
-    float longitude_;
-    float altitude_;
-};
+void CommandTest::SetUp() {}
 
-#endif  // INCLUDE_DRONEOA_ROS_GPSPOINT_HPP_  // NOLINT
+void CommandTest::TearDown() {}

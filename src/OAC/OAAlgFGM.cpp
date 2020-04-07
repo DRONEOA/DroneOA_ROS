@@ -19,11 +19,13 @@
 
 #include <droneoa_ros/OAC/OAAlgFGM.hpp>
 
-OAAlgFGM::OAAlgFGM(CNCInterface *cnc, LidarInterface *lidar) : BaseAlg(cnc) {
+namespace OAC {
+
+OAAlgFGM::OAAlgFGM(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar) : BaseAlg(cnc) {
     init(lidar);
 }
 
-void OAAlgFGM::init(LidarInterface *lidar) {
+void OAAlgFGM::init(Lidar::LidarGeneric *lidar) {
     lidar_ = lidar;
 }
 
@@ -54,3 +56,5 @@ bool OAAlgFGM::plan() {
     //! @todo remain false until implemented
     return false;
 }
+
+}  // namespace OAC

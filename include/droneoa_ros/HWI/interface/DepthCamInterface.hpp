@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 DroneOA Group - All Rights Reserved
+/* Copyright (C) 2020 DroneOA Group - All Rights Reserved
  * This file is part of DroneOA_ROS.
  *
  * DroneOA_ROS is free software: you can redistribute it and/or 
@@ -17,26 +17,31 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef OAC_CAALGLIDAR_HPP_  // NOLINT
-#define OAC_CAALGLIDAR_HPP_  // NOLINT
+#ifndef HWI_INTERFACE_DEPTHCAMINTERFACE_HPP_  // NOLINT
+#define HWI_INTERFACE_DEPTHCAMINTERFACE_HPP_  // NOLINT
 
-#include <droneoa_ros/OAC/BaseAlg.hpp>
-#include <droneoa_ros/HWI/base/LidarGeneric.hpp>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/PointCloud2.h>
 
-namespace OAC {
+namespace Depth {
 
-class CAAlgLidar : public BaseAlg {
-    Lidar::LidarGeneric *lidar_;
-    float lidarThreshold_;
-    float lidarPossibility_;
+class DepthCamInterface {
  public:
-    CAAlgLidar(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar);
-    ~CAAlgLidar() override;
-    void init(Lidar::LidarGeneric *lidar);  // For restart
-    bool collect() override;  // Collect required sensor data
-    bool plan() override;  // Return false when get around is impossible
+    virtual ~DepthCamInterface() {}
+
+    // Init
+    virtual void initWatcherThread() = 0;
+
+    // Accessor
+    virtual float getMaxRange() = 0;
+    virtual float getMinRange() = 0;
+    virtual sensor_msgs::Image getDepthImage() = 0;
+    virtual sensor_msgs::PointCloud2 getPC2Cloud() = 0;
+
+    // Debug Print
+    virtual void printImgInfo() = 0;
 };
 
-}  // namespace OAC
+}  // namespace Depth
 
-#endif  // OAC_CAALGLIDAR_HPP_  // NOLINT
+#endif  // HWI_INTERFACE_DEPTHCAMINTERFACE_HPP_  // NOLINT

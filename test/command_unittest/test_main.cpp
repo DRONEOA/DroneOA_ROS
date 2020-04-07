@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 DroneOA Group - All Rights Reserved
+/* Copyright (C) 2020 DroneOA Group - All Rights Reserved
  * This file is part of DroneOA_ROS.
  *
  * DroneOA_ROS is free software: you can redistribute it and/or 
@@ -14,33 +14,16 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, April 2020
  */
 
+#include <gtest/gtest.h>
 #include <ros/ros.h>
+#include "../Utils/GeneralUtils.hpp"
 
-#include <droneoa_ros/OAC/BaseAlg.hpp>
-
-namespace OAC {
-
-void BaseAlg::init(CNC::CNCInterface *cnc) {
-    cnc_ = cnc;
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    int ret = RUN_ALL_TESTS();
+    logTestResult("CommandUnittest", ret);
+    return ret;
 }
-
-BaseAlg::BaseAlg(CNC::CNCInterface *cnc) {
-    init(cnc);
-}
-
-BaseAlg::~BaseAlg() {
-    ROS_INFO("Destroy BaseAlg");
-}
-
-Command::CommandQueue BaseAlg::getCommandQueue() {
-    return CMDQueue_;
-}
-
-Command::DataQueue BaseAlg::getDataQueue() {
-    return DATAQueue_;
-}
-
-}  // namespace OAC

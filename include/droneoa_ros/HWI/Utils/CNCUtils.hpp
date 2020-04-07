@@ -17,14 +17,15 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_UTILS_CNCUTILS_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_UTILS_CNCUTILS_HPP_  // NOLINT
+#ifndef HWI_UTILS_CNCUTILS_HPP_  // NOLINT
+#define HWI_UTILS_CNCUTILS_HPP_  // NOLINT
 
 #include <string>
 #include <vector>
-
 #include <utility>
-#include <droneoa_ros/GPSPoint.hpp>
+#include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
+
+namespace CNC {
 
 class CNCUtility {
  public:
@@ -76,4 +77,6 @@ class CNCUtility {
     static float validSpeedCMD(float targetSpeed);
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_UTILS_CNCUTILS_HPP_  // NOLINT
+}  // namespace CNC
+
+#endif  // HWI_UTILS_CNCUTILS_HPP_  // NOLINT

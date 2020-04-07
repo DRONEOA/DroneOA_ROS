@@ -20,7 +20,9 @@
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 
-CAAlgDepthCam::CAAlgDepthCam(CNCInterface *cnc, RSCInterface *rsc) : BaseAlg(cnc) {
+namespace OAC {
+
+CAAlgDepthCam::CAAlgDepthCam(CNC::CNCInterface *cnc, Depth::RSC *rsc) : BaseAlg(cnc) {
     init(rsc);
 }
 
@@ -28,7 +30,7 @@ CAAlgDepthCam::~CAAlgDepthCam() {
     CMDQueue_.clear();
 }
 
-void CAAlgDepthCam::init(RSCInterface *rsc) {
+void CAAlgDepthCam::init(Depth::RSC *rsc) {
     rsc_ = rsc;
 }
 
@@ -107,3 +109,5 @@ bool CAAlgDepthCam::plan() {
     }
     return true;
 }
+
+}  // namespace OAC
