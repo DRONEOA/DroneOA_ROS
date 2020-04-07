@@ -23,6 +23,8 @@ namespace Lidar {
 
 LidarYDLidar::LidarYDLidar(ros::NodeHandle node, ros::Rate rate) : LidarGeneric(node, rate) {}
 
+LidarYDLidar::~LidarYDLidar() {}
+
 void LidarYDLidar::printLidarInfo() {
     ROS_INFO("[LIDAR YDLidar] MaxRange: %f, MinRange: %f",
         getMaxRange(), getMinRnage());

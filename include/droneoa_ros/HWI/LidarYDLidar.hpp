@@ -27,6 +27,7 @@ namespace Lidar {
 class LidarYDLidar : public LidarGeneric {
  public:
     LidarYDLidar(ros::NodeHandle node, ros::Rate rate);
+    virtual ~LidarYDLidar();
 
     /***************************************************************************
      * Debug

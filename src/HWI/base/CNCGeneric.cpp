@@ -39,10 +39,22 @@ CNCGeneric::CNCGeneric(ros::NodeHandle node, ros::Rate rate) : mTargetAltitude(0
     mNodeHandle(node), mRate(rate) {}
 
 CNCGeneric::~CNCGeneric() {
-    if (mpThreadWatchAltitude) delete mpThreadWatchAltitude;
-    if (mpThreadWatchGPSFix) delete mpThreadWatchGPSFix;
-    if (mpThreadWatchState) delete mpThreadWatchState;
-    if (mpThreadWatchIMU) delete mpThreadWatchIMU;
+    if (mpThreadWatchAltitude) {
+        mpThreadWatchAltitude->join();
+        delete mpThreadWatchAltitude;
+    }
+    if (mpThreadWatchGPSFix) {
+        mpThreadWatchGPSFix->join();
+        delete mpThreadWatchGPSFix;
+    }
+    if (mpThreadWatchState) {
+        mpThreadWatchState->join();
+        delete mpThreadWatchState;
+    }
+    if (mpThreadWatchIMU) {
+        mpThreadWatchIMU->join();
+        delete mpThreadWatchIMU;
+    }
     ROS_INFO("Destroy CNCGeneric");
 }
 

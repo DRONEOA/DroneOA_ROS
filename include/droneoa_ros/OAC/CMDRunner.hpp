@@ -60,7 +60,6 @@ class CMDRunner {
     bool shutdown;
     boost::shared_mutex queue_mutex;
     boost::shared_mutex state_mutex;
-    boost::shared_mutex shutdown_mutex;
 
     void clearCMDQueue();
     bool populateCMDQueue(Command::CommandQueue commands);

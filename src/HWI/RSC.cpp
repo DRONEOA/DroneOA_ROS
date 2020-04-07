@@ -13,8 +13,6 @@
  * You should have received a copy of the GNU Affero General Public
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
- *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
 #include <cv_bridge/cv_bridge.h>
@@ -47,8 +45,14 @@ RSC::~RSC() {
     } catch(...) {
         ROS_INFO("cv::destroyWindow warn");
     }
-    if (mpThreadWatchDepthImg) delete mpThreadWatchDepthImg;
-    if (mpThreadWatchPointcloud) delete mpThreadWatchPointcloud;
+    if (mpThreadWatchDepthImg) {
+        mpThreadWatchDepthImg->join();
+        delete mpThreadWatchDepthImg;
+    }
+    if (mpThreadWatchPointcloud) {
+        mpThreadWatchPointcloud->join();
+        delete mpThreadWatchPointcloud;
+    }
 #ifdef PCL_DEBUG_VIEWER
     if (viewer) {
         delete viewer;

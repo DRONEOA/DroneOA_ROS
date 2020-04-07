@@ -38,7 +38,10 @@ OAController::~OAController() {
             delete elem.second;
         }
     }
+
+    // Wait for master thread to end
     if (thread_oac_master_) {
+        thread_oac_master_->join();
         delete thread_oac_master_;
         ROS_WARN("[OAC] MASTER THREAD ENDED");
     }

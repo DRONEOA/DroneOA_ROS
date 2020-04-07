@@ -39,7 +39,10 @@ LidarGeneric::~LidarGeneric() {
 #ifdef DEBUG_LIDAR_POPUP
     cv::destroyWindow(OPENCV_WINDOW_LIDAR);
 #endif
-    if (mpThreadWatchLidar) delete mpThreadWatchLidar;
+    if (mpThreadWatchLidar) {
+        mpThreadWatchLidar->join();
+        delete mpThreadWatchLidar;
+    }
     ROS_INFO("Destroy LidarGeneric");
 }
 

@@ -13,8 +13,6 @@
  * You should have received a copy of the GNU Affero General Public
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
- *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
 #include <signal.h>
@@ -35,6 +33,7 @@
 void sysSignalhandler(int signum) {
     ROS_WARN("Caught signal %d", signum);
     // Terminate program
+    ros::shutdown();
     exit(signum);
 }
 
@@ -78,11 +77,13 @@ int main(int argc, char **argv) {
         }
         free(commandIn);
         if (!masterSW) {  // Quit Signal
+            ros::shutdown();
             break;
         }
     }
 
-    while (node.ok() && masterSW) {
+    //! @todo Do we need this
+    while (node.ok()) {
       ros::spinOnce();
       rate.sleep();
     }

@@ -53,7 +53,6 @@ bool CMDRunner::toggleState(RUNNER_STATE newState) {
 }
 
 bool CMDRunner::isShutDownRequested() {
-    boost::shared_lock<boost::shared_mutex> lock(shutdown_mutex);
     return shutdown;
 }
 
@@ -119,8 +118,8 @@ void CMDRunner::runnerRoutine() {
 
 CMDRunner::~CMDRunner() {
     if (runnerThread) {
-        boost::unique_lock<boost::shared_mutex> uniqueLock(shutdown_mutex);
         shutdown = true;
+        runnerThread->join();
         delete runnerThread;
     }
     ROS_INFO("Destroy CMDRunner");
