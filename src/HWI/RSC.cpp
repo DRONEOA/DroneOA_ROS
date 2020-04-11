@@ -194,7 +194,7 @@ void RSC::printImgInfo() {
 #endif
 }
 
-void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1, int32_t thickness = 1) {
+void RSC::drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale, int32_t thickness) {
     int32_t font_face = cv::FONT_HERSHEY_COMPLEX;
     int32_t baseline;
     cv::Size text_size = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
@@ -209,7 +209,7 @@ void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font
 }
 
 // Warning: do not use the ouput as depth data
-cv::Mat getBetterImageDebug(cv::Mat input) {
+cv::Mat RSC::getBetterImageDebug(cv::Mat input) {
     double min = 0;
     double max = 12000;
     cv::minMaxIdx(input, &min, &max);

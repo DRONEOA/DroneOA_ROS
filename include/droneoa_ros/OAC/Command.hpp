@@ -41,7 +41,7 @@ constexpr char CommandDataDelimiter = ' ';
 /**
  * @brief ENUM of supported COMMAND types
  */
-enum CMD_QUEUE_TYPES {
+enum CMD_QUEUE_TYPES : uint32_t {
     CMD_CHMOD = 0,  /*!< DATA: mod name */
     CMD_SET_MAX_VELOCITY,  /*!< DATA: float speed */
     CMD_SET_YAW,  /*!< DATA: float heading */
@@ -79,7 +79,7 @@ typedef std::vector<CommandLine> CommandQueue;
 /**
  * @brief ENUM of supported DATA types
  */
-enum DATA_QUEUE_TYPES {
+enum DATA_QUEUE_TYPES : uint32_t {
     DATA_CONFIDENCE = 0,  /*!< DATA: confidence */
     DATA_ALG_NAME,  /*!< DATA: algorithm name */
 };

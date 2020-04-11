@@ -88,7 +88,9 @@ class RSC : public DepthCamInterface {
      */
     void printImgInfo() override;
     static void mouseCallback(int32_t event, int32_t x, int32_t y, int32_t flags, void* userdata);
-    pcl::PointCloud<pcl::PointXYZRGB> getPointCloud();
+    static void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1,
+            int32_t thickness = 1);
+    static cv::Mat getBetterImageDebug(cv::Mat input);
 
  private:
     ros::NodeHandle mNodeHandle;

@@ -83,16 +83,14 @@ bool CNCArdupilot::clearWaypoint() {
 // Goto Global Waypoint
 bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt) {
     // @TODO: check Guided mode
-    bool rel = false;
-    rel = clearWaypoint();
-    if (!rel) {
-        return rel;
+    if (!clearWaypoint()) {
+        return false;
     }
-    rel = pushWaypoints(x_lat, y_long, z_alt);
-    if (rel) {
+    if (pushWaypoints(x_lat, y_long, z_alt)) {
         mRecentWaypoint = GPSPoint(x_lat, y_long, z_alt);
+        return true;
     }
-    return rel;
+    return false;
 }
 
 // Goto Relative Waypoint (North+, East+)

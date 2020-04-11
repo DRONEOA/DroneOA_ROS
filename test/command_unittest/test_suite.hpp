@@ -33,8 +33,8 @@
 class CommandTest: public ::testing::Test {
  public:
     CommandTest();
-    void SetUp();
-    void TearDown();
+    void SetUp() override;
+    void TearDown() override;
 
     // Mock instances
     CNC::CNCMock cnc;
