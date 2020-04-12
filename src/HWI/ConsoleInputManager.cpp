@@ -168,6 +168,24 @@ bool ConsoleInputManager::handleCNCCommands() {
                 ROS_WARN("::GOTO YAW -> yaw:%f dist:%f alt:%f::", yawAngle, dist, alt);
                 cnc_->gotoHeading(yawAngle, dist, alt);
             }
+        } else if (cmdType == "climb") {
+            float deltaAlt = std::stof(currentCommand_.second.at(1));
+            if (deltaAlt < 0.0f) {
+                throw 1;
+            }
+            ROS_WARN("::SET ALTITUDE -> %f::", deltaAlt);
+            cnc_->setYaw(cnc_->getHUDData().heading);
+            //! @TODO To prevent slight heading change, try magnetic compass?
+            cnc_->gotoHeading(cnc_->getHUDData().heading, 0.0f, cnc_->getRelativeAltitude()+deltaAlt);
+        } else if (cmdType == "descent") {
+            float deltaAlt = std::stof(currentCommand_.second.at(1));
+            if (deltaAlt < 0.0f) {
+                throw 1;
+            }
+            ROS_WARN("::SET ALTITUDE -> -%f::", deltaAlt);
+            cnc_->setYaw(cnc_->getHUDData().heading);
+            //! @TODO To prevent slight heading change, try magnetic compass?
+            cnc_->gotoHeading(cnc_->getHUDData().heading, 0.0f, cnc_->getRelativeAltitude()-deltaAlt);
         } else if (cmdType == "info") {
             GPSPoint tmpGPSPoint = cnc_->getCurrentGPSPoint();
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
@@ -376,6 +394,8 @@ void ConsoleInputManager::printCNCHelper() {
     ROS_WARN("    rtl:                                  Return to land");
     ROS_WARN("    velocity [Speed]:                     Set max velocity");
     ROS_WARN("    yaw [Heading] <Distance> <Altitude>:  Change yaw / go to heading");
+    ROS_WARN("    climb [Altitude]:                     Climb based on relative altitude");
+    ROS_WARN("    descent [Altitude]:                   Descent based on relative altitude");
     ROS_WARN("    info:                                 Print information");
     ROS_WARN("    quit:                                 Quit the node");
 }

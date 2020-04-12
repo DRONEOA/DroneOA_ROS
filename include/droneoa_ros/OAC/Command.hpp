@@ -49,6 +49,8 @@ enum CMD_QUEUE_TYPES {
     CMD_GOTO_RELATIVE,  /*!< DATA: float North axis dist, float East axis dist, float Altitude */
     CMD_GOTO_GLOBAL,  /*!< DATA: float Latitude, float Longitude, float Altitude */
     CMD_GOTO_HEADING,  /*!< DATA: float heading, float distance, float Altitude */
+    CMD_CLIMB,  /*!< DATA: float Delta Altitude */
+    CMD_DESCEND,  /*!< DATA: float Delta Altitude */
 };
 
 /**
@@ -62,6 +64,8 @@ static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_GOTO_RELATIVE",
     "CMD_GOTO_GLOBAL",
     "CMD_GOTO_HEADING",
+    "CMD_CLIMB",
+    "CMD_DESCEND",
 };
 
 /**
