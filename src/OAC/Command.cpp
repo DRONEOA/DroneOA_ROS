@@ -87,6 +87,30 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
                 }
                 return cnc->gotoHeading(heading, dist, alt);
             }
+            case CMD_QUEUE_TYPES::CMD_CLIMB:
+            {
+                float deltaAlt = std::stof(cmdline.second);
+                if (deltaAlt < 0.0f) {
+                    throw 1;
+                }
+                float heading = cnc->getHUDData().heading;
+                float dist = 0.0f;
+                float alt = cnc->getRelativeAltitude();
+                //! @TODO To prevent slight heading change, try magnetic compass?
+                return cnc->gotoHeading(heading, dist, deltaAlt+alt);
+            }
+            case CMD_QUEUE_TYPES::CMD_DESCEND:
+            {
+                float deltaAlt = std::stof(cmdline.second);
+                if (deltaAlt < 0.0f) {
+                    throw 1;
+                }
+                float heading = cnc->getHUDData().heading;
+                float dist = 0.0f;
+                float alt = cnc->getRelativeAltitude();
+                //! @TODO To prevent slight heading change, try magnetic compass?
+                return cnc->gotoHeading(heading, dist, deltaAlt-alt);
+            }
             default:
                 throw 1;
         }
