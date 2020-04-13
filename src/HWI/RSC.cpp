@@ -69,9 +69,7 @@ void RSC::initWatcherThread() {
     cv::setMouseCallback(OPENCV_WINDOW, RSC::mouseCallback, NULL);  // DEBUG
 #endif
     mpThreadWatchDepthImg = new boost::thread(boost::bind(&RSC::watchDepthImgThread, this));
-#ifdef ENABLE_POINTCLOUD
     mpThreadWatchPointcloud = new boost::thread(boost::bind(&RSC::watchPointCloudThread, this));
-#endif
     ROS_INFO("[RSC] init");
 }
 
@@ -184,14 +182,12 @@ void RSC::updatePointCloudViewerThread() {
 void RSC::printImgInfo() {
     ROS_INFO("[IMG] height: %d width: %d", mDepthImage.height, mDepthImage.width);
     ROS_INFO("[IMG] encoding: %s", mDepthImage.encoding.c_str());
-#ifdef ENABLE_POINTCLOUD
     ROS_INFO("[Pointcloud] frameID: %s", mPointCloud.header.frame_id.c_str());
     ROS_INFO("[Pointcloud] field size: %zd", mPointCloud.fields.size());
     for (uint32_t i = 0; i < mPointCloud.fields.size(); ++i) {
         ROS_INFO("      field: %s", mPointCloud.fields[i].name.c_str());
     }
     ROS_INFO("[Pointcloud] pcl data size: %zd", mPclPointCloud.size());
-#endif
 }
 
 void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1, int32_t thickness = 1) {

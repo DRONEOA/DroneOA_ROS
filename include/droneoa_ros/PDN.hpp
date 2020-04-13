@@ -113,7 +113,6 @@ static const char* PC_SOURCE_UE4 = "/depth_registered/points";
 static const float UE4_SITL_SCALE = 1000.0f;
 
 // Defines
-#define ENABLE_POINTCLOUD
 // #define PCL_DEBUG_VIEWER
 // #define IMG_DEBUG_POPUP
 // #define DEBUG_LIDAR_POPUP

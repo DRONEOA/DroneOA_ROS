@@ -28,6 +28,7 @@
 #include <droneoa_ros/HWI/LidarYDLidar.hpp>
 #include <droneoa_ros/HWI/RSC.hpp>
 #include <droneoa_ros/OAC/OAC.hpp>
+#include <droneoa_ros/HWI/OctomapClient.hpp>
 #include <droneoa_ros/HWI/ConsoleInputManager.hpp>
 
 void sysSignalhandler(int signum) {
@@ -50,11 +51,13 @@ int main(int argc, char **argv) {
     CNC::CNCArdupilot cnc(node, rate);
     Lidar::LidarYDLidar lidar(node, rate);
     Depth::RSC rsc(node, rate);
+    SLAM::OctomapClient octomapClient(node, rate);
 
     // Init watchers
     cnc.initWatcherThread();
     if (ENABLE_RSC) {
         rsc.initWatcherThread();
+        octomapClient.initWatcherThread();
     }
     if (ENABLE_LIDAR) {
         lidar.initWatcherThread();
@@ -68,7 +71,7 @@ int main(int argc, char **argv) {
     char *commandIn;
     bool masterSW = true;
     IO::ConsoleInputManager consoleInputManager(&masterSW);
-    consoleInputManager.init(&cnc, &rsc, &oac, &lidar);
+    consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &octomapClient);
     while ((commandIn = readline("")) != nullptr) {
         if (*commandIn) {
             add_history(commandIn);

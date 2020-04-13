@@ -33,12 +33,17 @@ ConsoleInputManager::~ConsoleInputManager() {
 }
 
 bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac,
-        Lidar::LidarGeneric *lidar) {
+        Lidar::LidarGeneric *lidar, SLAM::OctomapClient *octomapClient) {
     cnc_ = cnc;
     rsc_ = rsc;
     oac_ = oac;
     lidar_ = lidar;
+    octomapClient_ = octomapClient;
+    if (!(cnc_ && rsc_ && oac_ && lidar_ && octomapClient_)) {
+        return false;
+    }
     thread_watch_command_ = new boost::thread(boost::bind(&ConsoleInputManager::watchCommandThread, this));
+    return true;
 }
 
 void ConsoleInputManager::command_callback(const std_msgs::String::ConstPtr& msg) {
@@ -107,6 +112,13 @@ bool ConsoleInputManager::commandDispatch() {
             return false;
         }
         return handleLIDARCommands();
+    } else if (currentCommand_.first == "map") {
+        //! @todo possible to also support 2d lidar
+        if (!ENABLE_RSC) {
+            ROS_WARN("This module requires [RSC] !!!");
+            return false;
+        }
+        return handleMapCommands();
     } else if (currentCommand_.first == "!") {
         return handleQuickCommands();
     } else {
@@ -364,6 +376,22 @@ bool ConsoleInputManager::handleLIDARCommands() {
     } catch (...) {
         ROS_WARN("ERROR happened while processing LIDAR command");
         printLIDARHelper();
+    }
+    return true;
+}
+
+bool ConsoleInputManager::handleMapCommands() {
+    try {
+        std::string cmdType = currentCommand_.second.at(0);
+        if (cmdType == "info") {
+            //! @todo
+            octomapClient_->printDebugInfo();
+            ROS_WARN("TODO SLAM");
+        } else {
+            ROS_WARN("Unknown MAP command");
+        }
+    } catch (...) {
+        ROS_WARN("ERROR happened while processing MAP command");
     }
     return true;
 }

@@ -25,6 +25,10 @@ find_package(OpenCV REQUIRED COMPONENTS
 
 find_package( PCL REQUIRED )
 
+find_package(octomap REQUIRED)
+find_package(ompl REQUIRED)
+find_package(fcl REQUIRED)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -157,6 +161,7 @@ add_library(droneoa_ros_libhwi
   src/HWI/Utils/CNCUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
   src/HWI/ConsoleInputManager.cpp
+  src/HWI/OctomapClient.cpp
 )
 
 ## Add cmake target dependencies of the library

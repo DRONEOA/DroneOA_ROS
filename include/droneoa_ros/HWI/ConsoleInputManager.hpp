@@ -30,6 +30,7 @@
 #include <droneoa_ros/HWI/base/LidarGeneric.hpp>
 #include <droneoa_ros/HWI/RSC.hpp>
 #include <droneoa_ros/OAC/OAC.hpp>
+#include <droneoa_ros/HWI/OctomapClient.hpp>
 
 namespace IO {
 
@@ -40,7 +41,8 @@ class ConsoleInputManager {
     explicit ConsoleInputManager(bool* masterSwitch);
     virtual ~ConsoleInputManager();
 
-    bool init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac, Lidar::LidarGeneric *lidar);
+    bool init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac, Lidar::LidarGeneric *lidar,
+            SLAM::OctomapClient *octomapClient);
 
     /**
      * @brief Pass the input console command, and execute if valid
@@ -60,6 +62,7 @@ class ConsoleInputManager {
     Depth::RSC *rsc_;
     OAC::OAController *oac_;
     Lidar::LidarGeneric *lidar_;
+    SLAM::OctomapClient *octomapClient_;
 
     // Listen to command from topic
     boost::thread* thread_watch_command_ = nullptr;
@@ -74,6 +77,7 @@ class ConsoleInputManager {
     bool handleOACCommands();
     bool handleRSCCommands();
     bool handleLIDARCommands();
+    bool handleMapCommands();
     bool handleQuickCommands();
 
     // Helper
