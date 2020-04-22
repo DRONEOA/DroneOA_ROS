@@ -2,6 +2,4 @@
     <include file="../components/apmSITL.launch" />
     <include file="../components/rs_camera.launch" />
     <include file="../components/lidar.launch" />
-    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch" /> -->
-    <!-- <include file="$(find ydlidar)/launch/lidar.launch" /> -->
 </launch>

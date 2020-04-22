@@ -60,6 +60,9 @@ sudo apt-get install ros-melodic-perception -y
 sudo apt-get install ros-melodic-pcl-ros -y
 sudo apt-get install ros-melodic-pcl-conversions -y
 sudo apt-get install ros-melodic-mavros -y
+sudo apt-get install ros-melodic-octomap -y
+sudo apt-get install ros-melodic-octomap-server -y
+sudo apt-get install ros-melodic-octomap-rviz-plugins -y
 cd src
 git clone https://github.com/IntelRealSense/realsense-ros.git
 git clone http://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git

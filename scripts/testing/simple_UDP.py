@@ -10,7 +10,7 @@ ue4_address = ('127.0.0.1', 23339)
 fdm = fgFDM.fgFDM()
 
 def init():
-    # Create a UDP socket
+    # Create a UDP socket, careful not use ports occupied by SITL
     sitl_address = ('127.0.0.1', 5503)
     udp.bind(sitl_address)
 
