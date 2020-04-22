@@ -22,10 +22,11 @@
 
 #include <fstream>
 #include <string>
+#include <cstdint>
 
 static const char* logFilePath = "./unittest_result.txt";
 
-bool logTestResult(std::string testName, int ret) {
+bool logTestResult(const std::string &testName, uint32_t ret) {
     std::ofstream outfile;
     outfile.open(logFilePath, std::ios_base::app);
     if (outfile.fail()) {

@@ -150,7 +150,7 @@ bool ConsoleInputManager::handleCNCCommands() {
         } else if (cmdType == "velocity") {
             float vel = std::stof(currentCommand_.second.at(1));
             ROS_WARN("::SET MAX VELOCITY -> %f::", vel);
-            if (vel == 0.0) {
+            if (vel <= 0.0) {
                 ROS_WARN("Invalid Speed Setting");
                 return false;
             }
