@@ -2,3 +2,4 @@ src/pyflwor/*
 report/*
 .vscode/*
 launch/unittest_result.txt
+launch/sitl/step1log.txt
