@@ -17,9 +17,12 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
+#include <ros/ros.h>
 #include <droneoa_ros/OAC/CMDRunner.hpp>
 
-CMDRunner::CMDRunner(CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), cnc_(cnc) {
+namespace OAC {
+
+CMDRunner::CMDRunner(CNC::CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), cnc_(cnc) {
     toggleState(RUNNER_STATE::INIT);
     runnerThread = new boost::thread(boost::bind(&CMDRunner::runnerRoutine, this));
 }
@@ -30,7 +33,7 @@ void CMDRunner::clearCMDQueue() {
     theCMDQueue.clear();
 }
 
-bool CMDRunner::populateCMDQueue(CommandQueue commands) {
+bool CMDRunner::populateCMDQueue(Command::CommandQueue commands) {
     //! @todo(shibohan) pre-check commands here
     ROS_DEBUG("[CMDRunner] %s", __func__);
     boost::unique_lock<boost::shared_mutex> uniqueLock(queue_mutex);
@@ -50,11 +53,10 @@ bool CMDRunner::toggleState(RUNNER_STATE newState) {
 }
 
 bool CMDRunner::isShutDownRequested() {
-    boost::shared_lock<boost::shared_mutex> lock(shutdown_mutex);
     return shutdown;
 }
 
-bool CMDRunner::setupRunner(CommandQueue commands) {
+bool CMDRunner::setupRunner(Command::CommandQueue commands) {
     populateCMDQueue(commands);
 }
 
@@ -96,7 +98,7 @@ void CMDRunner::runnerRoutine() {
                 internalTimmer = 0;
             }
         }
-        if (theCMDQueue.front().first == CMD_QUEUE_TYPES::CMD_DELAY_MSEC) {
+        if (theCMDQueue.front().first == Command::CMD_QUEUE_TYPES::CMD_DELAY_MSEC) {
             // Handle Delay
             try {
                 internalTimmer = std::stoi(theCMDQueue.front().second);
@@ -108,7 +110,7 @@ void CMDRunner::runnerRoutine() {
             }
         } else {
             // Common Instant Commands
-            parseCMD(cnc_, theCMDQueue.front());
+            Command::parseCMD(cnc_, theCMDQueue.front());
             theCMDQueue.erase(theCMDQueue.begin());
         }
     }
@@ -116,8 +118,11 @@ void CMDRunner::runnerRoutine() {
 
 CMDRunner::~CMDRunner() {
     if (runnerThread) {
-        boost::unique_lock<boost::shared_mutex> uniqueLock(shutdown_mutex);
         shutdown = true;
+        runnerThread->join();
+        delete runnerThread;
     }
     ROS_INFO("Destroy CMDRunner");
 }
+
+}  // namespace OAC

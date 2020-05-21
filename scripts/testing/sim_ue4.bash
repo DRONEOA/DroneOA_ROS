@@ -5,16 +5,27 @@ killbg() {
         done
 }
 trap killbg EXIT
-cd ../../launch
 pids=()
-# sim_vehicle doesn't work in background mode. Need to find a solution later
-# sim_vehicle.py -v ArduCopter &
-# pids+=($!)
-# sleep 15
+# sim_vehicle will be started by UE4 SIM
+echo ">>> Starting UDP ......"
+python ./simple_UDP.py & 
+pids+=($!)
+echo ">>> Starting dependency nodes ......"
+cd ../../launch/sitl
 roslaunch ./step1SITLUE4.launch > step1log.txt  &
 pids+=($!)
+echo ">>> 10s interval <<<"
 sleep 10
-echo "UDP python"
-python ../scripts/simple_UDP.py & 
-pids+=($!)
+echo "==================================="
+echo ">>>>>     If need octomap     <<<<<"
+echo ">>>>>   Start UE4 SIM ASAP    <<<<<"
+echo "==================================="
+sleep 5
+echo "==================================="
+echo ">>>>> You Can Start Main Node <<<<<"
+echo "==================================="
+# cd ..
+# roslaunch ./step2.launch > step1log.txt  &
+# pids+=($!)
+echo ">>> Waiting for shutdown signal <<<"
 sleep infinity

@@ -13,75 +13,79 @@
  * You should have received a copy of the GNU Affero General Public
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
- *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
 #include <signal.h>
 #include <ros/ros.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include <cstdlib>
 #include <iomanip>
 #include <sstream>
 
-#include <droneoa_ros/CNCInterface.hpp>
-#include <droneoa_ros/RSCInterface.hpp>
-#include <droneoa_ros/LidarInterface.hpp>
-#include <droneoa_ros/OAController.hpp>
-#include <droneoa_ros/Utils/CNCUtils.hpp>
-#include <droneoa_ros/ConsoleInputManager.hpp>
+#include <droneoa_ros/HWI/CNCArdupilot.hpp>
+#include <droneoa_ros/HWI/LidarYDLidar.hpp>
+#include <droneoa_ros/HWI/RSC.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
+#include <droneoa_ros/HWI/ConsoleInputManager.hpp>
 
 void sysSignalhandler(int signum) {
     ROS_WARN("Caught signal %d", signum);
     // Terminate program
+    ros::shutdown();
     exit(signum);
 }
 
 int main(int argc, char **argv) {
     // Setup Refresh Rate
-    int32_t rate = 10;
-
-    ros::init(argc, argv, "mavros_takeoff");
-    ros::NodeHandle n;
-
-    ros::Rate r(rate);
+    ros::init(argc, argv, "droneoa");
+    ros::NodeHandle node;
+    ros::Rate rate(GLOBAL_ROS_RATE);
 
     // Register exit signal
     signal(SIGINT, sysSignalhandler);
 
-    // Interface Instance
-    CNCInterface cnc;
-    RSCInterface rsc;
-    LidarInterface lidar;
-    cnc.init(n, r);
+    // HWI Components
+    CNC::CNCArdupilot cnc(node, rate);
+    Lidar::LidarYDLidar lidar(node, rate);
+    Depth::RSC rsc(node, rate);
+
+    // Init watchers
+    cnc.initWatcherThread();
     if (ENABLE_RSC) {
-        rsc.init(n, r);
+        rsc.initWatcherThread();
     }
     if (ENABLE_LIDAR) {
-        lidar.init(n, r);
+        lidar.initWatcherThread();
     }
 
-    // Create CMD Queue Runner
-    CMDRunner runner(&cnc);
+    // OAC Components
+    OAC::CMDRunner runner(&cnc);
+    OAC::OAController oac(&cnc, &lidar, &rsc, &runner, ros::Rate(OAC_REFRESH_FREQ));
 
-    // Create OA Controller
-    OAController oac(&cnc, &lidar, &rsc, &runner, ros::Rate(OAC_REFRESH_FREQ));
-
-    // Process Console Commands
-    std::string commandIn;
+    // Console IO
+    char *commandIn;
     bool masterSW = true;
-    ConsoleInputManager consoleInputManager(&masterSW);
+    IO::ConsoleInputManager consoleInputManager(&masterSW);
     consoleInputManager.init(&cnc, &rsc, &oac, &lidar);
-    while (std::getline(std::cin, commandIn)) {
-        consoleInputManager.parseAndExecuteConsole(commandIn);
+    while ((commandIn = readline("")) != nullptr) {
+        if (*commandIn) {
+            add_history(commandIn);
+            std::string sCommandIn(commandIn);
+            consoleInputManager.parseAndExecuteConsole(sCommandIn);
+        }
+        free(commandIn);
         if (!masterSW) {  // Quit Signal
+            ros::shutdown();
             break;
         }
     }
 
-    while (n.ok() && masterSW) {
+    //! @todo Do we need this
+    while (node.ok()) {
       ros::spinOnce();
-      r.sleep();
+      rate.sleep();
     }
 
     return 0;

@@ -17,12 +17,14 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, January 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT
+#ifndef OAC_CMDRUNNER_HPP_  // NOLINT
+#define OAC_CMDRUNNER_HPP_  // NOLINT
 
 #include <boost/thread.hpp>
 #include <droneoa_ros/OAC/Command.hpp>
-#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+
+namespace OAC {
 
 /**
  * @brief 5 States Of The Runner
@@ -51,22 +53,21 @@ static const int32_t RUNNER_TICK_TIME = 100;
 class CMDRunner {
     void runnerRoutine();
     boost::thread *runnerThread;
-    CNCInterface *cnc_;
+    CNC::CNCInterface *cnc_;
 
-    CommandQueue theCMDQueue;
+    Command::CommandQueue theCMDQueue;
     RUNNER_STATE runnerState;
     bool shutdown;
     boost::shared_mutex queue_mutex;
     boost::shared_mutex state_mutex;
-    boost::shared_mutex shutdown_mutex;
 
     void clearCMDQueue();
-    bool populateCMDQueue(CommandQueue commands);
+    bool populateCMDQueue(Command::CommandQueue commands);
     bool toggleState(RUNNER_STATE newState);
     bool isShutDownRequested();
 
  public:
-    explicit CMDRunner(CNCInterface *cnc);
+    explicit CMDRunner(CNC::CNCInterface *cnc);
     virtual ~CMDRunner();
     /**
      * @brief Send a new command queue to the runner
@@ -75,7 +76,7 @@ class CMDRunner {
      * @return true operation is successful
      * @return false condition unsatisfied or command queue contains error
      */
-    bool setupRunner(CommandQueue commands);
+    bool setupRunner(Command::CommandQueue commands);
     bool startRunner();
     //! @todo(shibohan) interrupt and management
 
@@ -86,4 +87,6 @@ class CMDRunner {
     RUNNER_STATE getRunnerState();
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAC_CMDRUNNER_HPP_  // NOLINT
+}  // namespace OAC
+
+#endif  // OAC_CMDRUNNER_HPP_  // NOLINT

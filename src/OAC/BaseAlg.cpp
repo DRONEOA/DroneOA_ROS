@@ -17,13 +17,17 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
+#include <ros/ros.h>
+
 #include <droneoa_ros/OAC/BaseAlg.hpp>
 
-void BaseAlg::init(CNCInterface *cnc) {
+namespace OAC {
+
+void BaseAlg::init(CNC::CNCInterface *cnc) {
     cnc_ = cnc;
 }
 
-BaseAlg::BaseAlg(CNCInterface *cnc) {
+BaseAlg::BaseAlg(CNC::CNCInterface *cnc) {
     init(cnc);
 }
 
@@ -31,10 +35,12 @@ BaseAlg::~BaseAlg() {
     ROS_INFO("Destroy BaseAlg");
 }
 
-CommandQueue BaseAlg::getCommandQueue() {
+Command::CommandQueue BaseAlg::getCommandQueue() {
     return CMDQueue_;
 }
 
-DataQueue BaseAlg::getDataQueue() {
+Command::DataQueue BaseAlg::getDataQueue() {
     return DATAQueue_;
 }
+
+}  // namespace OAC

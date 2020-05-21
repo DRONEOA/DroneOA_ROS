@@ -20,7 +20,9 @@
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 
-CAAlgDepthCam::CAAlgDepthCam(CNCInterface *cnc, RSCInterface *rsc) : BaseAlg(cnc) {
+namespace OAC {
+
+CAAlgDepthCam::CAAlgDepthCam(CNC::CNCInterface *cnc, Depth::RSC *rsc) : BaseAlg(cnc) {
     init(rsc);
 }
 
@@ -28,7 +30,7 @@ CAAlgDepthCam::~CAAlgDepthCam() {
     CMDQueue_.clear();
 }
 
-void CAAlgDepthCam::init(RSCInterface *rsc) {
+void CAAlgDepthCam::init(Depth::RSC *rsc) {
     rsc_ = rsc;
 }
 
@@ -99,11 +101,13 @@ bool CAAlgDepthCam::plan() {
     CMDQueue_.clear();
     DATAQueue_.clear();
     DATAQueue_.push_back(
-        DataLine(DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_DEPTH));
+        Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_DEPTH));
     if (camPossibility_ > 0.5) {
-        CMDQueue_.push_back(CommandLine(CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
-        DATAQueue_.push_back(DataLine(
-            DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(camPossibility_)));
+        CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
+        DATAQueue_.push_back(Command::DataLine(
+            Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(camPossibility_)));
     }
     return true;
 }
+
+}  // namespace OAC

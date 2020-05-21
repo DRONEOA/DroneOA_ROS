@@ -17,22 +17,24 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, November 2019
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAC_CMDPARSER_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAC_CMDPARSER_HPP_  // NOLINT
+#ifndef OAC_CMDPARSER_HPP_  // NOLINT
+#define OAC_CMDPARSER_HPP_  // NOLINT
 
 #include <utility>
 #include <vector>
 #include <string>
-#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
 #include <droneoa_ros/OAC/Command.hpp>
 #include <droneoa_ros/OAC/CMDRunner.hpp>
 
+namespace OAC {
+
 class CMDParser {
-    CNCInterface *cnc_;
+    CNC::CNCInterface *cnc_;
     CMDRunner *cmdRunner_;
 
  public:
-    explicit CMDParser(CNCInterface *cnc, CMDRunner *runner);
+    explicit CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner);
     virtual ~CMDParser();
     /**
      * @brief Parse and execute the command queue
@@ -40,7 +42,9 @@ class CMDParser {
      * @param isInstant true if all command can be executed at the same time, false will use the runner
      * @return whether the operation is successful
      */
-    bool parseCMDQueue(const CommandQueue& cmdqueue, bool isInstant = true);
+    bool parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isInstant = true);
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAC_CMDPARSER_HPP_  // NOLINT
+}  // namespace OAC
+
+#endif  // OAC_CMDPARSER_HPP_  // NOLINT

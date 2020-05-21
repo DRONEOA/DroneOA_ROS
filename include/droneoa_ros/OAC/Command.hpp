@@ -25,27 +25,32 @@
  * @date 2020-02
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT
+#ifndef OAC_COMMAND_HPP_  // NOLINT
+#define OAC_COMMAND_HPP_  // NOLINT
 
 #include <utility>
 #include <vector>
 #include <string>
-#include <droneoa_ros/CNCInterface.hpp>
+#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+#include <droneoa_ros/PDN.hpp>
 
-//! @todo Make this a Utility class
+namespace Command {
 
 constexpr char CommandDataDelimiter = ' ';
 
 /**
  * @brief ENUM of supported COMMAND types
  */
-enum CMD_QUEUE_TYPES {
+enum CMD_QUEUE_TYPES : uint32_t {
     CMD_CHMOD = 0,  /*!< DATA: mod name */
     CMD_SET_MAX_VELOCITY,  /*!< DATA: float speed */
+    CMD_SET_YAW,  /*!< DATA: float heading */
     CMD_DELAY_MSEC,  /*!< DATA: uint32 time in ms */
     CMD_GOTO_RELATIVE,  /*!< DATA: float North axis dist, float East axis dist, float Altitude */
     CMD_GOTO_GLOBAL,  /*!< DATA: float Latitude, float Longitude, float Altitude */
+    CMD_GOTO_HEADING,  /*!< DATA: float heading, float distance, float Altitude */
+    CMD_CLIMB,  /*!< DATA: float Delta Altitude */
+    CMD_DESCEND,  /*!< DATA: float Delta Altitude */
 };
 
 /**
@@ -54,9 +59,13 @@ enum CMD_QUEUE_TYPES {
 static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_CHMOD",
     "CMD_SET_MAX_VELOCITY",
+    "CMD_SET_YAW",
     "CMD_DELAY_MSEC",
     "CMD_GOTO_RELATIVE",
     "CMD_GOTO_GLOBAL",
+    "CMD_GOTO_HEADING",
+    "CMD_CLIMB",
+    "CMD_DESCEND",
 };
 
 /**
@@ -74,7 +83,7 @@ typedef std::vector<CommandLine> CommandQueue;
 /**
  * @brief ENUM of supported DATA types
  */
-enum DATA_QUEUE_TYPES {
+enum DATA_QUEUE_TYPES : uint32_t {
     DATA_CONFIDENCE = 0,  /*!< DATA: confidence */
     DATA_ALG_NAME,  /*!< DATA: algorithm name */
 };
@@ -105,6 +114,8 @@ typedef std::vector<DataLine> DataQueue;
  * @param cmdline the source CommandLine
  * @return whether the operation is successful
  */
-bool parseCMD(CNCInterface *cnc, const CommandLine& cmdline);
+bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline);
 
-#endif  // INCLUDE_DRONEOA_ROS_OAC_COMMAND_HPP_  // NOLINT
+}  // namespace Command
+
+#endif  // OAC_COMMAND_HPP_  // NOLINT

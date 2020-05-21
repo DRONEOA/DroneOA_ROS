@@ -1,0 +1,11 @@
+<launch>
+    <include file="./step1SITL.launch" />
+    <include file="../components/rosbridge_tcp.launch">
+        <arg name="bson_only_mode" value="true" /> 
+    </include>
+    <include file="../components/imageToPC2.launch" />
+    <include file="../components/octomap_depth.launch">
+        <arg name="octomap_frame_id" value="world"/>
+        <arg name="octomap_pc_src" value="/depth_registered/points"/>
+    </include>
+</launch>

@@ -9,7 +9,7 @@ rs-enumerate-devices
 ```
 Record ``Serial Number`` for both t265 tracking camera anf d435 depth camera.
 
-Modify ``rs_camera_t265_d435.launch`` file with correct serial number:
+Modify ``component/rs_camera_t265_d435.launch`` file with correct serial number:
 ```xml
 <arg name="serial_no_camera1"    			default="909212110178"/> 			<!-- Note: Replace with actual serial number -->
 <arg name="serial_no_camera2"    			default="841512070232"/> 			<!-- Note: Replace with actual serial number -->
@@ -36,7 +36,7 @@ rs-enumerate-devices
 ```
 Record ``Serial Number`` for both t265 tracking camera anf d435 depth camera.
 
-Modify ``rs_camera_t265_d435.launch`` file with correct serial number:
+Modify ``component/rs_camera_t265_d435.launch`` file with correct serial number:
 ```xml
 <arg name="serial_no_camera1"    			default="909212110178"/> 			<!-- Note: Replace with actual serial number -->
 <arg name="serial_no_camera2"    			default="841512070232"/> 			<!-- Note: Replace with actual serial number -->
@@ -52,11 +52,11 @@ cd <workspace>/src/droneoa_ros/launch
 ```
 If use t265 tracking camera for nav data:
 ```shell
-roslaunch step1SITL_t265.launch
+roslaunch ./sitl/step1SITL_t265.launch
 ```
 else:
 ```shell
-roslaunch step1SITL.launch
+roslaunch ./sitl/step1SITL.launch
 ```
 ### Launch Main Nodes
 Enter lauch file folder:
@@ -72,9 +72,10 @@ roslaunch step2.launch
 
 Q: I cannot launch after doing a sudo upgrade. The error contains something like 
 ```shell
-API version mismatch: librealsense.so was compiled with API version 2.29.0 but the application was compiled with 2.28.0
+API version mismatch: librealsense.so was compiled with API version 2.XX.0 but the application was compiled with 2.XX.0
 ```
-A: You need to update the ``realsence-ros`` repo.
+A: You likely need to update the ``realsence-ros`` repo.
 * Enter ``realsence-ros``
 * Checkout the ``developer`` branch if you did not do so
 * Perform git pull.
+* Rebuild all packages by ``catkin_make`` in you workspace root

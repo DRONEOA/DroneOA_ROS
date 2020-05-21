@@ -17,22 +17,24 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, Feb 2020
  */
 
-#ifndef INCLUDE_DRONEOA_ROS_OAC_OAALGFGM_HPP_  // NOLINT
-#define INCLUDE_DRONEOA_ROS_OAC_OAALGFGM_HPP_  // NOLINT
+#ifndef OAC_OAALGFGM_HPP_  // NOLINT
+#define OAC_OAALGFGM_HPP_  // NOLINT
 
 #include <droneoa_ros/OAC/BaseAlg.hpp>
-#include <droneoa_ros/LidarInterface.hpp>
+#include <droneoa_ros/HWI/base/LidarGeneric.hpp>
 
-// #define DEBUG_ALG_OBSTACLE_FGM
+namespace OAC {
 
 class OAAlgFGM : public BaseAlg {
-    LidarInterface *lidar_;
+    Lidar::LidarGeneric *lidar_;
  public:
-    OAAlgFGM(CNCInterface *cnc, LidarInterface *lidar);
+    OAAlgFGM(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar);
     ~OAAlgFGM() override;
-    void init(LidarInterface *lidar);  // For restart
+    void init(Lidar::LidarGeneric *lidar);  // For restart
     bool collect() override;  // Collect required sensor data
     bool plan() override;  // Return false when get around is impossible
 };
 
-#endif  // INCLUDE_DRONEOA_ROS_OAC_OAALGFGM_HPP_  // NOLINT
+}  // namespace OAC
+
+#endif  // OAC_OAALGFGM_HPP_  // NOLINT

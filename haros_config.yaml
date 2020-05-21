@@ -9,3 +9,10 @@ plugin_blacklist: [
     "haros_plugin_ccd",
     "haros_plugin_lizard",
 ]
+analysis:
+    ignore:
+        rules:
+            - "haros_plugin_cppcheck:harosDefaultArguments"
+            - "haros_plugin_cppcheck:harosDoublePointer"
+            - "haros_plugin_cppcheck:harosIntegerTypes"
+            - "haros_plugin_cppcheck:unusedFunction"

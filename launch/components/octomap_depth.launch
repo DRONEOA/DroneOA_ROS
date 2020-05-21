@@ -1,0 +1,23 @@
+<launch>
+    <arg name="octomap_frame_id"           default="map"/>
+    <arg name="octomap_pc_src"           default="/d435/depth/color/points"/>
+
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+        <param name="resolution" value="0.1" />
+        <!-- fixed map frame (set to 'map' if SLAM or localization running!) -->
+        <param name="frame_id" type="string" value="$(arg octomap_frame_id)" />
+        <!-- maximum range to integrate (speedup!) -->
+        <param name="sensor_model/max_range" value="10.0" />
+        <param name="sensor_model/min" value="0.01" />
+        <param name="sensor_model/max" value="0.99" />
+        <param name="sensor_model/hit" value="0.9" />
+        <param name="sensor_model/miss" value="0.45" />
+        <!-- data source to integrate (PointCloud2) -->
+        <remap from="cloud_in" to="$(arg octomap_pc_src)" />
+
+        <!-- Filter out obstacles which are lower than 1 meter -->
+        <param name="occupancy_min_z" value="1.0" />
+        <param name="height_map" value="false" />
+        <param name="publish_free_space" value="false" />
+    </node>
+</launch>

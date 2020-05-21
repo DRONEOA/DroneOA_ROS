@@ -1,6 +1,5 @@
 src/pyflwor/*
 report/*
 .vscode/*
-launch/*
-!launch/*.launch
-!launch/*.md
+launch/unittest_result.txt
+launch/sitl/step1log.txt

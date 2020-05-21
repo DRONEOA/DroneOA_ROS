@@ -19,11 +19,13 @@
 
 #include <droneoa_ros/OAC/CAAlgLidar.hpp>
 
-CAAlgLidar::CAAlgLidar(CNCInterface *cnc, LidarInterface *lidar) : BaseAlg(cnc) {
+namespace OAC {
+
+CAAlgLidar::CAAlgLidar(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar) : BaseAlg(cnc) {
     init(lidar);
 }
 
-void CAAlgLidar::init(LidarInterface *lidar) {
+void CAAlgLidar::init(Lidar::LidarGeneric *lidar) {
     lidar_ = lidar;
     lidarPossibility_ = 0.0;
 }
@@ -65,10 +67,13 @@ bool CAAlgLidar::collect() {
 bool CAAlgLidar::plan() {
     CMDQueue_.clear();
     DATAQueue_.clear();
-    DATAQueue_.push_back(DataLine(DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_LIDAR));
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_LIDAR));
     if (lidarPossibility_ > 0.75) {
-        CMDQueue_.push_back(CommandLine(CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
-        DATAQueue_.push_back(DataLine(DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(lidarPossibility_)));
+        CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
+        DATAQueue_.push_back(Command::DataLine(
+            Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(lidarPossibility_)));
     }
     return true;
 }
+
+}  // namespace OAC

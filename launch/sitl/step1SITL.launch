@@ -1,0 +1,5 @@
+<launch>
+    <include file="../components/apmSITL.launch" />
+    <include file="../components/rs_camera.launch" />
+    <include file="../components/lidar.launch" />
+</launch>
