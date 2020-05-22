@@ -26,7 +26,7 @@ OAAlgFGM::OAAlgFGM(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar) : BaseAlg
 }
 
 void OAAlgFGM::init(Lidar::LidarGeneric *lidar) {
-    lidar_ = lidar;
+    mpLidar = lidar;
 }
 
 OAAlgFGM::~OAAlgFGM() {
@@ -36,11 +36,11 @@ OAAlgFGM::~OAAlgFGM() {
 bool OAAlgFGM::collect() {
     // Collect data directly from interface as required
     //! @todo WIP
-    if (!cnc_) {
+    if (!mpCNC) {
         ROS_ERROR("[OAAlgFGM] Missing CNC pointer !!!");
         return false;
     }
-    if (!lidar_) {
+    if (!mpLidar) {
         ROS_ERROR("[OAAlgFGM] Missing LIDAR pointer !!!");
         return false;
     }

@@ -26,7 +26,7 @@ CAAlgLidar::CAAlgLidar(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar) : Bas
 }
 
 void CAAlgLidar::init(Lidar::LidarGeneric *lidar) {
-    lidar_ = lidar;
+    mpLidar = lidar;
     lidarPossibility_ = 0.0;
 }
 
@@ -37,19 +37,19 @@ CAAlgLidar::~CAAlgLidar() {
 bool CAAlgLidar::collect() {
     // Collect data directly from interface as required
     //! @todo Statue Check e.g. flight mode
-    if (!cnc_) {
+    if (!mpCNC) {
         ROS_ERROR("[CAAlgLidar] Missing CNC pointer !!!");
         return false;
     }
-    if (!lidar_) {
+    if (!mpLidar) {
         ROS_ERROR("[CAAlgLidar] Missing LIDAR pointer !!!");
         return false;
     }
-    float gSpeed = cnc_->getHUDData().groundspeed;
+    float gSpeed = mpCNC->getHUDData().groundspeed;
     lidarThreshold_ = ((gSpeed * gSpeed) / (2 * VEHICLE_MAX_ACCELEATION));  // unit: m
     lidarThreshold_ = lidarThreshold_ < VEHICLE_MIN_SAFE_DISTANCE ? VEHICLE_MIN_SAFE_DISTANCE : lidarThreshold_;
     // Compute Collision Possibility
-    std::pair<float, float> closeSector = lidar_->getClosestSectorData();
+    std::pair<float, float> closeSector = mpLidar->getClosestSectorData();
     if (lidarThreshold_ > closeSector.second) {
         lidarPossibility_ = 1.0;
     } else {

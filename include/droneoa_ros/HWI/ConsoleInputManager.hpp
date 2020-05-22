@@ -56,10 +56,10 @@ class ConsoleInputManager {
     bool* masterSwitch_;
 
     // Pointer to controller
-    CNC::CNCInterface *cnc_;
-    Depth::RSC *rsc_;
+    CNC::CNCInterface *mpCNC;
+    Depth::RSC *mpRSC;
     OAC::OAController *oac_;
-    Lidar::LidarGeneric *lidar_;
+    Lidar::LidarGeneric *mpLidar;
 
     // Listen to command from topic
     boost::thread* thread_watch_command_ = nullptr;

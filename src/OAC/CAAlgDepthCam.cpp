@@ -31,7 +31,7 @@ CAAlgDepthCam::~CAAlgDepthCam() {
 }
 
 void CAAlgDepthCam::init(Depth::RSC *rsc) {
-    rsc_ = rsc;
+    mpRSC = rsc;
 }
 
 float avgInRangeHelper(std::vector<float> source, float min, float max) {
@@ -49,7 +49,7 @@ float avgInRangeHelper(std::vector<float> source, float min, float max) {
 }
 
 bool CAAlgDepthCam::collect() {
-    float gSpeed = cnc_->getHUDData().groundspeed;
+    float gSpeed = mpCNC->getHUDData().groundspeed;
 
     /**
      * The following equation calculates the brack distance of the droone.
@@ -67,7 +67,7 @@ bool CAAlgDepthCam::collect() {
         camThreshold_ = 150.0f;
     }  // Official documentation said the min dist is 105mm; to be safe, use 150 mm instead.
 
-    std::vector<float> zCoords = rsc_->pointCloudZCoordsInRange();
+    std::vector<float> zCoords = mpRSC->pointCloudZCoordsInRange();
     float danger = avgInRangeHelper(zCoords, 150.0f, camThreshold_);
     float neutral = avgInRangeHelper(zCoords, camThreshold_, 2*camThreshold_);
     float safe = avgInRangeHelper(zCoords, 2*camThreshold_, 3*camThreshold_);

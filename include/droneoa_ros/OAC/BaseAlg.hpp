@@ -62,7 +62,7 @@ class BaseAlg {
     virtual Command::DataQueue getDataQueue();
 
  protected:
-    CNC::CNCInterface *cnc_;
+    CNC::CNCInterface *mpCNC;
     /**
      * @brief A vector of CommandLine which is a pair of CMD_QUEUE_TYPES and std::string
      */
