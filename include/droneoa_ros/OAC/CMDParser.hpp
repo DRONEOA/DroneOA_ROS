@@ -34,7 +34,7 @@ class CMDParser {
     CMDRunner *cmdRunner_;
 
  public:
-    explicit CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner);
+    CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner);
     virtual ~CMDParser();
     /**
      * @brief Parse and execute the command queue
@@ -42,7 +42,7 @@ class CMDParser {
      * @param isInstant true if all command can be executed at the same time, false will use the runner
      * @return whether the operation is successful
      */
-    bool parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isInstant = true);
+    bool parseCMDQueue(const Command::CommandQueue& cmdqueue);
 };
 
 }  // namespace OAC

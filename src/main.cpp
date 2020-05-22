@@ -68,7 +68,7 @@ int main(int argc, char **argv) {
     char *commandIn;
     bool masterSW = true;
     IO::ConsoleInputManager consoleInputManager(&masterSW);
-    consoleInputManager.init(&cnc, &rsc, &oac, &lidar);
+    consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &runner);  // @todo Or seperate runner ?
     while ((commandIn = readline("")) != nullptr) {
         if (*commandIn) {
             add_history(commandIn);

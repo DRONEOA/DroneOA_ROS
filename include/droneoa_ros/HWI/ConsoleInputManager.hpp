@@ -34,13 +34,14 @@
 namespace IO {
 
 static const char ConsoleDelimiter = ' ';
-
+typedef std::pair<std::string, std::vector<std::string>> CMDPair;
 class ConsoleInputManager {
  public:
-    explicit ConsoleInputManager(bool* masterSwitch);
+    ConsoleInputManager(bool* masterSwitch);
     virtual ~ConsoleInputManager();
 
-    bool init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac, Lidar::LidarGeneric *lidar);
+    bool init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac, Lidar::LidarGeneric *lidar,
+         OAC::CMDRunner *runner);
 
     /**
      * @brief Pass the input console command, and execute if valid
@@ -52,8 +53,12 @@ class ConsoleInputManager {
     void command_callback(const std_msgs::String::ConstPtr& msg);
 
  private:
-    std::pair<std::string, std::vector<std::string>> currentCommand_;
+    CMDPair currentCommand_;
     bool* masterSwitch_;
+
+    // Parser
+    OAC::CMDParser* mpParser;
+    Command::CommandQueue mGeneratedCMDQueue;
 
     // Pointer to controller
     CNC::CNCInterface *cnc_;
@@ -67,14 +72,15 @@ class ConsoleInputManager {
 
     // Private Handlers
     bool splitModuleCommand(std::string cmd);
-    bool commandDispatch();
+    bool buildCommandQueue();
 
     // Module Handlers
-    bool handleCNCCommands();
-    bool handleOACCommands();
-    bool handleRSCCommands();
-    bool handleLIDARCommands();
-    bool handleQuickCommands();
+    bool buildCNCCommands();
+    bool buildOACCommands();
+    bool buildRSCCommands();
+    bool buildLIDARCommands();
+    bool buildQuickCommands();
+    bool buildQueueCommands();
 
     // Helper
     void printFormatHelper();
