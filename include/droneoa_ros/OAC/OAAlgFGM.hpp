@@ -26,7 +26,7 @@
 namespace OAC {
 
 class OAAlgFGM : public BaseAlg {
-    Lidar::LidarGeneric *lidar_;
+    Lidar::LidarGeneric *mpLidar;
  public:
     OAAlgFGM(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar);
     ~OAAlgFGM() override;

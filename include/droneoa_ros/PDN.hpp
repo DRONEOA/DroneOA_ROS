@@ -33,7 +33,7 @@
 /**
  * @brief ROS Rate
  */
-static const double GLOBAL_ROS_RATE = 10;
+static const double GLOBAL_ROS_RATE = 20;
 
 /**
  * @brief List of flight modes

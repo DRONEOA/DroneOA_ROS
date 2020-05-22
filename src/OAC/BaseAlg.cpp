@@ -24,7 +24,7 @@
 namespace OAC {
 
 void BaseAlg::init(CNC::CNCInterface *cnc) {
-    cnc_ = cnc;
+    mpCNC = cnc;
 }
 
 BaseAlg::BaseAlg(CNC::CNCInterface *cnc) {

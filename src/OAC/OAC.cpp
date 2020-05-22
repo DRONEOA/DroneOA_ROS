@@ -24,25 +24,25 @@ namespace OAC {
 
 OAController::OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc,
         CMDRunner *runner, ros::Rate r) {
-    theRunner_ = runner;
-    r_ = r;
+    mpTheRunner = runner;
+    mR = r;
     init(cnc, lidar, rsc);
 
-    thread_oac_master_ = new boost::thread(boost::bind(&OAController::masterThread, this));
+    mpOACMasterThread = new boost::thread(boost::bind(&OAController::masterThread, this));
 }
 
 OAController::~OAController() {
-    if (parserExecuter_) delete parserExecuter_;
-    for (const auto& elem : algorithmInstances_) {
+    if (mpParserExecuter) delete mpParserExecuter;
+    for (const auto& elem : mAlgorithmInstances) {
         if (elem.second) {
             delete elem.second;
         }
     }
 
     // Wait for master thread to end
-    if (thread_oac_master_) {
-        thread_oac_master_->join();
-        delete thread_oac_master_;
+    if (mpOACMasterThread) {
+        mpOACMasterThread->join();
+        delete mpOACMasterThread;
         ROS_WARN("[OAC] MASTER THREAD ENDED");
     }
     ROS_INFO("Destroy OAController");
@@ -51,37 +51,37 @@ OAController::~OAController() {
 // Init OA Controller (for restart)
 // - Input: CNCInterface *, LidarInterface *, RSCInterface *
 void OAController::init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc) {
-    cnc_ = cnc;
-    lidar_ = lidar;
-    rsc_ = rsc;
-    currState_ = SYS_State::SYS_IDLE;
+    mpCNC = cnc;
+    mpLidar = lidar;
+    mpRSC = rsc;
+    mCurrState = SYS_State::SYS_IDLE;
     // init parser
-    if (parserExecuter_) {
-        delete parserExecuter_;
+    if (mpParserExecuter) {
+        delete mpParserExecuter;
     }
-    parserExecuter_ = new CMDParser(cnc_, theRunner_);
+    mpParserExecuter = new CMDParser(mpCNC, mpTheRunner);
     // create algorithm instances
-    for (auto tmp : algorithmInstances_) {
+    for (auto tmp : mAlgorithmInstances) {
         if (tmp.second) delete tmp.second;
     }
-    algorithmInstances_[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(cnc_, lidar_);
-    algorithmInstances_[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(cnc_, rsc_);
-    algorithmInstances_[SYS_Algs::ALG_FGM] = new OAAlgFGM(cnc_, lidar_);
+    mAlgorithmInstances[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(mpCNC, mpLidar);
+    mAlgorithmInstances[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(mpCNC, mpRSC);
+    mAlgorithmInstances[SYS_Algs::ALG_FGM] = new OAAlgFGM(mpCNC, mpLidar);
     //! @todo create new alg instance here
     ROS_INFO("[OAC] init");
 }
 
 std::string OAController::getStatus() {
-    if (!isOn_) {
+    if (!mIsOn) {
         return "PAUSED";
     }
-    return SYS_STATE_NAME[currState_];
+    return SYS_STATE_NAME[mCurrState];
 }
 
 // Switch on/off the tick event
 void OAController::masterSwitch(bool isOn) {
-    isOn_ = isOn;
-    if (isOn_) {
+    mIsOn = isOn;
+    if (mIsOn) {
         ROS_WARN("[OAC] MASTER RESUMED");
         return;
     }
@@ -90,12 +90,12 @@ void OAController::masterSwitch(bool isOn) {
 
 // Tick Event, Automatically switch states and run handlers
 void OAController::tick() {
-    if (isTerminated) {
+    if (mIsTerminated) {
         ROS_WARN("[OAC] Terminated");
         return;
     }
 
-    switch (currState_) {
+    switch (mCurrState) {
         case SYS_State::SYS_IDLE:
             evaluate();
             break;
@@ -109,10 +109,10 @@ void OAController::tick() {
             abort();
             break;
         case SYS_State::SYS_EXEC:
-            currState_ = SYS_State::SYS_IDLE;
+            mCurrState = SYS_State::SYS_IDLE;
             break;
         case SYS_State::SYS_SAFE:
-            currState_ = SYS_State::SYS_IDLE;
+            mCurrState = SYS_State::SYS_IDLE;
             break;
         default:
             // Should not be here
@@ -125,64 +125,64 @@ void OAController::masterThread() {
     ROS_WARN("[OAC] MASTER THREAD START - PAUSED");
 
     while (ros::ok()) {
-        if (isOn_) {
+        if (mIsOn) {
             tick();
         }
         ros::spinOnce();
-        r_.sleep();
+        mR.sleep();
     }
 }
 
 bool OAController::evaluate() {
     // Entry state: SYS_IDLE
-    selectedAlgorithm_ = selectAlgorithm();
+    mSelectedAlgorithm = selectAlgorithm();
 
-    for (SYS_Algs tmp : selectedAlgorithm_) {
-        if (!algorithmInstances_[tmp]->collect()) {
+    for (SYS_Algs tmp : mSelectedAlgorithm) {
+        if (!mAlgorithmInstances[tmp]->collect()) {
             // Remove from selected if collect with error
             popAlgorithmFromSelected(tmp);
         }
     }
 
-    if (selectedAlgorithm_.size() == 0) {
-        currState_ = SYS_State::SYS_IDLE;
+    if (mSelectedAlgorithm.size() == 0) {
+        mCurrState = SYS_State::SYS_IDLE;
         ROS_ERROR("NO VALID ALGORITHM ENABLED !!!");
         return false;
     }
 
-    currState_ = SYS_State::SYS_EVALUATED;
+    mCurrState = SYS_State::SYS_EVALUATED;
     return true;
 }
 
 bool OAController::plan() {
     // Entry state: SYS_EVALUATED
-    algCMDmap_.clear();
-    algDATAmap_.clear();
-    for (SYS_Algs tmp : selectedAlgorithm_) {
-        if (!algorithmInstances_[tmp]->plan()) {
+    mAlgCMDmap.clear();
+    mAlgDATAmap.clear();
+    for (SYS_Algs tmp : mSelectedAlgorithm) {
+        if (!mAlgorithmInstances[tmp]->plan()) {
             popAlgorithmFromSelected(tmp);
             continue;
         }
-        algCMDmap_[tmp] = (algorithmInstances_[tmp])->getCommandQueue();
-        algDATAmap_[tmp] = (algorithmInstances_[tmp])->getDataQueue();
+        mAlgCMDmap[tmp] = (mAlgorithmInstances[tmp])->getCommandQueue();
+        mAlgDATAmap[tmp] = (mAlgorithmInstances[tmp])->getDataQueue();
     #ifdef DEBUG_OAC
         ROS_INFO("[OAC] PLAN NODE: %d", tmp);
-        for (auto cmdline : algCMDmap_[tmp]) {
+        for (auto cmdline : mAlgCMDmap[tmp]) {
             ROS_INFO("            CMD: %d with %s", cmdline.first, cmdline.second.c_str());
         }
-        for (auto dataline : algDATAmap_[tmp]) {
+        for (auto dataline : mAlgDATAmap[tmp]) {
             ROS_INFO("            DATA: %d with %s", dataline.first, dataline.second.c_str());
         }
     #endif
     }
 
-    if (selectedAlgorithm_.size() == 0) {
-        currState_ = SYS_State::SYS_IDLE;
+    if (mSelectedAlgorithm.size() == 0) {
+        mCurrState = SYS_State::SYS_IDLE;
         ROS_ERROR("NO VALID ALGORITHM ENABLED !!!");
         return false;
     }
 
-    currState_ = SYS_State::SYS_PLANNED;
+    mCurrState = SYS_State::SYS_PLANNED;
     return true;
 }
 
@@ -200,19 +200,19 @@ bool OAController::execute() {
             determineFunStage3();
             break;
         default:
-            currState_ = SYS_State::SYS_ABORT;
+            mCurrState = SYS_State::SYS_ABORT;
             return false;
     }
 
-    currState_ = SYS_State::SYS_EXEC;
+    mCurrState = SYS_State::SYS_EXEC;
     return true;
 }
 
 void OAController::determineFunStage1() {
     double lidarConf, depthConf;
     try {
-        algDATAmap_.at(SYS_Algs::ALG_COLLISION_LIDAR);
-        for (auto dataline : algDATAmap_[SYS_Algs::ALG_COLLISION_LIDAR]) {
+        mAlgDATAmap.at(SYS_Algs::ALG_COLLISION_LIDAR);
+        for (auto dataline : mAlgDATAmap[SYS_Algs::ALG_COLLISION_LIDAR]) {
             if (dataline.first == Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE) {
                 lidarConf = std::stof(dataline.second);
             }
@@ -221,8 +221,8 @@ void OAController::determineFunStage1() {
         lidarConf = 0.0;
     }
     try {
-        algDATAmap_.at(SYS_Algs::ALG_COLLISION_DEPTH);
-        for (auto dataline : algDATAmap_[SYS_Algs::ALG_COLLISION_DEPTH]) {
+        mAlgDATAmap.at(SYS_Algs::ALG_COLLISION_DEPTH);
+        for (auto dataline : mAlgDATAmap[SYS_Algs::ALG_COLLISION_DEPTH]) {
             if (dataline.first == Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE) {
                 depthConf = std::stof(dataline.second);
             }
@@ -232,9 +232,9 @@ void OAController::determineFunStage1() {
     }
     if (depthConf >= 0.9 || lidarConf >= 0.9) {
         if (depthConf >= lidarConf) {
-            parserExecuter_->parseCMDQueue(algCMDmap_[SYS_Algs::ALG_COLLISION_DEPTH]);
+            mpParserExecuter->parseCMDQueue(mAlgCMDmap[SYS_Algs::ALG_COLLISION_DEPTH]);
         } else {
-            parserExecuter_->parseCMDQueue(algCMDmap_[SYS_Algs::ALG_COLLISION_LIDAR]);
+            mpParserExecuter->parseCMDQueue(mAlgCMDmap[SYS_Algs::ALG_COLLISION_LIDAR]);
         }
     }
 }
@@ -248,14 +248,14 @@ void OAController::determineFunStage3() {
 }
 
 bool OAController::abort() {
-    if (cnc_->getMode() == FLT_MODE_BRAKE) {
+    if (mpCNC->getMode() == FLT_MODE_BRAKE) {
         // Re-init is required to re-enable the OAC
-        isTerminated = true;
+        mIsTerminated = true;
         return true;
     }
-    if (cnc_->setMode(FLT_MODE_BRAKE)) {
+    if (mpCNC->setMode(FLT_MODE_BRAKE)) {
         ROS_INFO("[ABORT] set BRAKE mode");
-        isTerminated = true;
+        mIsTerminated = true;
         return true;
     }
     //! @todo handle fail to abort
@@ -264,9 +264,9 @@ bool OAController::abort() {
 }
 
 bool OAController::popAlgorithmFromSelected(SYS_Algs algName) {
-    auto it = std::find(selectedAlgorithm_.begin(), selectedAlgorithm_.end(), algName);
-    if (it != selectedAlgorithm_.end()) {
-        selectedAlgorithm_.erase(it);
+    auto it = std::find(mSelectedAlgorithm.begin(), mSelectedAlgorithm.end(), algName);
+    if (it != mSelectedAlgorithm.end()) {
+        mSelectedAlgorithm.erase(it);
         return true;
     }
     return false;
@@ -274,22 +274,22 @@ bool OAController::popAlgorithmFromSelected(SYS_Algs algName) {
 
 std::vector<SYS_Algs> OAController::selectAlgorithm() {
     // @todo select algorthm according to environment
-    selectedAlgorithm_.clear();
+    mSelectedAlgorithm.clear();
     if (OAC_STAGE_SETTING == 1) {
-        if (ENABLE_LIDAR) selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_LIDAR);
-        if (ENABLE_RSC) selectedAlgorithm_.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
+        if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_COLLISION_LIDAR);
+        if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
     } else if (OAC_STAGE_SETTING == 2) {
-        if (ENABLE_LIDAR) selectedAlgorithm_.push_back(SYS_Algs::ALG_FGM);
-        // if (ENABLE_RSC) selectedAlgorithm_.push_back(SYS_Algs::ALG_VISION);
+        if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_FGM);
+        // if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_VISION);
     } else if (OAC_STAGE_SETTING == 3) {
-        if (ENABLE_LIDAR) selectedAlgorithm_.push_back(SYS_Algs::ALG_FGM);
-        // if (ENABLE_RSC) selectedAlgorithm_.push_back(SYS_Algs::ALG_VISION);
-        // selectedAlgorithm_.push_back(SYS_Algs::ALG_AI);
-        // selectedAlgorithm_.push_back(SYS_Algs::ALG_SLAM);
+        if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_FGM);
+        // if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_VISION);
+        // mSelectedAlgorithm.push_back(SYS_Algs::ALG_AI);
+        // mSelectedAlgorithm.push_back(SYS_Algs::ALG_SLAM);
     } else {
         ROS_ERROR("Invalid OAC Stage Setting !!!");
     }
-    return selectedAlgorithm_;
+    return mSelectedAlgorithm;
 }
 
 SYS_SelectedDetermineFun OAController::selectDetermineFunction() {

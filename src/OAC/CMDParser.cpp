@@ -22,7 +22,7 @@
 
 namespace OAC {
 
-CMDParser::CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner) : cnc_(cnc), cmdRunner_(runner) {}
+CMDParser::CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner) : mpCNC(cnc), cmdRunner_(runner) {}
 
 CMDParser::~CMDParser() {
     ROS_INFO("Destroy CMDParser");
@@ -47,7 +47,7 @@ bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue) {
     }
     if (isInstant) {
         for (auto cmdline : cmdqueue) {
-            if (!Command::parseCMD(cnc_, cmdline)) {
+            if (!Command::parseCMD(mpCNC, cmdline)) {
                 ROS_ERROR("[CMD PARSER] Queue Parser Terminated With ERROR !!!");
                 return false;
             }

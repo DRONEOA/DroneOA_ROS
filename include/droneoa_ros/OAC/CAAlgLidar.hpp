@@ -26,7 +26,7 @@
 namespace OAC {
 
 class CAAlgLidar : public BaseAlg {
-    Lidar::LidarGeneric *lidar_;
+    Lidar::LidarGeneric *mpLidar;
     float lidarThreshold_;
     float lidarPossibility_;
  public:

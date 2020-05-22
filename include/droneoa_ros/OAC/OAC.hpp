@@ -87,8 +87,8 @@ enum SYS_SelectedDetermineFun {
 };
 
 class OAController {
-    CMDParser *parserExecuter_ = nullptr;
-    CMDRunner *theRunner_ = nullptr;
+    CMDParser *mpParserExecuter = nullptr;
+    CMDRunner *mpTheRunner = nullptr;
 
  public:
     OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc, CMDRunner *runner, ros::Rate r);
@@ -132,23 +132,23 @@ class OAController {
     void determineFunStage3();
 
     // Thread
-    bool isOn_ = false;
+    bool mIsOn = false;
     void masterThread();
-    boost::thread *thread_oac_master_;
+    boost::thread *mpOACMasterThread;
 
-    ros::Rate r_ = ros::Rate(OAC_REFRESH_FREQ);
-    CNC::CNCInterface *cnc_;
-    Lidar::LidarGeneric *lidar_;
-    Depth::RSC *rsc_;
-    std::map<SYS_Algs, BaseAlg*> algorithmInstances_;
-    bool isTerminated = false;
+    ros::Rate mR = ros::Rate(OAC_REFRESH_FREQ);
+    CNC::CNCInterface *mpCNC;
+    Lidar::LidarGeneric *mpLidar;
+    Depth::RSC *mpRSC;
+    std::map<SYS_Algs, BaseAlg*> mAlgorithmInstances;
+    bool mIsTerminated = false;
 
     // Current State
-    SYS_State currState_ = SYS_State::SYS_IDLE;
-    std::vector<SYS_Algs> selectedAlgorithm_;
+    SYS_State mCurrState = SYS_State::SYS_IDLE;
+    std::vector<SYS_Algs> mSelectedAlgorithm;
     SYS_SelectedDetermineFun selectedDetermineFun_;
-    std::map<SYS_Algs, Command::CommandQueue> algCMDmap_;
-    std::map<SYS_Algs, Command::DataQueue> algDATAmap_;
+    std::map<SYS_Algs, Command::CommandQueue> mAlgCMDmap;
+    std::map<SYS_Algs, Command::DataQueue> mAlgDATAmap;
 };
 
 }  // namespace OAC

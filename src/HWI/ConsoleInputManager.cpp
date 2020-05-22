@@ -26,7 +26,7 @@
 namespace IO {
 
 ConsoleInputManager::ConsoleInputManager(bool* masterSwitch) : masterSwitch_(masterSwitch),
-        cnc_(nullptr), rsc_(nullptr), oac_(nullptr), lidar_(nullptr) {}
+        mpCNC(nullptr), mpRSC(nullptr), oac_(nullptr), mpLidar(nullptr) {}
 
 ConsoleInputManager::~ConsoleInputManager() {
     if (thread_watch_command_) delete thread_watch_command_;
@@ -34,10 +34,10 @@ ConsoleInputManager::~ConsoleInputManager() {
 
 bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac,
         Lidar::LidarGeneric *lidar, OAC::CMDRunner *runner) {
-    cnc_ = cnc;
-    rsc_ = rsc;
+    mpCNC = cnc;
+    mpRSC = rsc;
     oac_ = oac;
-    lidar_ = lidar;
+    mpLidar = lidar;
     thread_watch_command_ = new boost::thread(boost::bind(&ConsoleInputManager::watchCommandThread, this));
     mpParser = new OAC::CMDParser(cnc, runner);
 }
@@ -163,9 +163,9 @@ bool ConsoleInputManager::buildCNCCommands() {
             ROS_WARN("::TAKEOFF::");
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_TAKEOFF, currentCommand_.second.at(1)});
         } else if (cmdType == "chmod") {
-            std::string currentMode = cnc_->getMode();
+            std::string currentMode = mpCNC->getMode();
             std::string newMode = currentCommand_.second.at(1);
-            if (!cnc_->checkFModeExist(newMode)) {
+            if (!mpCNC->checkFModeExist(newMode)) {
                 ROS_WARN("Flight Mode Does Not Exist !!!");
                 return false;
             }
@@ -194,7 +194,7 @@ bool ConsoleInputManager::buildCNCCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, std::to_string(yawAngle)});
             if (currentCommand_.second.size() >= 3) {
                 float dist = std::stof(currentCommand_.second.at(2));
-                float alt = cnc_->getRelativeAltitude();
+                float alt = mpCNC->getRelativeAltitude();
                 if (currentCommand_.second.size() >= 4) {
                     alt = std::stof(currentCommand_.second.at(3));
                 }
@@ -207,7 +207,7 @@ bool ConsoleInputManager::buildCNCCommands() {
             if (deltaAlt < 0.0f) {
                 throw 1;
             }
-            ROS_WARN("::CLIMB -> %f::", deltaAlt);
+            ROS_WARN("::CLIMB -> -%f::", deltaAlt);
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_CLIMB, std::to_string(deltaAlt)});
         } else if (cmdType == "descent") {
             float deltaAlt = std::stof(currentCommand_.second.at(1));
@@ -217,21 +217,21 @@ bool ConsoleInputManager::buildCNCCommands() {
             ROS_WARN("::DECENT -> -%f::", deltaAlt);
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DESCEND, std::to_string(deltaAlt)});
         } else if (cmdType == "info") {
-            GPSPoint tmpGPSPoint = cnc_->getCurrentGPSPoint();
+            GPSPoint tmpGPSPoint = mpCNC->getCurrentGPSPoint();
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
             ROS_INFO("[DISPLAY] gps: %f %f", tmpGPSPoint.latitude_, tmpGPSPoint.longitude_);
-            ROS_INFO("[DISPLAY] altitude: %f", cnc_->getRelativeAltitude());
-            ROS_INFO("[DISPLAY] mode: %s", cnc_->getMode().c_str());
-            ROS_INFO("[DISPLAY] voltage: %f", cnc_->getBatteryVoltage());
-            ROS_INFO("[DISPLAY] orientation: %f, %f, %f", cnc_->getIMUData().orientation.x,
-                                                        cnc_->getIMUData().orientation.y,
-                                                        cnc_->getIMUData().orientation.z);
-            ROS_INFO("[HUD] heading: %d", cnc_->getHUDData().heading);
-            ROS_INFO("[HUD] airspeed: %f", cnc_->getHUDData().airspeed);
-            ROS_INFO("[HUD] groundspeed: %f", cnc_->getHUDData().groundspeed);
-            ROS_INFO("[HUD] altitude: %f", cnc_->getHUDData().altitude);
-            ROS_INFO("[HUD] climb: %f", cnc_->getHUDData().climb);
-            ROS_INFO("[HUD] throttle: %f", cnc_->getHUDData().throttle);
+            ROS_INFO("[DISPLAY] altitude: %f", mpCNC->getRelativeAltitude());
+            ROS_INFO("[DISPLAY] mode: %s", mpCNC->getMode().c_str());
+            ROS_INFO("[DISPLAY] voltage: %f", mpCNC->getBatteryVoltage());
+            ROS_INFO("[DISPLAY] orientation: %f, %f, %f", mpCNC->getIMUData().orientation.x,
+                                                        mpCNC->getIMUData().orientation.y,
+                                                        mpCNC->getIMUData().orientation.z);
+            ROS_INFO("[HUD] heading: %d", mpCNC->getHUDData().heading);
+            ROS_INFO("[HUD] airspeed: %f", mpCNC->getHUDData().airspeed);
+            ROS_INFO("[HUD] groundspeed: %f", mpCNC->getHUDData().groundspeed);
+            ROS_INFO("[HUD] altitude: %f", mpCNC->getHUDData().altitude);
+            ROS_INFO("[HUD] climb: %f", mpCNC->getHUDData().climb);
+            ROS_INFO("[HUD] throttle: %f", mpCNC->getHUDData().throttle);
             ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else if (cmdType == "quit") {
             ROS_WARN("::QUIT::");
@@ -279,7 +279,7 @@ bool ConsoleInputManager::buildQuickCommands() {
         if (cmdType == "w") {
             ROS_WARN("::GO NORTH::");
             float dist = std::stof(currentCommand_.second.at(1));
-            float alt = cnc_->getRelativeAltitude();
+            float alt = mpCNC->getRelativeAltitude();
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
             }
@@ -288,7 +288,7 @@ bool ConsoleInputManager::buildQuickCommands() {
         } else if (cmdType == "s") {
             ROS_WARN("::GO SOUTH::");
             float dist = std::stof(currentCommand_.second.at(1));
-            float alt = cnc_->getRelativeAltitude();
+            float alt = mpCNC->getRelativeAltitude();
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
             }
@@ -297,7 +297,7 @@ bool ConsoleInputManager::buildQuickCommands() {
         } else if (cmdType == "a") {
             ROS_WARN("::GO WEST::");
             float dist = std::stof(currentCommand_.second.at(1));
-            float alt = cnc_->getRelativeAltitude();
+            float alt = mpCNC->getRelativeAltitude();
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
             }
@@ -306,7 +306,7 @@ bool ConsoleInputManager::buildQuickCommands() {
         } else if (cmdType == "d") {
             ROS_WARN("::GO EAST::");
             float dist = std::stof(currentCommand_.second.at(1));
-            float alt = cnc_->getRelativeAltitude();
+            float alt = mpCNC->getRelativeAltitude();
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
             }
@@ -328,19 +328,19 @@ bool ConsoleInputManager::buildRSCCommands() {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "info") {
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
-            rsc_->printImgInfo();
+            mpRSC->printImgInfo();
             ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else if (cmdType == "chsrc") {
             if (currentCommand_.second.size() >= 2) {
                 std::string srcName = currentCommand_.second.at(1);
                 if (srcName == "rsc") {
                     ROS_WARN("::RSC SRC -> RSC::");
-                    rsc_->changeDepthSource(DEPTH_SOURCE_RSC);
-                    rsc_->changePC2Source(PC_SOURCE_RSC);
+                    mpRSC->changeDepthSource(DEPTH_SOURCE_RSC);
+                    mpRSC->changePC2Source(PC_SOURCE_RSC);
                 } else if (srcName == "ue4") {
                     ROS_WARN("::RSC SRC -> UE4::");
-                    rsc_->changeDepthSource(DEPTH_SOURCE_UE4);
-                    rsc_->changePC2Source(PC_SOURCE_UE4);
+                    mpRSC->changeDepthSource(DEPTH_SOURCE_UE4);
+                    mpRSC->changePC2Source(PC_SOURCE_UE4);
                 } else {
                     ROS_WARN("Unknown New Source Name");
                     ROS_WARN("    rsc:      use real realsense camera data");
@@ -359,10 +359,10 @@ bool ConsoleInputManager::buildRSCCommands() {
                 if (max < min || min < 0) {
                     throw 1;
                 }
-                rsc_->setRange(min, max);
-                rsc_->setRangeSwitch(true);
+                mpRSC->setRange(min, max);
+                mpRSC->setRangeSwitch(true);
             } else if (currentCommand_.second.size() == 2 && cancel == "cancel") {
-                rsc_->setRangeSwitch(false);
+                mpRSC->setRangeSwitch(false);
             } else {
                 ROS_WARN("Unknown Range Operation");
                 ROS_WARN("    [max(mm)] [min(mm)]       Set range");
@@ -384,17 +384,17 @@ bool ConsoleInputManager::buildLIDARCommands() {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "info") {
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
-            lidar_->printLidarInfo();
+            mpLidar->printLidarInfo();
             ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else if (cmdType == "chsrc") {
             if (currentCommand_.second.size() >= 2) {
                 std::string srcName = currentCommand_.second.at(1);
                 if (srcName == "ydlidar") {
                     ROS_WARN("::LIDAR SRC -> YDLIDAR::");
-                    lidar_->changeLidarSource(LIDAR_SOURCE_YDLIDAR);
+                    mpLidar->changeLidarSource(LIDAR_SOURCE_YDLIDAR);
                 } else if (srcName == "ue4") {
                     ROS_WARN("::LIDAR SRC -> UE4::");
-                    lidar_->changeLidarSource(LIDAR_SOURCE_UE4);
+                    mpLidar->changeLidarSource(LIDAR_SOURCE_UE4);
                 } else {
                     ROS_WARN("Unknown New Source Name");
                     ROS_WARN("    ydlidar:  use real YDLidar data");

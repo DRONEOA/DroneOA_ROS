@@ -22,7 +22,7 @@
 
 namespace OAC {
 
-CMDRunner::CMDRunner(CNC::CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), cnc_(cnc) {
+CMDRunner::CMDRunner(CNC::CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), mpCNC(cnc) {
     toggleState(RUNNER_STATE::INIT);
     runnerThread = new boost::thread(boost::bind(&CMDRunner::runnerRoutine, this));
 }
@@ -110,7 +110,7 @@ void CMDRunner::runnerRoutine() {
             }
         } else {
             // Common Instant Commands
-            Command::parseCMD(cnc_, theCMDQueue.front());
+            Command::parseCMD(mpCNC, theCMDQueue.front());
             theCMDQueue.erase(theCMDQueue.begin());
         }
     }
