@@ -55,7 +55,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
                 if (!cnc->isArmed()) {
                     ROS_WARN("VEHICLE NOT ARMED !!!");
                     return false;
-                }       
+                }
                 float targetAltitude = std::stof(cmdline.second);
                 return cnc->takeoff(targetAltitude);
             }

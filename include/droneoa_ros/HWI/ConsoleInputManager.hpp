@@ -37,7 +37,7 @@ static const char ConsoleDelimiter = ' ';
 typedef std::pair<std::string, std::vector<std::string>> CMDPair;
 class ConsoleInputManager {
  public:
-    ConsoleInputManager(bool* masterSwitch);
+    explicit ConsoleInputManager(bool* masterSwitch);
     virtual ~ConsoleInputManager();
 
     bool init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAController *oac, Lidar::LidarGeneric *lidar,
