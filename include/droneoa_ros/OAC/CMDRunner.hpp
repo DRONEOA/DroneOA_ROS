@@ -53,7 +53,7 @@ static const int32_t RUNNER_TICK_TIME = 100;
 class CMDRunner {
     void runnerRoutine();
     boost::thread *runnerThread;
-    CNC::CNCInterface *cnc_;
+    CNC::CNCInterface *mpCNC;
 
     Command::CommandQueue theCMDQueue;
     RUNNER_STATE runnerState;

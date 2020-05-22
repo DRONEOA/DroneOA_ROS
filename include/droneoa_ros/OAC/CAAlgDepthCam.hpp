@@ -26,7 +26,7 @@
 namespace OAC {
 
 class CAAlgDepthCam : public BaseAlg {
-    Depth::RSC *rsc_;
+    Depth::RSC *mpRSC;
     float camThreshold_;
     float camPossibility_;
  public:

@@ -30,7 +30,7 @@
 namespace OAC {
 
 class CMDParser {
-    CNC::CNCInterface *cnc_;
+    CNC::CNCInterface *mpCNC;
     CMDRunner *cmdRunner_;
 
  public:
