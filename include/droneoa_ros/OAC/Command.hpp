@@ -43,9 +43,9 @@ constexpr char CommandDataDelimiter = ' ';
  */
 enum CMD_QUEUE_TYPES : uint32_t {
     CMD_CHMOD = 0,  /*!< DATA: mod name */
-    CMD_ARM,
-    CMD_TAKEOFF,
-    CMD_LAND,
+    CMD_ARM,  /*!< DATA: none */
+    CMD_TAKEOFF,  /*!< DATA: float altitude */
+    CMD_LAND,  /*!< DATA: none */
     CMD_SET_MAX_VELOCITY,  /*!< DATA: float speed */
     CMD_SET_YAW,  /*!< DATA: float heading */
     CMD_DELAY_MSEC,  /*!< DATA: uint32 time in ms */
