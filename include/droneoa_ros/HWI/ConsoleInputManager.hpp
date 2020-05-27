@@ -70,6 +70,9 @@ class ConsoleInputManager {
     boost::thread* thread_watch_command_ = nullptr;
     void watchCommandThread();
 
+    // Statue
+    bool mIsBuildingQueue;
+
     // Private Handlers
     bool splitModuleCommand(std::string cmd);
     bool buildCommandQueue();
@@ -90,6 +93,7 @@ class ConsoleInputManager {
     void printOACHelper();
     void printLIDARHelper();
     void printQuickHelper();
+    void printQueueHelper();
 };
 
 }  // namespace IO

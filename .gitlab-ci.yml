@@ -38,6 +38,7 @@ haros:
   stage: StaticAnalysis
   script:
     - pip install haros
+    - pip install python-magic
     - pip install ply nose
     - pip install -e git+https://github.com/timtadh/pyflwor.git#egg=pyflwor
     - pip install radon

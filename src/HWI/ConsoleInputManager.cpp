@@ -26,7 +26,7 @@
 namespace IO {
 
 ConsoleInputManager::ConsoleInputManager(bool* masterSwitch) : masterSwitch_(masterSwitch),
-        mpCNC(nullptr), mpRSC(nullptr), oac_(nullptr), mpLidar(nullptr) {}
+        mpCNC(nullptr), mpRSC(nullptr), oac_(nullptr), mpLidar(nullptr), mIsBuildingQueue(false) {}
 
 ConsoleInputManager::~ConsoleInputManager() {
     if (thread_watch_command_) delete thread_watch_command_;
@@ -44,7 +44,9 @@ bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAC
 
 void ConsoleInputManager::command_callback(const std_msgs::String::ConstPtr& msg) {
     std_msgs::String inputCMD = *msg;
-    parseAndExecuteConsole(inputCMD.data);
+    if (!parseAndExecuteConsole(inputCMD.data)) {
+        ROS_ERROR("ERROR in incoming command via input_command topic");
+    }
 }
 
 void ConsoleInputManager::watchCommandThread() {
@@ -117,9 +119,17 @@ bool ConsoleInputManager::buildCommandQueue() {
     } else if (currentCommand_.first == "start") {
         return buildQueueCommands();
     } else if (currentCommand_.first == "delay") {
-        mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DELAY_MSEC, currentCommand_.second.at(0)});
+        if (mIsBuildingQueue && currentCommand_.second.size() > 0) {
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DELAY_MSEC, currentCommand_.second.at(0)});
+            return true;
+        }
+        mIsBuildingQueue = false;
+        ROS_ERROR("Delay is only valid in command queue: delay [time in ms]");
+        return false;
     } else if (currentCommand_.first == "until") {
         // @todo until WIP
+        ROS_ERROR("Until command is WIP");
+        return false;
     } else {
         ROS_WARN("Unknown Module Name: %s", currentCommand_.first.c_str());
         printModuleHelper();
@@ -131,14 +141,20 @@ bool ConsoleInputManager::buildQueueCommands() {
     std::vector<std::string> inputCmd = currentCommand_.second;
     if (inputCmd.size() == 0) {
         ROS_WARN("Empty Command Queue");
+        printQueueHelper();
         return false;
     }
     uint8_t stepCount = 0;  // 0: module name 1-:entries
     currentCommand_.second.clear();
+    mIsBuildingQueue = true;
     for (std::string entry : inputCmd) {
         if (entry == "then" || entry == "end") {
             stepCount = 0;
-            buildCommandQueue();
+            if (!buildCommandQueue()) {
+                printQueueHelper();
+                mIsBuildingQueue = false;
+                return false;
+            }
             currentCommand_.second.clear();
             continue;
         }
@@ -149,6 +165,7 @@ bool ConsoleInputManager::buildQueueCommands() {
         }
         currentCommand_.second.push_back(entry);
     }
+    mIsBuildingQueue = false;
     ROS_WARN("QUEUE BUILD DONE");
     return true;
 }
@@ -186,8 +203,7 @@ bool ConsoleInputManager::buildCNCCommands() {
                 ROS_WARN("Invalid Speed Setting");
                 return false;
             }
-            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_MAX_VELOCITY,
-                    currentCommand_.second.at(1)});
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_MAX_VELOCITY, std::to_string(vel)});
         } else if (cmdType == "yaw") {
             float yawAngle = std::stof(currentCommand_.second.at(1));
             ROS_WARN("::SET YAW -> %f::", yawAngle);
@@ -195,12 +211,13 @@ bool ConsoleInputManager::buildCNCCommands() {
             if (currentCommand_.second.size() >= 3) {
                 float dist = std::stof(currentCommand_.second.at(2));
                 float alt = mpCNC->getRelativeAltitude();
+                std::string dataStr = std::to_string(yawAngle) + " " + std::to_string(dist);
                 if (currentCommand_.second.size() >= 4) {
                     alt = std::stof(currentCommand_.second.at(3));
+                    dataStr = dataStr + " " + std::to_string(alt);
                 }
                 ROS_WARN("::GOTO YAW -> yaw:%f dist:%f alt:%f::", yawAngle, dist, alt);
-                mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_HEADING, std::to_string(yawAngle)
-                        + " " + std::to_string(dist)});
+                mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_HEADING, dataStr});
             }
         } else if (cmdType == "climb") {
             float deltaAlt = std::stof(currentCommand_.second.at(1));
@@ -280,37 +297,45 @@ bool ConsoleInputManager::buildQuickCommands() {
             ROS_WARN("::GO NORTH::");
             float dist = std::stof(currentCommand_.second.at(1));
             float alt = mpCNC->getRelativeAltitude();
+            std::string dataStr = std::to_string(dist) + " 0";
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
+                dataStr = dataStr + " " + std::to_string(alt);
             }
-            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, std::to_string(dist) + " 0"});
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "0"});
         } else if (cmdType == "s") {
             ROS_WARN("::GO SOUTH::");
             float dist = std::stof(currentCommand_.second.at(1));
             float alt = mpCNC->getRelativeAltitude();
+            std::string dataStr = std::to_string(-dist) + " 0";
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
+                dataStr = dataStr + " " + std::to_string(alt);
             }
-            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, std::to_string(-dist) + " 0"});
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "180"});
         } else if (cmdType == "a") {
             ROS_WARN("::GO WEST::");
             float dist = std::stof(currentCommand_.second.at(1));
             float alt = mpCNC->getRelativeAltitude();
+            std::string dataStr = "0 " + std::to_string(-dist);
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
+                dataStr = dataStr + " " + std::to_string(alt);
             }
-            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, "0 " + std::to_string(-dist)});
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW,  "270"});
         } else if (cmdType == "d") {
             ROS_WARN("::GO EAST::");
             float dist = std::stof(currentCommand_.second.at(1));
             float alt = mpCNC->getRelativeAltitude();
+            std::string dataStr = "0 " + std::to_string(dist);
             if (currentCommand_.second.size() >= 3) {
                 alt = std::stof(currentCommand_.second.at(2));
+                dataStr = dataStr + " " + std::to_string(alt);
             }
-            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, "0 " + std::to_string(dist)});
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "90"});
         } else {
             ROS_WARN("Unknown Quick command");
@@ -471,6 +496,17 @@ void ConsoleInputManager::printModuleHelper() {
     ROS_WARN("    RSC:    Realsense Camera HS Interface");
     ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
     ROS_WARN("    !:      Quick Commands");
+}
+
+void ConsoleInputManager::printQueueHelper() {
+    ROS_WARN("Command Queue Helper:");
+    ROS_WARN("Usage: START [CMD] THEN [CMD] TEHN [CMD] ... END");
+    ROS_WARN("Supported Commands [CMD]:");
+    ROS_WARN("    CNC:   all expect: quit");
+    ROS_WARN("    OAC:   none WIP");
+    ROS_WARN("    RSC:   none WIP");
+    ROS_WARN("    Lidar: none WIP");
+    ROS_WARN("    !:     all");
 }
 
 }  // namespace IO
