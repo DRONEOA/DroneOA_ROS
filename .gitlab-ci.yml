@@ -37,6 +37,7 @@ catkinlint:
 haros:
   stage: StaticAnalysis
   script:
+    - apt-get install libmagic-dev -y
     - pip install haros
     - pip install python-magic
     - pip install ply nose
