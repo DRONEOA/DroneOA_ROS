@@ -45,6 +45,24 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
                 if (cnc->getMode() == cmdline.second) return true;
                 return cnc->setMode(cmdline.second);
             }
+            case CMD_QUEUE_TYPES::CMD_ARM:
+            {
+                cnc->setMode(FLT_MODE_GUIDED);
+                return cnc->armVehicle();
+            }
+            case CMD_QUEUE_TYPES::CMD_TAKEOFF:
+            {
+                if (!cnc->isArmed()) {
+                    ROS_WARN("VEHICLE NOT ARMED !!!");
+                    return false;
+                }
+                float targetAltitude = std::stof(cmdline.second);
+                return cnc->takeoff(targetAltitude);
+            }
+            case CMD_QUEUE_TYPES::CMD_LAND:
+            {
+                return cnc->land(1);
+            }
             case CMD_QUEUE_TYPES::CMD_SET_MAX_VELOCITY:
             {
                 float targetSpeed = std::stof(cmdline.second);
@@ -59,29 +77,37 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
             case CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE:
             {
                 std::vector<std::string> dataList = getDataListFromString(cmdline.second);
-                if (dataList.size() != 3) throw 1;
+                if (dataList.size() > 3 || dataList.size() < 2) throw 1;
                 float northAxis = std::stof(dataList.at(0));
                 float eastAxis = std::stof(dataList.at(1));
-                float alt = std::stof(dataList.at(2));
+                float alt = cnc->getRelativeAltitude();
+                if (dataList.size() == 3) {
+                    alt = std::stof(dataList.at(2));
+                }
                 return cnc->gotoRelative(northAxis, eastAxis, alt);
             }
             case CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL:
             {
                 std::vector<std::string> dataList = getDataListFromString(cmdline.second);
-                if (dataList.size() != 3) throw 1;
+                if (dataList.size() > 3 || dataList.size() < 2) throw 1;
                 float latPos = std::stof(dataList.at(0));
                 float longPos = std::stof(dataList.at(1));
-                float alt = std::stof(dataList.at(2));
+                float alt = cnc->getRelativeAltitude();
+                if (dataList.size() == 3) {
+                    alt = std::stof(dataList.at(2));
+                }
                 return cnc->gotoGlobal(latPos, longPos, alt);
             }
             case CMD_QUEUE_TYPES::CMD_GOTO_HEADING:
             {
                 std::vector<std::string> dataList = getDataListFromString(cmdline.second);
-                if (dataList.size() != 3) throw 1;
+                if (dataList.size() > 3 || dataList.size() < 2) throw 1;
                 float heading = std::stof(dataList.at(0));
                 float dist = std::stof(dataList.at(1));
-                float alt = std::stof(dataList.at(2));
-                //! @todo consider add whether heading to target as an option
+                float alt = cnc->getRelativeAltitude();
+                if (dataList.size() == 3) {
+                    alt = std::stof(dataList.at(2));
+                }
                 if (!cnc->setYaw(heading)) {
                     return false;
                 }
