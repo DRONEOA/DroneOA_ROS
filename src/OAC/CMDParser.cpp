@@ -32,9 +32,19 @@ CMDParser::~CMDParser() {
  * Parse a queue of commands in order
  * - Input: command queue
  * - Output: whether operation is succesuful
- * - TODO: support timed commands (currently all commands are sent with no delay or complete check)
+ * - TODO: isInstant can be determined inside
  */
-bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isInstant) {
+bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue) {
+    if (cmdqueue.size() == 0) {
+        return true;
+    }
+    bool isInstant = true;
+    for (auto tmpLine : cmdqueue) {
+        if (tmpLine.first == Command::CMD_QUEUE_TYPES::CMD_DELAY_MSEC) {
+            isInstant = false;
+            break;
+        }
+    }
     if (isInstant) {
         for (auto cmdline : cmdqueue) {
             if (!Command::parseCMD(mpCNC, cmdline)) {
