@@ -65,7 +65,7 @@ sudo apt-get install ros-melodic-octomap-server -y
 sudo apt-get install ros-melodic-octomap-rviz-plugins -y
 cd src
 git clone https://github.com/IntelRealSense/realsense-ros.git
-git clone http://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
+git clone https://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
 cd realsense-ros/
 git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
 
