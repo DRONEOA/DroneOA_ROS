@@ -20,11 +20,11 @@
 #ifndef HWI_CONSOLEINPUTMANAGER_HPP_  // NOLINT
 #define HWI_CONSOLEINPUTMANAGER_HPP_  // NOLINT
 
-#include <std_msgs/String.h>
-
 #include <vector>
 #include <string>
 #include <utility>
+
+#include <std_msgs/String.h>
 
 #include <droneoa_ros/HWI/interface/CNCInterface.hpp>
 #include <droneoa_ros/HWI/base/LidarGeneric.hpp>

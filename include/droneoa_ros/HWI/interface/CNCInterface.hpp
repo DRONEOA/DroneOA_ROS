@@ -20,10 +20,10 @@
 #ifndef HWI_INTERFACE_CNCINTERFACE_HPP_  // NOLINT
 #define HWI_INTERFACE_CNCINTERFACE_HPP_  // NOLINT
 
+#include <string>
+
 #include <sensor_msgs/Imu.h>
 #include <mavros_msgs/VFR_HUD.h>
-
-#include <string>
 
 #include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
 

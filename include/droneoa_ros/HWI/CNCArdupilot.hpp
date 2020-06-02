@@ -20,12 +20,12 @@
 #ifndef HWI_CNCARDUPILOT_HPP_  // NOLINT
 #define HWI_CNCARDUPILOT_HPP_  // NOLINT
 
+#include <string>
+
 #include <ros/ros.h>
 #include <mavros_msgs/Waypoint.h>
 #include <mavros_msgs/WaypointPush.h>
 #include <mavros_msgs/WaypointClear.h>
-
-#include <string>
 
 #include <droneoa_ros/HWI/base/CNCGeneric.hpp>
 

@@ -20,9 +20,10 @@
 #ifndef UT_MOCK_MOCK_RATE_HPP  // NOLINT
 #define UT_MOCK_MOCK_RATE_HPP  // NOLINT
 
+#include <string>
+
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include <string>
 
 #include "../../include/droneoa_ros/HWI/interface/CNCInterface.hpp"
 

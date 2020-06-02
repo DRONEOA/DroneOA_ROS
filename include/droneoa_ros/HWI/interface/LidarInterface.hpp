@@ -20,12 +20,12 @@
 #ifndef HWI_INTERFACE_LIDARINTERFACE_HPP_  // NOLINT
 #define HWI_INTERFACE_LIDARINTERFACE_HPP_  // NOLINT
 
-#include <ros/ros.h>
-#include <sensor_msgs/LaserScan.h>
-
 #include <string>
 #include <utility>
 #include <map>
+
+#include <ros/ros.h>
+#include <sensor_msgs/LaserScan.h>
 
 namespace Lidar {
 

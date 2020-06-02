@@ -20,6 +20,8 @@
 #ifndef HWI_BASE_CNCGENERIC_HPP_  // NOLINT
 #define HWI_BASE_CNCGENERIC_HPP_  // NOLINT
 
+#include <string>
+
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/Altitude.h>
 #include <mavros_msgs/HomePosition.h>
@@ -30,7 +32,6 @@
 #include <sensor_msgs/MagneticField.h>
 #include <std_msgs/Float64.h>
 
-#include <string>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
