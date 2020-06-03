@@ -71,7 +71,7 @@ class CNCArdupilot : public CNCGeneric{
      * @param isAltDelta not used
      * @return client send response
      */
-    bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false) override;
+    bool gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta = false) override;
     /**
      * @brief Goto Target Head
      * @param heading in degree
