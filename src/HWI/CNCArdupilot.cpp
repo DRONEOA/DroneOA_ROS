@@ -94,8 +94,9 @@ bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt) {
 }
 
 // Goto Relative Waypoint (North+, East+)
-bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta) {
+bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta) {
     // @TODO: check GPS available
+    // @TODO: consider changing altitude first
     GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
     return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);
 }
