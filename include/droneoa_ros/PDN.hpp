@@ -109,6 +109,13 @@ static const char* DEPTH_SOURCE_UE4 = "/unreal_ros/image_depth";
 static const char* PC_SOURCE_RSC = "/d435/depth/color/points";
 static const char* PC_SOURCE_UE4 = "/depth_registered/points";
 
+// Runner
+static const int32_t RUNNER_TIMEOUT_LIMIT = 100000;  /**< @brief unit: msec */
+
+// Max Error
+static const double GPS_COMPARE_DIFF_MAX = 0.5;  /**< @brief max distance consider to be the same GPS point unit: m */
+static const double ALT_COMPARE_DIFF_MAX = 0.1;  /**< @brief max distance consider to be the same Altitude unit: m */
+
 // SITL
 static const float UE4_SITL_SCALE = 1000.0f;
 

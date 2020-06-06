@@ -17,7 +17,10 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
+#include <math.h>
+
 #include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
+#include <droneoa_ros/PDN.hpp>
 
 GPSPoint::GPSPoint() {
     latitude_ = 0;
@@ -29,4 +32,14 @@ GPSPoint::GPSPoint(float latitude, float longitude, float altitude) {
     latitude_ = latitude;
     longitude_ = longitude;
     altitude_ = altitude;
+}
+
+bool GPSPoint::operator==(const GPSPoint& other) const {
+    float dlat = this->latitude_ - other.latitude_;
+    float dlong = this->longitude_ - other.longitude_;
+    float dist = sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5;
+    if (dist < GPS_COMPARE_DIFF_MAX) {
+        return true;
+    }
+    return false;
 }
