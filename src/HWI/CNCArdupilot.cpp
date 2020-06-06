@@ -17,9 +17,6 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <cstdlib>
-#include <iostream>
-
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/CommandLong.h>
@@ -27,6 +24,9 @@
 #include <sensor_msgs/NavSatStatus.h>
 #include <std_msgs/String.h>
 #include <tf/tf.h>
+
+#include <cstdlib>
+#include <iostream>
 
 #include <droneoa_ros/HWI/CNCArdupilot.hpp>
 #include <droneoa_ros/PDN.hpp>
@@ -185,6 +185,7 @@ bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt) {
 // Goto Relative Waypoint (North+, East+)
 bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta) {
     // @TODO: check GPS available
+    // @TODO: consider changing altitude first
     GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
     return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);
 }

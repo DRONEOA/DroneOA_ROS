@@ -20,9 +20,6 @@
 #ifndef HWI_CNCARDUPILOT_HPP_  // NOLINT
 #define HWI_CNCARDUPILOT_HPP_  // NOLINT
 
-#include <string>
-#include <vector>
-
 #include <ros/ros.h>
 #include <mavros_msgs/Waypoint.h>
 #include <mavros_msgs/WaypointPush.h>
@@ -30,6 +27,9 @@
 #include <mavros_msgs/WaypointClear.h>
 #include <mavros_msgs/WaypointReached.h>
 #include <mavros_msgs/WaypointList.h>
+
+#include <string>
+#include <vector>
 
 #include <droneoa_ros/HWI/base/CNCGeneric.hpp>
 
@@ -99,7 +99,7 @@ class CNCArdupilot : public CNCGeneric{
      * @param isAltDelta not used
      * @return client send response
      */
-    bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false) override;
+    bool gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta = false) override;
     /**
      * @brief Goto Target Head
      * @param heading in degree
