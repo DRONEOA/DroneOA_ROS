@@ -52,6 +52,9 @@ enum UNTIL_MODE {
     NONE = 0,  /*!< Until: None (disabled) */
     ARRWP,  /*!< Until: Arrive at next waypoint */
     CLRWP,  /*!< Until: Clear all waypoints */
+    ALTEQ,  /*!< Until: Altitude equal */
+    ALTLT,  /*!< Until: Altitude less than */
+    ALTGT,  /*!< Until: Altitude greater than */
 };
 
 /**
@@ -69,11 +72,17 @@ class CMDRunner {
     bool shutdown;
     boost::shared_mutex queue_mutex;
     boost::shared_mutex state_mutex;
+    uint32_t mInternalTimmer;
 
+    // Until CMD
     uint32_t mWaypointListSize;
-    UNTIL_MODE mWaitUntilMode;  // 0 = none; 1 = arrwp; 2 = clrwp
+    float mUntilAlt;
+    UNTIL_MODE mWaitUntilMode;
     bool checkReachLastWP();
+    bool handleUntilCommand();
+    bool recheckUntilCommand();
 
+    // Helpers
     void clearCMDQueue();
     bool populateCMDQueue(Command::CommandQueue commands);
     bool toggleState(RUNNER_STATE newState);

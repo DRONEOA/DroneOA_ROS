@@ -23,8 +23,8 @@
 
 namespace OAC {
 
-CMDRunner::CMDRunner(CNC::CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), mpCNC(cnc),
-        mWaitUntilMode(UNTIL_MODE::NONE) {
+CMDRunner::CMDRunner(CNC::CNCInterface *cnc) : runnerState(RUNNER_STATE::INIT), shutdown(false), mInternalTimmer(0),
+        mpCNC(cnc), mWaitUntilMode(UNTIL_MODE::NONE) {
     toggleState(RUNNER_STATE::INIT);
     runnerThread = new boost::thread(boost::bind(&CMDRunner::runnerRoutine, this));
 }
@@ -76,7 +76,6 @@ RUNNER_STATE CMDRunner::getRunnerState() {
  */
 
 void CMDRunner::runnerRoutine() {
-    uint32_t internalTimmer = 0;
     while (true) {
         boost::this_thread::sleep(boost::posix_time::milliseconds(RUNNER_TICK_TIME));
         // Terminate Thread On Shutdown Request
@@ -87,51 +86,28 @@ void CMDRunner::runnerRoutine() {
         if (theCMDQueue.empty()) {
             // In case last command is a wait, we ignore it
             toggleState(RUNNER_STATE::IDLE);
-            internalTimmer = 0;
+            mInternalTimmer = 0;
             continue;
         } else {
             toggleState(RUNNER_STATE::RUNNING);
         }
         // Run the timer if any
-        if (internalTimmer > 0) {
-            if (mWaitUntilMode == UNTIL_MODE::ARRWP) {
-                // Recheck whether wp list size changed for until command
-                CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
-                if (!advCNC) {
-                    ROS_ERROR("This FCU does not support arrwp command !!!");
-                }
-                int currentWPListSize = advCNC->getWaypointList().waypoints.size();
-                if ((mWaypointListSize != currentWPListSize) || (currentWPListSize == 1 && checkReachLastWP())) {
-                    //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
-                    mWaitUntilMode = UNTIL_MODE::NONE;
-                    internalTimmer = 0;
-                }
-            } else if (mWaitUntilMode == UNTIL_MODE::CLRWP) {
-                // Recheck whether wp list size changed for until command
-                CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
-                if (!advCNC) {
-                    ROS_ERROR("This FCU does not support arrwp command !!!");
-                }
-                int currentWPListSize = advCNC->getWaypointList().waypoints.size();
-                if ((currentWPListSize == 0) || (currentWPListSize == 1 && checkReachLastWP())) {
-                    //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
-                    mWaitUntilMode = UNTIL_MODE::NONE;
-                    internalTimmer = 0;
-                }
-            }
-            if (internalTimmer >= RUNNER_TICK_TIME) {
-                internalTimmer -= RUNNER_TICK_TIME;
+        if (mInternalTimmer > 0) {
+            recheckUntilCommand();
+            if (mInternalTimmer >= RUNNER_TICK_TIME) {
+                mInternalTimmer -= RUNNER_TICK_TIME;
                 continue;
             } else {
                 mWaitUntilMode = UNTIL_MODE::NONE;  // Timeout reset
-                internalTimmer = 0;
+                mInternalTimmer = 0;
             }
         }
+        // Handle runner specific commands
         if (theCMDQueue.front().first == Command::CMD_QUEUE_TYPES::CMD_DELAY_MSEC) {
             // Handle Delay
             try {
-                internalTimmer = std::stoi(theCMDQueue.front().second);
-                ROS_WARN("[CMDRunner] Timer Start With: %u", internalTimmer);
+                mInternalTimmer = std::stoi(theCMDQueue.front().second);
+                ROS_WARN("[CMDRunner] Timer Start With: %u", mInternalTimmer);
                 theCMDQueue.erase(theCMDQueue.begin());
             } catch(...) {
                 ROS_ERROR("[CMDRunner] Delay Time Data Invalid");
@@ -139,39 +115,7 @@ void CMDRunner::runnerRoutine() {
             }
         } else if (theCMDQueue.front().first == Command::CMD_QUEUE_TYPES::CMD_UNTIL) {
             // Handle Until
-            try {
-                if (theCMDQueue.front().second == "arrwp") {
-                    // Until Arrive At Waypoint
-                    CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
-                    if (!advCNC) {
-                        ROS_ERROR("This FCU does not support arrwp command !!!");
-                        throw 1;
-                    }
-                    //! @note Seems there is a bug in mavros. Which causing Reach message not send with SITL
-                    // advCNC->registForReachEvent(std::bind(&CMDRunner::reachWaypointCallback, this));
-                    mWaypointListSize = advCNC->getWaypointList().waypoints.size();
-                    mWaitUntilMode = UNTIL_MODE::ARRWP;
-                    ROS_WARN("[CMDRunner] Until Arrive At Waypoint. Current Num WP: %u", mWaypointListSize);
-                } else if (theCMDQueue.front().second == "clrwp") {
-                    // Until Clear All Waypoints
-                    CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
-                    if (!advCNC) {
-                        ROS_ERROR("This FCU does not support arrwp command !!!");
-                        throw 1;
-                    }
-                    mWaitUntilMode = UNTIL_MODE::CLRWP;
-                    ROS_WARN("[CMDRunner] Until Clear All Waypoints");
-                } else {
-                    // Invalid mode data
-                    throw 1;
-                }
-                ROS_WARN("[CMDRunner] Until Start with timeout limit: %u", RUNNER_TIMEOUT_LIMIT);
-                internalTimmer = RUNNER_TIMEOUT_LIMIT;
-                theCMDQueue.erase(theCMDQueue.begin());
-            } catch(...) {
-                ROS_ERROR("[CMDRunner] Until Data Invalid");
-                clearCMDQueue();
-            }
+            handleUntilCommand();
         } else {
             // Common Instant Commands
             Command::parseCMD(mpCNC, theCMDQueue.front());
@@ -195,6 +139,111 @@ bool CMDRunner::checkReachLastWP() {
                             advCNC->getWaypointList().waypoints[0].y_long,
                             advCNC->getWaypointList().waypoints[0].z_alt);
     return wp == currentPos;
+}
+
+bool CMDRunner::handleUntilCommand() {
+    try {
+        std::vector<std::string> dataTokens = Command::getDataListFromString(theCMDQueue.front().second);
+        if (dataTokens.at(0) == "arrwp") {
+            // Until Arrive At Waypoint
+            CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
+            if (!advCNC) {
+                ROS_ERROR("This FCU does not support arrwp command !!!");
+                throw 1;
+            }
+            //! @note Seems there is a bug in mavros. Which causing Reach message not send with SITL
+            // advCNC->registForReachEvent(std::bind(&CMDRunner::reachWaypointCallback, this));
+            mWaypointListSize = advCNC->getWaypointList().waypoints.size();
+            mWaitUntilMode = UNTIL_MODE::ARRWP;
+            ROS_WARN("[CMDRunner] Until Arrive At Waypoint. Current Num WP: %u", mWaypointListSize);
+        } else if (dataTokens.at(0) == "clrwp") {
+            // Until Clear All Waypoints
+            CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
+            if (!advCNC) {
+                ROS_ERROR("This FCU does not support arrwp command !!!");
+                throw 1;
+            }
+            mWaitUntilMode = UNTIL_MODE::CLRWP;
+            ROS_WARN("[CMDRunner] Until Clear All Waypoints");
+        } else if (dataTokens.at(0) == "alt") {
+            if (dataTokens.size() >= 3) {
+                if (dataTokens.at(1) == "eq") {
+                    mWaitUntilMode = UNTIL_MODE::ALTEQ;
+                } else if (dataTokens.at(1) == "gt") {
+                    mWaitUntilMode = UNTIL_MODE::ALTGT;
+                } else if (dataTokens.at(1) == "lt") {
+                    mWaitUntilMode = UNTIL_MODE::ALTLT;
+                } else {
+                    throw 1;
+                }
+            }
+            mUntilAlt = std::stof(dataTokens.at(2));
+            ROS_WARN("[CMDRunner] Until Altitude %s: %f", dataTokens.at(1).c_str(), mUntilAlt);
+        } else {
+            // Invalid mode data
+            throw 1;
+        }
+        ROS_WARN("[CMDRunner] Until Start with timeout limit: %u", RUNNER_TIMEOUT_LIMIT);
+        mInternalTimmer = RUNNER_TIMEOUT_LIMIT;
+        theCMDQueue.erase(theCMDQueue.begin());
+    } catch(...) {
+        ROS_ERROR("[CMDRunner] Until Data Invalid");
+        clearCMDQueue();
+        return false;
+    }
+    return true;
+}
+
+bool CMDRunner::recheckUntilCommand() {
+    if (mWaitUntilMode == UNTIL_MODE::ARRWP) {
+        // Recheck whether wp list size changed for until command
+        CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
+        if (!advCNC) {
+            ROS_ERROR("This FCU does not support arrwp command !!!");
+            return false;
+        }
+        int currentWPListSize = advCNC->getWaypointList().waypoints.size();
+        if ((mWaypointListSize != currentWPListSize) || (currentWPListSize == 1 && checkReachLastWP())) {
+            //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
+            mWaitUntilMode = UNTIL_MODE::NONE;
+            mInternalTimmer = 0;
+        }
+    } else if (mWaitUntilMode == UNTIL_MODE::CLRWP) {
+        // Recheck whether wp list size changed for until command
+        CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
+        if (!advCNC) {
+            ROS_ERROR("This FCU does not support arrwp command !!!");
+            return false;
+        }
+        int currentWPListSize = advCNC->getWaypointList().waypoints.size();
+        if ((currentWPListSize == 0) || (currentWPListSize == 1 && checkReachLastWP())) {
+            //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
+            mWaitUntilMode = UNTIL_MODE::NONE;
+            mInternalTimmer = 0;
+        }
+    } else if (mWaitUntilMode == UNTIL_MODE::ALTEQ) {
+        // Recheck whether altitude equal to
+        float currentAlt = mpCNC->getRelativeAltitude();
+        if (abs(currentAlt - mUntilAlt) <= ALT_COMPARE_DIFF_MAX) {
+            mWaitUntilMode = UNTIL_MODE::NONE;
+            mInternalTimmer = 0;
+        }
+    } else if (mWaitUntilMode == UNTIL_MODE::ALTLT) {
+        // Recheck whether altitude less than
+        float currentAlt = mpCNC->getRelativeAltitude();
+        if (currentAlt < mUntilAlt) {
+            mWaitUntilMode = UNTIL_MODE::NONE;
+            mInternalTimmer = 0;
+        }
+    } else if (mWaitUntilMode == UNTIL_MODE::ALTGT) {
+        // Recheck whether altitude greater than
+        float currentAlt = mpCNC->getRelativeAltitude();
+        if (currentAlt > mUntilAlt) {
+            mWaitUntilMode = UNTIL_MODE::NONE;
+            mInternalTimmer = 0;
+        }
+    }
+    return true;
 }
 
 // Callbasks

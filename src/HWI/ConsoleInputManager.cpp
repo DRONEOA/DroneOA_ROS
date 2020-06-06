@@ -128,7 +128,11 @@ bool ConsoleInputManager::buildCommandQueue() {
         return false;
     } else if (currentCommand_.first == "until") {
         if (mIsBuildingQueue && currentCommand_.second.size() > 0) {
-            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_UNTIL, currentCommand_.second.at(0)});
+            std::string dataStr = "";
+            for (auto tmp : currentCommand_.second) {
+                dataStr = dataStr + tmp + " ";
+            }
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_UNTIL, dataStr});
             //! @todo will support more commands in the future (e.g. velocity greater than "velgt [num]")
             return true;
         }

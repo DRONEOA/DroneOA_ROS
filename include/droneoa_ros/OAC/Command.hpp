@@ -116,6 +116,8 @@ typedef std::pair<DATA_QUEUE_TYPES, std::string> DataLine;
  */
 typedef std::vector<DataLine> DataQueue;
 
+std::vector<std::string> getDataListFromString(std::string data);
+
 /**
  * @brief Generic Parser for a single line of command
  * @param cnc the pointer to the shared command and control module
