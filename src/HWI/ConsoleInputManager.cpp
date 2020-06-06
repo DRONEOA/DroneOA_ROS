@@ -127,8 +127,17 @@ bool ConsoleInputManager::buildCommandQueue() {
         ROS_ERROR("Delay is only valid in command queue: delay [time in ms]");
         return false;
     } else if (currentCommand_.first == "until") {
-        // @todo until WIP
-        ROS_ERROR("Until command is WIP");
+        if (mIsBuildingQueue && currentCommand_.second.size() > 0) {
+            std::string dataStr = "";
+            for (auto tmp : currentCommand_.second) {
+                dataStr = dataStr + tmp + " ";
+            }
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_UNTIL, dataStr});
+            //! @todo will support more commands in the future (e.g. velocity greater than "velgt [num]")
+            return true;
+        }
+        mIsBuildingQueue = false;
+        ROS_ERROR("Until is only valid in command queue: until [mode]");
         return false;
     } else {
         ROS_WARN("Unknown Module Name: %s", currentCommand_.first.c_str());

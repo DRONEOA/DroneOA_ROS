@@ -32,7 +32,6 @@ CMDParser::~CMDParser() {
  * Parse a queue of commands in order
  * - Input: command queue
  * - Output: whether operation is succesuful
- * - TODO: isInstant can be determined inside
  */
 bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue) {
     if (cmdqueue.size() == 0) {
@@ -44,6 +43,11 @@ bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue) {
             isInstant = false;
             break;
         }
+        if (tmpLine.first == Command::CMD_QUEUE_TYPES::CMD_UNTIL) {
+            isInstant = false;
+            break;
+        }
+        //! @todo Merge continuous move wp command to single move wp list command
     }
     if (isInstant) {
         for (auto cmdline : cmdqueue) {

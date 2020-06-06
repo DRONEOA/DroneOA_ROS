@@ -54,6 +54,7 @@ enum CMD_QUEUE_TYPES : uint32_t {
     CMD_GOTO_HEADING,  /*!< DATA: float heading, float distance, float Altitude */
     CMD_CLIMB,  /*!< DATA: float Delta Altitude */
     CMD_DESCEND,  /*!< DATA: float Delta Altitude */
+    CMD_UNTIL,  /*!< DATA: mode (arrwp: arrive at way point; clrwp: clear all waypoints; More to be added) */
 };
 
 /**
@@ -72,6 +73,7 @@ static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_GOTO_HEADING",
     "CMD_CLIMB",
     "CMD_DESCEND",
+    "CMD_UNTIL",
 };
 
 /**
@@ -113,6 +115,8 @@ typedef std::pair<DATA_QUEUE_TYPES, std::string> DataLine;
  * a vector of datalines
  */
 typedef std::vector<DataLine> DataQueue;
+
+std::vector<std::string> getDataListFromString(std::string data);
 
 /**
  * @brief Generic Parser for a single line of command
