@@ -20,14 +20,15 @@
 #ifndef HWI_RSC_HPP_  // NOLINT
 #define HWI_RSC_HPP_  // NOLINT
 
-#include <string>
-#include <vector>
-
 #include <ros/ros.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/common/transforms.h>
+
+#include <string>
+#include <vector>
+
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 #include <opencv2/core/core.hpp>

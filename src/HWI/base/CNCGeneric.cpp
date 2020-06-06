@@ -17,9 +17,6 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
  */
 
-#include <cstdlib>
-#include <iostream>
-
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/CommandLong.h>
@@ -27,6 +24,9 @@
 #include <sensor_msgs/NavSatStatus.h>
 #include <std_msgs/String.h>
 #include <tf/tf.h>
+
+#include <cstdlib>
+#include <iostream>
 
 #include <droneoa_ros/HWI/base/CNCGeneric.hpp>
 #include <droneoa_ros/PDN.hpp>
