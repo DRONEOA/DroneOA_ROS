@@ -12,6 +12,7 @@ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31
 sudo apt update
 sudo apt install ros-melodic-desktop-full -y
 sudo rm /etc/ros/rosdep/sources.list.d/* || true # clear the directory before init
+sudo apt install python-rosdep
 sudo rosdep init
 rosdep update
 
