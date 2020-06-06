@@ -26,6 +26,8 @@ class GPSPoint {
     GPSPoint(float latitude, float longitude, float altitude);
     virtual ~GPSPoint() = default;
 
+    bool operator==(const GPSPoint& other) const;
+
     float latitude_;
     float longitude_;
     float altitude_;

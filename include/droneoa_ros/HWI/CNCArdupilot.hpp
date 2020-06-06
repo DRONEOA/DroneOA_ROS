@@ -21,26 +21,39 @@
 #define HWI_CNCARDUPILOT_HPP_  // NOLINT
 
 #include <string>
+#include <vector>
 
 #include <ros/ros.h>
 #include <mavros_msgs/Waypoint.h>
 #include <mavros_msgs/WaypointPush.h>
+#include <mavros_msgs/WaypointPull.h>
 #include <mavros_msgs/WaypointClear.h>
+#include <mavros_msgs/WaypointReached.h>
+#include <mavros_msgs/WaypointList.h>
 
 #include <droneoa_ros/HWI/base/CNCGeneric.hpp>
 
 namespace CNC {
 
 class CNCArdupilot : public CNCGeneric{
+    std::vector<std::function<void()>> mpWpReachCallbackList;
+    mavros_msgs::WaypointList mWaypointList;
+
+    boost::thread* mpThreadWatchWPReach = nullptr;
+    boost::thread* mpThreadWatchWPList = nullptr;
+    void watchReachThread();
+    void watchWPListThread();
+
  public:
     CNCArdupilot(ros::NodeHandle node, ros::Rate rate);
     virtual ~CNCArdupilot();
+    void initWatcherThread() override;
 
     /***************************************************************************
      * Mission
      */
     /**
-     * @brief Push New Waypoint List
+     * @brief Push New Waypoint
      * @param x_lat
      * @param y_long
      * @param z_alt
@@ -50,7 +63,22 @@ class CNCArdupilot : public CNCGeneric{
      */
     bool pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent = 2,
         uint16_t command = mavros_msgs::CommandCode::NAV_WAYPOINT);
+    /**
+     * @brief Push New Waypoint List
+     * @param std::vector<GPSPoint> (Waypoints Global)
+     * @param isCurrent (2 = isCurrent Guided)
+     * @param command (default NAV_WAYPOINT)
+     * @return client send response
+     */
+    bool pushWaypoints(std::vector<GPSPoint> wpList, uint8_t isCurrent = 2,
+        uint16_t command = mavros_msgs::CommandCode::NAV_WAYPOINT);
+    mavros_msgs::WaypointPull pullWaypoints();
     bool clearWaypoint();
+    void registForReachEvent(std::function<void()> callback);
+    mavros_msgs::WaypointList getWaypointList();
+
+    void WP_reach_callback(const mavros_msgs::WaypointReachedConstPtr& msg);
+    void WP_list_callback(const mavros_msgs::WaypointListConstPtr& msg);
 
     /***************************************************************************
      * User Simple Function

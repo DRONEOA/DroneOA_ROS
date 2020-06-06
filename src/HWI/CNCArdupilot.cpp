@@ -36,7 +36,50 @@
 namespace CNC {
 
 CNCArdupilot::CNCArdupilot(ros::NodeHandle node, ros::Rate rate) : CNCGeneric(node, rate) {}
+
 CNCArdupilot::~CNCArdupilot() {}
+
+void CNCArdupilot::initWatcherThread() {
+    CNCGeneric::initWatcherThread();
+    //! @note Seems there is a bug in mavros. Which causing Reach message not send with SITL
+    // mpThreadWatchWPReach = new boost::thread(boost::bind(&CNCArdupilot::watchReachThread, this));
+    mpThreadWatchWPList = new boost::thread(boost::bind(&CNCArdupilot::watchWPListThread, this));
+}
+
+void CNCArdupilot::watchReachThread() {
+    auto wpReach_sub =
+        mNodeHandle.subscribe<mavros_msgs::WaypointReached>("mavros/mission/reached", 1,
+            boost::bind(&CNCArdupilot::WP_reach_callback, this, _1));
+
+    while (ros::ok()) {
+        ros::spinOnce();
+        mRate.sleep();
+    }
+}
+
+void CNCArdupilot::watchWPListThread() {
+    auto wpReach_sub =
+        mNodeHandle.subscribe<mavros_msgs::WaypointList>("mavros/mission/waypoints", 1,
+            boost::bind(&CNCArdupilot::WP_list_callback, this, _1));
+
+    while (ros::ok()) {
+        ros::spinOnce();
+        mRate.sleep();
+    }
+}
+
+void CNCArdupilot::WP_reach_callback(const mavros_msgs::WaypointReachedConstPtr& msg) {
+    for (auto call : mpWpReachCallbackList) {
+        if (call) {
+            call();
+        }
+    }
+    mpWpReachCallbackList.clear();
+}
+
+void CNCArdupilot::WP_list_callback(const mavros_msgs::WaypointListConstPtr& msg) {
+    mWaypointList = *msg;
+}
 
 /***************************************************************************
  * Mission
@@ -65,6 +108,42 @@ bool CNCArdupilot::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t
     }
 }
 
+bool CNCArdupilot::pushWaypoints(std::vector<GPSPoint> wpList, uint8_t isCurrent, uint16_t command) {
+    ros::ServiceClient pushWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
+    mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
+    float z_alt = getRelativeAltitude();
+    for (auto tmpWP : wpList) {
+        mavros_msgs::Waypoint wp;
+        wp.frame          = mavros_msgs::Waypoint::FRAME_GLOBAL_REL_ALT;
+        wp.command        = command;
+        wp.is_current     = isCurrent;
+        wp.autocontinue   = true;
+        wp.x_lat          = tmpWP.latitude_;
+        wp.y_long         = tmpWP.longitude_;
+        z_alt = CNCUtility::validSpeedCMD(tmpWP.altitude_);
+        wp.z_alt          = z_alt;
+        wp_push_srv.request.waypoints.push_back(wp);
+    }
+    // Send WPs to Vehicle
+    if (pushWP_cl.call(wp_push_srv)) {
+        ROS_INFO("Send waypoints ok: %d", wp_push_srv.response.success);
+        mTargetAltitude = z_alt;
+        return true;
+    } else {
+        ROS_ERROR("Send waypoints FAILED.");
+        return false;
+    }
+}
+
+mavros_msgs::WaypointPull CNCArdupilot::pullWaypoints() {
+    mavros_msgs::WaypointPull pulledWp;
+    ros::ServiceClient pullWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/pull");
+    if (pullWP_cl.call(pulledWp) && pulledWp.response.success) {
+        ROS_INFO("%d", pulledWp.response.wp_received);
+        ROS_INFO("Waypoint pull success");
+    }
+}
+
 bool CNCArdupilot::clearWaypoint() {
     ros::ServiceClient clearWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointClear>("mavros/mission/clear");
     mavros_msgs::WaypointClear wp_clear_srv;
@@ -75,6 +154,16 @@ bool CNCArdupilot::clearWaypoint() {
         ROS_ERROR("Clear waypoints FAILED.");
         return false;
     }
+}
+
+void CNCArdupilot::registForReachEvent(std::function<void()> callback) {
+    if (callback) {
+        mpWpReachCallbackList.push_back(callback);
+    }
+}
+
+mavros_msgs::WaypointList CNCArdupilot::getWaypointList() {
+    return mWaypointList;
 }
 
 /*****************************************************
@@ -94,7 +183,7 @@ bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt) {
 }
 
 // Goto Relative Waypoint (North+, East+)
-bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta) {
+bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta) {
     // @TODO: check GPS available
     GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
     return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);

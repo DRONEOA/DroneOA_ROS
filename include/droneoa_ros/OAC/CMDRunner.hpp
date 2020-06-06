@@ -46,6 +46,15 @@ static const char* RUNNER_STATE_STR[] = {
 };
 
 /**
+ * @brief Command specific enums
+ */
+enum UNTIL_MODE {
+    NONE = 0,  /*!< Until: None (disabled) */
+    ARRWP,  /*!< Until: Arrive at next waypoint */
+    CLRWP,  /*!< Until: Clear all waypoints */
+};
+
+/**
  * @brief Interval between runner ticks (usually 50 ~ 250)
  */
 static const int32_t RUNNER_TICK_TIME = 100;
@@ -60,6 +69,10 @@ class CMDRunner {
     bool shutdown;
     boost::shared_mutex queue_mutex;
     boost::shared_mutex state_mutex;
+
+    uint32_t mWaypointListSize;
+    UNTIL_MODE mWaitUntilMode;  // 0 = none; 1 = arrwp; 2 = clrwp
+    bool checkReachLastWP();
 
     void clearCMDQueue();
     bool populateCMDQueue(Command::CommandQueue commands);
@@ -85,6 +98,9 @@ class CMDRunner {
      * @return RUNNER_STATE
      */
     RUNNER_STATE getRunnerState();
+
+    // Callbacks
+    void reachWaypointCallback();
 };
 
 }  // namespace OAC
