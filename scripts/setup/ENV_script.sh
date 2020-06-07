@@ -35,17 +35,12 @@ cd ~
 echo "Please pick you workspace root directory(absolute path): press ENTER to continue"
 echo ""
 read absolutePath
-mkdir $absolutePath || true
-cd $absolutePath
-mkdir ardupilot_ws
-cd ardupilot_ws
-mkdir src
-cd src
+mkdir -p $absolutePath/ardupilot_ws/src
+cd $absolutePath/ardupilot_ws/src
 git clone http://gitlab.tuotuogzs.com/droneoa/droneoa_ros.git
 
-cd ~/ardupilot_ws
 echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | sudo tee /etc/apt/sources.list.d/realsense-public.list
-sudo apt-key add ./src/droneoa_ros/scripts/ci/realsenseKey
+sudo apt-key add ./droneoa_ros/scripts/ci/realsenseKey
 sudo apt-get update
 sudo apt-get install librealsense2-dkms --allow-unauthenticated -y
 sudo apt-get install librealsense2-dev --allow-unauthenticated -y
@@ -64,7 +59,6 @@ sudo apt-get install ros-melodic-mavros -y
 sudo apt-get install ros-melodic-octomap -y
 sudo apt-get install ros-melodic-octomap-server -y
 sudo apt-get install ros-melodic-octomap-rviz-plugins -y
-cd src
 git clone https://github.com/IntelRealSense/realsense-ros.git
 git clone https://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
 cd realsense-ros/
@@ -75,14 +69,13 @@ sudo chmod +x ./install_geographiclib_datasets.sh
 sudo ./install_geographiclib_datasets.sh
 
 
-cd ~
 cd $absolutePath
-git clone https://github.com/ArduPilot/ardupilot
+git clone -b Copter-3.6.8-hotfix https://github.com/ArduPilot/ardupilot
 cd ardupilot
 git submodule update --init --recursive
-sudo chown -R $USER ~/ardupilot
-sudo chown -R $USER ~/ardupilot_ws
-Tools/environment_install/install-prereqs-ubuntu.sh -y
+sudo chown -R $USER $absolutePath/ardupilot
+sudo chown -R $USER $absolutePath/ardupilot_ws
+find . -name install-prereqs-ubuntu.sh -exec /bin/bash -x {} -y \;
 . ~/.profile
 sudo apt-get install libxml2-dev libxslt-dev python-dev -y
 sudo -H pip2 install -U future lxml
