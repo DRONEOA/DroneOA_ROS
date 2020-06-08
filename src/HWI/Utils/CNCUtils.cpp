@@ -77,4 +77,16 @@ float CNCUtility::validSpeedCMD(float targetSpeed) {
     return targetSpeed;
 }
 
+geometry_msgs::Vector3 CNCUtility::quaternionToRPY(geometry_msgs::Quaternion quaternion) {
+    geometry_msgs::Vector3 RPY;
+    double w = quaternion.w;
+    double x = quaternion.x;
+    double y = quaternion.y;
+    double z = quaternion.z;
+    RPY.x = 1.0 * (asin(-2 * x * z + 2 * w * y));  // pitch
+    RPY.y = 1.0 * (atan2(2 * y * z + 2 * w * x, -2 * x * x - 2 * y * y + 1));  // roll
+    RPY.z = 1.0 * (atan2(2 * (x * y + w * z), w * w + x * x - y * y - z * z));  // yaw
+    return RPY;
+}
+
 }  // namespace CNC

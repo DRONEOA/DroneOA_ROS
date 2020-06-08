@@ -20,6 +20,7 @@
 #ifndef HWI_UTILS_CNCUTILS_HPP_  // NOLINT
 #define HWI_UTILS_CNCUTILS_HPP_  // NOLINT
 
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <string>
 #include <vector>
 #include <utility>
@@ -75,6 +76,16 @@ class CNCUtility {
      * @return float 
      */
     static float validSpeedCMD(float targetSpeed);
+
+    /**
+     * @brief Convert quaternion to roll & pitch & yaw
+     * @param quaternion 
+     * @return geometry_msgs::Vector3 (rad)
+     *         x: pitch
+     *         y: roll
+     *         z: yaw
+     */
+    static geometry_msgs::Vector3 quaternionToRPY(geometry_msgs::Quaternion quaternion);
 };
 
 }  // namespace CNC
