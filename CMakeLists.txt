@@ -156,6 +156,7 @@ add_library(droneoa_ros_libhwi
   src/HWI/RSC.cpp
   src/HWI/Utils/CNCUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
+  src/HWI/Utils/LidarUtils.cpp
   src/HWI/ConsoleInputManager.cpp
 )
 

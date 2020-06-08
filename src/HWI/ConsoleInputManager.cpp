@@ -244,14 +244,15 @@ bool ConsoleInputManager::buildCNCCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DESCEND, std::to_string(deltaAlt)});
         } else if (cmdType == "info") {
             GPSPoint tmpGPSPoint = mpCNC->getCurrentGPSPoint();
+            geometry_msgs::Vector3 RPY = CNC::CNCUtility::quaternionToRPY(mpCNC->getIMUData().orientation);
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
             ROS_INFO("[DISPLAY] gps: %f %f", tmpGPSPoint.latitude_, tmpGPSPoint.longitude_);
             ROS_INFO("[DISPLAY] altitude: %f", mpCNC->getRelativeAltitude());
             ROS_INFO("[DISPLAY] mode: %s", mpCNC->getMode().c_str());
             ROS_INFO("[DISPLAY] voltage: %f", mpCNC->getBatteryVoltage());
-            ROS_INFO("[DISPLAY] orientation: %f, %f, %f", mpCNC->getIMUData().orientation.x,
-                                                        mpCNC->getIMUData().orientation.y,
-                                                        mpCNC->getIMUData().orientation.z);
+            ROS_INFO("[DISPLAY] orientation: P:%f, R:%f, Y%f", RPY.x*57.3,
+                                                        RPY.y*57.3,
+                                                        RPY.z*57.3);
             ROS_INFO("[HUD] heading: %d", mpCNC->getHUDData().heading);
             ROS_INFO("[HUD] airspeed: %f", mpCNC->getHUDData().airspeed);
             ROS_INFO("[HUD] groundspeed: %f", mpCNC->getHUDData().groundspeed);
