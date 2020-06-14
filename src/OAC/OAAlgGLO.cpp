@@ -65,7 +65,6 @@ bool OAAlgGLO::plan() {
     //! @todo remain false until implemented
     return false;
 }
-void OAAlgGLO::pathCallback(const mavros_msgs::Trajectory& msg){
-
+void OAAlgGLO::pathCallback(const mavros_msgs::Trajectory& msg) {
 }
 }  // namespace OAC

@@ -20,10 +20,11 @@
 #ifndef OAC_OAALGGLO_HPP_  // NOLINT
 #define OAC_OAALGGLO_HPP_  // NOLINT
 
-#include <droneoa_ros/OAC/BaseAlg.hpp>
-#include <droneoa_ros/HWI/base/LidarGeneric.hpp>
 #include <std_msgs/String.h>
 #include <mavros_msgs/Trajectory.h>
+#include <droneoa_ros/OAC/BaseAlg.hpp>
+#include <droneoa_ros/HWI/base/LidarGeneric.hpp>
+
 
 namespace OAC {
 
