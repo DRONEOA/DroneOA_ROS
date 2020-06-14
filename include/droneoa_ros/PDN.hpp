@@ -65,6 +65,7 @@ static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz suggest to be s
 static const char* ALG_STR_BUG = "ALG_BUG";
 static const char* ALG_STR_VFF = "ALG_VFF";
 static const char* ALG_STR_FGM = "ALG_FGM";
+static const char* ALG_STR_GLO = "ALG_GLO";
 static const char* ALG_STR_VISION = "ALG_VISION";
 static const char* ALG_STR_COLLISION_LIDAR = "ALG_CA_LIDAR";
 static const char* ALG_STR_COLLISION_DEPTH = "ALG_CA_DEPTH";

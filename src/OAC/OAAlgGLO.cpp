@@ -24,7 +24,7 @@ namespace OAC {
 OAAlgGLO::OAAlgGLO(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, ros::NodeHandle n) : BaseAlg(cnc) {
     this->n = n;
     init(lidar);
-    //ros::Publisher start3DGLO = n.advertise<std_msgs::String>("generate3DGLOBAL", 1000);
+    // ros::Publisher start3DGLO = n.advertise<std_msgs::String>("generate3DGLOBAL", 1000);
 }
 
 void OAAlgGLO::init(Lidar::LidarGeneric *lidar) {
