@@ -32,6 +32,7 @@
 #include <droneoa_ros/OAC/CAAlgLidar.hpp>
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
 #include <droneoa_ros/OAC/OAAlgFGM.hpp>
+#include <droneoa_ros/OAC/OAAlgGLO.hpp>
 #include <droneoa_ros/OAC/CMDParser.hpp>
 #include <droneoa_ros/PDN.hpp>
 
@@ -68,6 +69,7 @@ enum SYS_Algs {
     ALG_BUG,  // S2 If time allows
     ALG_VFF,  // S2 If time allows
     ALG_FGM,  // S2
+    ALG_GLO,
     ALG_VISION,  // S2
     ALG_COLLISION_LIDAR,  // S1
     ALG_COLLISION_DEPTH,  // S1

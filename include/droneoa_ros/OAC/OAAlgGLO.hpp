@@ -22,12 +22,17 @@
 
 #include <droneoa_ros/OAC/BaseAlg.hpp>
 #include <droneoa_ros/HWI/base/LidarGeneric.hpp>
+#include <std_msgs/String.h>
+#include <mavros_msgs/Trajectory.h>
 
 namespace OAC {
 
 class OAAlgGLO : public BaseAlg {
     Lidar::LidarGeneric *mpLidar;
     ros::NodeHandle n;
+    ros::Publisher start3DGLO;
+    ros::Subscriber getData;
+    void pathCallback(const mavros_msgs::Trajectory& msg);
  public:
     OAAlgGLO(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, ros::NodeHandle n);
     ~OAAlgGLO() override;

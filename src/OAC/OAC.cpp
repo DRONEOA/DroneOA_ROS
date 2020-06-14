@@ -67,6 +67,7 @@ void OAController::init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Dept
     mAlgorithmInstances[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(mpCNC, mpLidar);
     mAlgorithmInstances[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(mpCNC, mpRSC);
     mAlgorithmInstances[SYS_Algs::ALG_FGM] = new OAAlgFGM(mpCNC, mpLidar);
+    // mAlgorithmInstances[SYS_Algs::ALG_GLO] = new OAAlgGLO(mpCNC, mpLidar);
     //! @todo create new alg instance here
     ROS_INFO("[OAC] init");
 }

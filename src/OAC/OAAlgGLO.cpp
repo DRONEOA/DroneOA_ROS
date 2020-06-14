@@ -23,12 +23,18 @@ namespace OAC {
 
 OAAlgGLO::OAAlgGLO(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, ros::NodeHandle n) : BaseAlg(cnc) {
     this->n = n;
+    start3DGLO = n.advertise<std_msgs::String>("droneOA/generate3DGLOBAL", 1000);
     init(lidar);
-    // ros::Publisher start3DGLO = n.advertise<std_msgs::String>("generate3DGLOBAL", 1000);
 }
 
 void OAAlgGLO::init(Lidar::LidarGeneric *lidar) {
     mpLidar = lidar;
+    ROS_INFO("3D_global initialize.");
+    std_msgs::String msg;
+    std::stringstream ss;
+    ss << "initializing 3D-global algo";
+    msg.data == ss.str();
+    start3DGLO.publish(msg);
 }
 
 OAAlgGLO::~OAAlgGLO() {
@@ -47,6 +53,7 @@ bool OAAlgGLO::collect() {
         return false;
     }
     //! @todo remain false until implemented
+    getData = n.subscribe("/result", 1, &OAAlgGLO::pathCallback, this);
     return false;
 }
 
@@ -58,5 +65,7 @@ bool OAAlgGLO::plan() {
     //! @todo remain false until implemented
     return false;
 }
+void OAAlgGLO::pathCallback(const mavros_msgs::Trajectory& msg){
 
+}
 }  // namespace OAC

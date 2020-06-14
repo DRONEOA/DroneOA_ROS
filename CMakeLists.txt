@@ -142,6 +142,7 @@ add_library(droneoa_ros_liboac
   src/OAC/CAAlgLidar.cpp
   src/OAC/CAAlgDepthCam.cpp
   src/OAC/OAAlgFGM.cpp
+  src/OAC/OAAlgGLO.cpp
   src/OAC/CMDParser.cpp
   src/OAC/CMDRunner.cpp
   src/OAC/Command.cpp
