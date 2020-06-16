@@ -26,7 +26,6 @@
 #include <map>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 #include <droneoa_ros/PDN.hpp>
 #include <droneoa_ros/HWI/interface/LidarInterface.hpp>
@@ -34,6 +33,8 @@
 namespace Lidar {
 
 typedef std::vector<float> degreeSector;
+
+class LidarPopup;
 
 class LidarGeneric : public LidarInterface {
  public:
@@ -72,6 +73,7 @@ class LidarGeneric : public LidarInterface {
      * Debug
      */
     void printLidarInfo() override;
+    virtual void registerGUIPopup(LidarPopup* gui);
 
     /***************************************************************************
      * Callback
@@ -102,8 +104,9 @@ class LidarGeneric : public LidarInterface {
     virtual void generateDataMap();
     virtual void generateDegreeSector();
 
-    // Debug
-    virtual void drawLidarData();
+    // Debug popup
+    std::vector<LidarPopup*> popupList;  // Subscriber
+    virtual void notifyGUIPopups();
 };
 
 }  // namespace Lidar
