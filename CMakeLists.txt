@@ -160,6 +160,11 @@ add_library(droneoa_ros_libhwi
   src/HWI/ConsoleInputManager.cpp
 )
 
+add_library(droneoa_ros_libgui
+  src/GUI/Debug/LidarPopup.cpp
+  src/GUI/Debug/RSCPopup.cpp
+)
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -188,6 +193,7 @@ target_link_libraries(droneoa_ros
   droneoa_ros_libhwi
   droneoa_ros_libutils
   droneoa_ros_liboac
+  droneoa_ros_libgui
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${PCL_LIBRARIES}
@@ -230,7 +236,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # )
 
 install(
-	TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_libhwi ${PROJECT_NAME}_libutils ${PROJECT_NAME}_liboac
+	TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_libhwi ${PROJECT_NAME}_libutils ${PROJECT_NAME}_liboac ${PROJECT_NAME}_libgui
 	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})

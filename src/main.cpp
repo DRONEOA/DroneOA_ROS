@@ -30,6 +30,8 @@
 #include <droneoa_ros/HWI/RSC.hpp>
 #include <droneoa_ros/OAC/OAC.hpp>
 #include <droneoa_ros/HWI/ConsoleInputManager.hpp>
+#include <droneoa_ros/GUI/Debug/LidarPopup.hpp>
+#include <droneoa_ros/GUI/Debug/RSCPopup.hpp>
 
 void sysSignalhandler(int signum) {
     ROS_WARN("Caught signal %d", signum);
@@ -64,6 +66,18 @@ int main(int argc, char **argv) {
     // OAC Components
     OAC::CMDRunner runner(&cnc);
     OAC::OAController oac(&cnc, &lidar, &rsc, &runner, ros::Rate(OAC_REFRESH_FREQ));
+
+    // GUIs
+    #ifdef DEBUG_LIDAR_POPUP
+    Lidar::LidarPopup lp = Lidar::LidarPopup("Lidar Debug Popup", &lidar);
+    #endif
+    #ifdef DEBUG_DEPTH_IMG_POPUP
+        #ifdef DEBUG_PCL_VIEWER
+        Depth::RSCPopup dp = Depth::RSCPopup("RSC Debug Popup", &rsc, true);
+        #else
+        Depth::RSCPopup dp = Depth::RSCPopup("RSC Debug Popup", &rsc, false);
+        #endif
+    #endif
 
     // Console IO
     char *commandIn;

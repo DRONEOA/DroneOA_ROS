@@ -1,5 +1,5 @@
-echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | tee /etc/apt/sources.list.d/realsense-public.list
-apt-key add ./src/droneoa_ros/scripts/ci/realsenseKey
+apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE
+echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo bionic main' | tee /etc/apt/sources.list.d/realsense-public.list
 apt-get update
 apt-get install librealsense2-dkms --allow-unauthenticated -y
 apt-get install librealsense2-dev --allow-unauthenticated -y

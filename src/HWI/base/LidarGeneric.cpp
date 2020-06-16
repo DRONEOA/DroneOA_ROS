@@ -21,24 +21,15 @@
 
 #include <droneoa_ros/HWI/base/LidarGeneric.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
-
-#include <opencv2/imgproc/imgproc.hpp>
+#include <droneoa_ros/GUI/Debug/LidarPopup.hpp>
 
 namespace Lidar {
 
-static const char* OPENCV_WINDOW_LIDAR = "Lidar Debug window";
-
 LidarGeneric::LidarGeneric(ros::NodeHandle node, ros::Rate rate) : mNodeHandle(node), mRate(rate) {
     mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
-#ifdef DEBUG_LIDAR_POPUP
-    cv::namedWindow(OPENCV_WINDOW_LIDAR);
-#endif
 }
 
 LidarGeneric::~LidarGeneric() {
-#ifdef DEBUG_LIDAR_POPUP
-    cv::destroyWindow(OPENCV_WINDOW_LIDAR);
-#endif
     if (mpThreadWatchLidar) {
         mpThreadWatchLidar->join();
         delete mpThreadWatchLidar;
@@ -49,10 +40,7 @@ LidarGeneric::~LidarGeneric() {
 void LidarGeneric::initWatcherThread() {
     mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
     mpThreadWatchLidar = new boost::thread(boost::bind(&LidarGeneric::watchLidarThread, this));
-#ifdef DEBUG_LIDAR_POPUP
-    cv::startWindowThread();  // DEBUG
-    drawLidarData();
-#endif
+    notifyGUIPopups();
     ROS_INFO("[LIDAR Generic] init");
 }
 
@@ -61,9 +49,7 @@ void LidarGeneric::lidar_callback(const sensor_msgs::LaserScanConstPtr& msg) {
     mScannerData = *msg;
     // Pre-processing
     generateDataMap();
-#ifdef DEBUG_LIDAR_POPUP
-    drawLidarData();
-#endif
+    notifyGUIPopups();
 }
 
 /* Thread */
@@ -185,36 +171,17 @@ void LidarGeneric::printLidarInfo() {
         getTimeIncreament(), getScanTime());
 }
 
-void drawLidarPoint(const cv::Mat &img, const cv::Point &center, float angle, float range, bool isLine = false) {
-    range *= LIDAR_POPUP_SCALE;  // zoom up to draw better radar map
-    double angleradians = angle * M_PI / 180.0f;
-    double x = range * std::sin(angleradians);
-    double y = range * std::cos(angleradians);
-    x += center.x;
-    y = center.y - y;
-    if (isLine) {
-        cv::line(img, center, cv::Point(x, y), cv::Scalar(0, 100, 100), 2);
-    } else {
-        cv::circle(img, cv::Point(x, y), 2, cv::Scalar(0, 0, 200));
-    }
+void LidarGeneric::registerGUIPopup(LidarPopup* gui) {
+    //! @todo check for duplication
+    popupList.push_back(gui);
 }
 
-void LidarGeneric::drawLidarData() {
-    int32_t winWidth = 800;
-    int32_t winHeight = 800;
-    cv::Point center(winWidth / 2, winHeight / 2);
-    cv::Mat lidarDisk(winWidth, winHeight, CV_8UC3, cv::Scalar(0, 0, 0));
-    // Draw center
-    cv::circle(lidarDisk, center, 4, cv::Scalar(200, 0, 0), 2);
-    // Draw lidar points
-    for (auto it = mSectorDataMap.begin(); it != mSectorDataMap.end(); it++) {
-        drawLidarPoint(lidarDisk, center, it->first, (it->second)[0]);
+void LidarGeneric::notifyGUIPopups() {
+    for (auto popup : popupList) {
+        if (popup) {
+            popup->UpdateView();
+        }  // else remove from subscriber list ?
     }
-    // Draw closest
-    std::pair<float, float> minPoint = getClosestSectorData();
-    drawLidarPoint(lidarDisk, center, minPoint.first, minPoint.second, true);
-
-    cv::imshow(OPENCV_WINDOW_LIDAR, lidarDisk);
 }
 
 }  // namespace Lidar
