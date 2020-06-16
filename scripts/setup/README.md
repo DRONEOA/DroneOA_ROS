@@ -23,6 +23,6 @@ You can add `--console` for mavproxy console, and `--map` for satellite map view
 ### sim_vehicle.py command not found:
 Solutions:
 - Rebooting / Sign out your computer.
-- If still not found, you can find this script here: `<Ardupilot_Path>/Tools/autotest/sim_vehicle.py`
+- If still not found, you can find this script here: `<Ardupilot_Path>/Tools/autotest/sim_vehicle.py`, and `python sim_vehicle.py -v ArduCopter`
 ### Asking for repo path in the environment setup script
 The path is absolute path
