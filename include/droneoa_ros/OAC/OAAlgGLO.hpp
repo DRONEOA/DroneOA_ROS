@@ -24,22 +24,24 @@
 #include <mavros_msgs/Trajectory.h>
 #include <droneoa_ros/OAC/BaseAlg.hpp>
 #include <droneoa_ros/HWI/base/LidarGeneric.hpp>
-
+#include <boost/bind.hpp>
+#include <boost/thread/thread.hpp>
 
 namespace OAC {
 
 class OAAlgGLO : public BaseAlg {
-    Lidar::LidarGeneric *mpLidar;
-    ros::NodeHandle n;
+    ros::NodeHandle mNode;
     ros::Publisher start3DGLO;
     ros::Subscriber getData;
-    void pathCallback(const mavros_msgs::Trajectory& msg);
+    boost::thread* thread_watch_path_ = nullptr;
+    void watchPathThread();
  public:
-    OAAlgGLO(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, ros::NodeHandle n);
+    OAAlgGLO(CNC::CNCInterface *cnc);
     ~OAAlgGLO() override;
-    void init(Lidar::LidarGeneric *lidar);  // For restart
+    void init();  // For restart
     bool collect() override;  // Collect required sensor data
     bool plan() override;  // Return false when get around is impossible
+    void pathCallback(const mavros_msgs::Trajectory& msg);
 };
 
 }  // namespace OAC

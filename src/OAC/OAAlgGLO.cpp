@@ -21,20 +21,19 @@
 
 namespace OAC {
 
-OAAlgGLO::OAAlgGLO(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, ros::NodeHandle n) : BaseAlg(cnc) {
-    this->n = n;
-    start3DGLO = n.advertise<std_msgs::String>("droneOA/generate3DGLOBAL", 1000);
-    init(lidar);
+OAAlgGLO::OAAlgGLO(CNC::CNCInterface *cnc) : BaseAlg(cnc) {
+    start3DGLO = mNode.advertise<std_msgs::String>("droneOA/generate3DGLOBAL", 1000);
+    init();
 }
 
-void OAAlgGLO::init(Lidar::LidarGeneric *lidar) {
-    mpLidar = lidar;
+void OAAlgGLO::init() {
     ROS_INFO("3D_global initialize.");
-    std_msgs::String msg;
-    std::stringstream ss;
-    ss << "initializing 3D-global algo";
-    msg.data == ss.str();
-    start3DGLO.publish(msg);
+    // std_msgs::String msg;
+    // std::stringstream ss;
+    // ss << "initializing 3D-global algo";
+    // msg.data == ss.str();
+    // start3DGLO.publish(msg);
+    thread_watch_path_ = new boost::thread(boost::bind(&OAAlgGLO::watchPathThread, this));
 }
 
 OAAlgGLO::~OAAlgGLO() {
@@ -48,12 +47,8 @@ bool OAAlgGLO::collect() {
         ROS_ERROR("[OAAlgGLO] Missing CNC pointer !!!");
         return false;
     }
-    if (!mpLidar) {
-        ROS_ERROR("[OAAlgGLO] Missing LIDAR pointer !!!");
-        return false;
-    }
     //! @todo remain false until implemented
-    getData = n.subscribe("/result", 1, &OAAlgGLO::pathCallback, this);
+    // getData = mNode.subscribe("/result", 1, &OAAlgGLO::pathCallback, this);
     return false;
 }
 
@@ -66,5 +61,16 @@ bool OAAlgGLO::plan() {
     return false;
 }
 void OAAlgGLO::pathCallback(const mavros_msgs::Trajectory& msg) {
+
+}
+void OAAlgGLO::watchPathThread() {
+    auto rate = ros::Rate(OAC_REFRESH_FREQ);
+    auto gpsFix_sub =
+        mNode.subscribe("/droneOA/3Dresult", 1, &OAAlgGLO::pathCallback, this);
+
+    while (ros::ok()) {
+        ros::spinOnce();
+        rate.sleep();
+    }
 }
 }  // namespace OAC
