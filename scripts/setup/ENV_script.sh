@@ -81,7 +81,7 @@ sudo apt-get install libxml2-dev libxslt-dev python-dev -y
 sudo -H pip2 install -U future lxml
 sudo -H pip2 install -U pymavlink
 sudo apt-get install python3-dev python3-opencv python3-pip python3-matplotlib -y
-sudo -H pip install MAVProxy
+sudo -H pip install -Iv MAVProxy==1.8.18
 make sitl
 
 
