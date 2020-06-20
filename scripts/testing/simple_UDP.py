@@ -26,7 +26,8 @@ def tryRead():
         pitch = fdm.get('theta', units='radians')
         roll = fdm.get('phi', units='radians')
         yaw = fdm.get('psi', units='radians')
-        printLineMsg = "GPS: %s %s %s SPD: %s PRY: %s %s %s" % (latitude, longitude, altitude, vcas, pitch, roll, yaw)
+        rpm = fdm.get('rpm', 0)
+        printLineMsg = "GPS: %s %s %s SPD: %s PRY: %s %s %s RPM: %s" % (latitude, longitude, altitude, vcas, pitch, roll, yaw, rpm)
         # print(printLineMsg)
         sent = udpSender.sendto(printLineMsg, ue4_address)
 
