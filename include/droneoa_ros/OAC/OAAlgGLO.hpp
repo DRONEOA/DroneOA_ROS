@@ -36,7 +36,7 @@ class OAAlgGLO : public BaseAlg {
     boost::thread* thread_watch_path_ = nullptr;
     void watchPathThread();
  public:
-    explciit OAAlgGLO(CNC::CNCInterface *cnc);
+    explicit OAAlgGLO(CNC::CNCInterface *cnc);
     ~OAAlgGLO() override;
     void init();  // For restart
     bool collect() override;  // Collect required sensor data
