@@ -61,7 +61,7 @@ bool OAAlgGLO::plan() {
     return false;
 }
 void OAAlgGLO::pathCallback(const mavros_msgs::Trajectory& msg) {
-
+    //! @todo a;lsdja kjdklsj o;al
 }
 void OAAlgGLO::watchPathThread() {
     auto rate = ros::Rate(OAC_REFRESH_FREQ);
