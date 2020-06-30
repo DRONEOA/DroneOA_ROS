@@ -60,6 +60,8 @@ catkin_make:
   script:
     - sh ./src/droneoa_ros/scripts/ci/prescript.sh
     - catkin_make
+  artifacts:
+    untracked: true
   retry: 2
 
 catkin tools:
@@ -71,9 +73,9 @@ catkin tools:
 
 Unittest:
   stage: Unittest
-  script:
-    - sh ./src/droneoa_ros/scripts/ci/prescript.sh
+  dependencies: 
     - catkin_make
+  script:
     - source ./devel/setup.sh
     # - roscore &
     - rosrun droneoa_ros droneoa_ros_utiltest || true
