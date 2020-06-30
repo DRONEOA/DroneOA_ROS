@@ -70,7 +70,7 @@ sudo ./install_geographiclib_datasets.sh
 
 
 cd $absolutePath
-git clone -b Copter-3.6.8-hotfix https://github.com/ArduPilot/ardupilot
+git clone -b Copter-4.0.3 https://github.com/ArduPilot/ardupilot
 cd ardupilot
 git submodule update --init --recursive
 sudo chown -R $USER $absolutePath/ardupilot
@@ -82,7 +82,12 @@ sudo -H pip2 install -U future lxml
 sudo -H pip2 install -U pymavlink
 sudo apt-get install python3-dev python3-opencv python3-pip python3-matplotlib -y
 sudo -H pip install -Iv MAVProxy==1.8.18
-make sitl
+pip install MAVProxy==1.8.18
+./waf configure --board sitl
+. ~/.profile
+cd ArduCopter
+sim_vehicle.py -w
+
 
 
 
