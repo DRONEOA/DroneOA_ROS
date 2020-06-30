@@ -3,6 +3,7 @@ stages:
   - StaticAnalysis
   - Build
   - Unittest
+  - Release
 
 image: ros:melodic-perception
 
@@ -80,3 +81,20 @@ Unittest:
     - rosrun droneoa_ros droneoa_ros_commandtest || true
     - sh ./src/droneoa_ros/scripts/ci/checkUnittestResult.sh
   retry: 2
+
+Release_Package:
+  stage: Release
+  script:
+    - cd ./src/droneoa_ros
+    - mkdir ../../../release
+    - cp -R ./scripts/setup ../../../release/setup_dev
+    - cp -R ./scripts/deploy ../../../release/deploy
+  artifacts:
+    name: "$CI_COMMIT_BRANCH-release-scripts"
+    paths:
+      - ./release/
+    expire_in: 4 weeks
+  only:
+    - latest-stable
+    - latest-dev
+
