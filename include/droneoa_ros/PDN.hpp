@@ -122,8 +122,8 @@ static const float UE4_SITL_SCALE = 1000.0f;
 
 // Defines
 #define ENABLE_POINTCLOUD
-// #define PCL_DEBUG_VIEWER
-// #define IMG_DEBUG_POPUP
+// #define DEBUG_DEPTH_IMG_POPUP
+// #define DEBUG_PCL_VIEWER  // Enable image popup first
 // #define DEBUG_LIDAR_POPUP
 // #define DEBUG_OAC
 // #define DEBUG_ALG_COLLISION_LIDAR

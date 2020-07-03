@@ -28,6 +28,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
@@ -37,6 +38,8 @@
 #include <droneoa_ros/HWI/interface/DepthCamInterface.hpp>
 
 namespace Depth {
+
+class RSCPopup;
 
 class RSC : public DepthCamInterface {
  public:
@@ -76,8 +79,11 @@ class RSC : public DepthCamInterface {
      */
     float getMaxRange() override;  /*!< Unit: m */
     float getMinRange() override;  /*!< Unit: m */
+    std::pair<float, float> getRangeFilterSetting();   /*!< Pair: min, max */
     sensor_msgs::Image getDepthImage() override;
+    cv::Mat getDepthCVFrame();
     sensor_msgs::PointCloud2 getPC2Cloud() override;
+    pcl::PointCloud<pcl::PointXYZRGB> getPCLCloud();
 
     /***************************************************************************
      * Callback
@@ -89,10 +95,7 @@ class RSC : public DepthCamInterface {
      * Debug
      */
     void printImgInfo() override;
-    static void mouseCallback(int32_t event, int32_t x, int32_t y, int32_t flags, void* userdata);
-    static void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1,
-            int32_t thickness = 1);
-    static cv::Mat getBetterImageDebug(cv::Mat input);
+    void registerGUIPopup(RSCPopup* gui);
 
  private:
     ros::NodeHandle mNodeHandle;
@@ -125,14 +128,9 @@ class RSC : public DepthCamInterface {
     ros::Subscriber mDepthSub;
     ros::Subscriber mPC2Sub;
 
-    // Debug
-    void drawDebugOverlay();
-    static cv::Point mDebugMousePos;
-#ifdef PCL_DEBUG_VIEWER
-    pcl::visualization::CloudViewer *viewer;
-    void updatePointCloudViewerThread();
-    boost::thread* thread_pointcloud_viewer_ = nullptr;
-#endif
+    // GUI
+    std::vector<RSCPopup*> popupList;
+    void notifyGUIPopups();
 };
 
 }  // namespace Depth
