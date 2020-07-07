@@ -27,16 +27,16 @@ We plan to deploy the project via drone communities, like the Ardupilot communit
 ![Top-Level Architecture](docs/HighArchitecture.png)
 
 ### To Develop An Addon
-Developers can choose either of the 2 strategies for integration that clearly distinguishes and separates app and core features.
 To clearly separate apps and core features, developers have 2 strategies for integration.
+Developers can choose either of the 2 strategies for integration that clearly distinguishes and separates app and core features.
 - For developing an app that does not need raw sensor data or low-level control:
-- Write a separate node and only use the **console command "API"** to control the drone through ROS topic. This can avoid unexpected calls to insecure low-level functionalities.
-- So in summary, it's more like a ROS "API" which uses topic and command message as intermediary.
-- For example, a mobile ground station OR a food delivery management app falls into this category.
+  - Write a separate node and only use the **console command "API"** to control the drone through ROS topic. This can avoid unexpected calls to insecure low-level functionalities.
+  - So in summary, it's more like a ROS "API" which uses topic and command message as intermediary.
+  - For example, a mobile ground station OR a food delivery management app falls into this category.
 - For developing something which directly uses raw sensor data, and needs high control priority or low-level control (internal only commands):
-- Write the new feature direct in the main node **OR** write a receiver/mock component in the main node and communicate with an external algorithm node via a private ROS topic. 
-- Only write core features directly into the main node with access to all functionalities (including insecure ones).
-- For example, a new obstacle avoidance algorithm OR a new hardware interface falls into this category.
+  - Write the new feature direct in the main node **OR** write a receiver/mock component in the main node and communicate with an external algorithm node via a private ROS topic. 
+  - Only write core features directly into the main node with access to all functionalities (including insecure ones).
+  - For example, a new obstacle avoidance algorithm OR a new hardware interface falls into this category.
 
 ### Hardware
 
