@@ -19,6 +19,7 @@
 
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
 
 namespace OAC {
 
@@ -101,7 +102,7 @@ bool CAAlgDepthCam::plan() {
     CMDQueue_.clear();
     DATAQueue_.clear();
     DATAQueue_.push_back(
-        Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_DEPTH));
+        Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, SYS_Algs_STR[SYS_Algs::ALG_COLLISION_DEPTH]));
     if (camPossibility_ > 0.5) {
         CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
         DATAQueue_.push_back(Command::DataLine(

@@ -18,6 +18,7 @@
  */
 
 #include <droneoa_ros/OAC/CAAlgLidar.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
 
 namespace OAC {
 
@@ -67,7 +68,8 @@ bool CAAlgLidar::collect() {
 bool CAAlgLidar::plan() {
     CMDQueue_.clear();
     DATAQueue_.clear();
-    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_COLLISION_LIDAR));
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME,
+            SYS_Algs_STR[SYS_Algs::ALG_COLLISION_LIDAR]));
     if (lidarPossibility_ > 0.75) {
         CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE));
         DATAQueue_.push_back(Command::DataLine(
