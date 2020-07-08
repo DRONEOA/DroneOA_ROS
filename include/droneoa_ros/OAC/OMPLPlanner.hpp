@@ -35,10 +35,11 @@
 #include <fcl/geometry/collision_geometry.h>
 #include <fcl/geometry/octree/octree.h>
 
+#include <mutex>  // NOLINT
+#include <memory>
+
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
-#include <mutex>
-#include <memory>
 
 namespace OAC {
 
@@ -57,6 +58,7 @@ class OMPLPlanner {
     bool setTargetPos(Position3D pos);
     bool setOctomap(octomap::OcTree* dataTree);
     bool plan();
+    bool getIsSolving();
     // Threads Callback
     void Octomap_callback(const octomap_msgs::OctomapConstPtr& msg);
 

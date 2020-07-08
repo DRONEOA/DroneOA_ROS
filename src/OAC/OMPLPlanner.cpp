@@ -17,9 +17,9 @@
 
 // Reference: https://github.com/ArduPilot/OctomapPlanner
 
+#include <ros/ros.h>
 #include <droneoa_ros/OAC/OMPLPlanner.hpp>
 #include <droneoa_ros/PDN.hpp>
-#include <ros/ros.h>
 
 namespace OAC {
 
@@ -84,6 +84,10 @@ void OMPLPlanner::Octomap_callback(const octomap_msgs::OctomapConstPtr& msg) {
     std::lock_guard<std::mutex> lock(mutex_);
     octomap::AbstractOcTree* tree = octomap_msgs::msgToMap(*msg);
     setOctomap(dynamic_cast<octomap::OcTree*>(tree));
+}
+
+bool OMPLPlanner::getIsSolving() {
+    return mIsSolving;
 }
 
 bool OMPLPlanner::setOctomap(octomap::OcTree* dataTree) {

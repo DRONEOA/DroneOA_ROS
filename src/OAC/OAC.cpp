@@ -64,9 +64,16 @@ void OAController::init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Dept
     for (auto tmp : mAlgorithmInstances) {
         if (tmp.second) delete tmp.second;
     }
+    // Collision are alwayse enable as safety gurantee
     mAlgorithmInstances[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(mpCNC, mpLidar);
     mAlgorithmInstances[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(mpCNC, mpRSC);
-    mAlgorithmInstances[SYS_Algs::ALG_FGM] = new OAAlgFGM(mpCNC, mpLidar);
+    if (OAC_STAGE_SETTING == 2) {
+        // Add FGM for stage 2, Obstacle Avoidance (Local Path Planning)
+        mAlgorithmInstances[SYS_Algs::ALG_FGM] = new OAAlgFGM(mpCNC, mpLidar);
+    } else if (OAC_STAGE_SETTING == 3) {
+        // Add RRT for stage 3, Obstacle Avoidance (Global Path Planning)
+        mAlgorithmInstances[SYS_Algs::ALG_RRT] = new OAAlgRRT(mpCNC);
+    }
     //! @todo create new alg instance here
     ROS_INFO("[OAC] init");
 }
@@ -280,12 +287,8 @@ std::vector<SYS_Algs> OAController::selectAlgorithm() {
         if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
     } else if (OAC_STAGE_SETTING == 2) {
         if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_FGM);
-        // if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_VISION);
     } else if (OAC_STAGE_SETTING == 3) {
-        if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_FGM);
-        // if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_VISION);
-        // mSelectedAlgorithm.push_back(SYS_Algs::ALG_AI);
-        // mSelectedAlgorithm.push_back(SYS_Algs::ALG_SLAM);
+        if (ENABLE_OCTOMAP) mSelectedAlgorithm.push_back(SYS_Algs::ALG_RRT);
     } else {
         ROS_ERROR("Invalid OAC Stage Setting !!!");
     }

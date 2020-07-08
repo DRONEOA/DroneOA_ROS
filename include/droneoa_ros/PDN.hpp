@@ -70,11 +70,15 @@ static const char* ALG_STR_COLLISION_LIDAR = "ALG_CA_LIDAR";
 static const char* ALG_STR_COLLISION_DEPTH = "ALG_CA_DEPTH";
 static const char* ALG_STR_AI = "ALG_AI";
 static const char* ALG_STR_SLAM = "ALG_SLAM";
+static const char* ALG_STR_RRT = "ALG_RRT";
 
 /**
  * @brief Enabled feature stage 1-3
+ * 1: COllision Avoidance
+ * 2: Obstacle Avoidance (Local Path Planning)
+ * 3: Obstacle Avoidance (Global Path Planning)
  */
-static const int32_t OAC_STAGE_SETTING = 1;
+static const int32_t OAC_STAGE_SETTING = 3;
 
 // Vehicle Data
 static const int32_t VEHICLE_BOUNDBOX_WIDTH = 1200;  /**< @brief unit: mm */
@@ -90,6 +94,7 @@ static const bool ENABLE_RSC = true;  /**< @brief enable realsense camera */
 static const bool ENABLE_LIDAR = true;  /**< @brief enable lidar scanner */
 static const bool ENABLE_AI = true;  /**< @brief enable AI module */
 static const bool ENABLE_NGN = true;  /**< @brief enable Non-GPS Navigation */
+static const bool ENABLE_OCTOMAP = true;
 
 // Lidar Setting
 static const float LIDAR_ORIENTATION_CW = 180;  /**< @brief unit: degree */
@@ -124,7 +129,7 @@ static const float UE4_SITL_SCALE = 1000.0f;
 // #define DEBUG_DEPTH_IMG_POPUP
 // #define DEBUG_PCL_VIEWER  // Enable image popup first
 // #define DEBUG_LIDAR_POPUP
-// #define DEBUG_OAC
+#define DEBUG_OAC
 // #define DEBUG_ALG_COLLISION_LIDAR
 // #define DEBUG_ALG_COLLISION_DEPTH
 // #define DEBUG_ALG_OBSTACLE_FGM

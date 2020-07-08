@@ -18,25 +18,39 @@
  */
 
 #include <droneoa_ros/OAC/OAAlgRRT.hpp>
+#include <ros/ros.h>
 
 namespace OAC {
 
-OAAlgRRT::OAAlgRRT(CNC::CNCInterface *cnc) : BaseAlg(cnc) {}
+OAAlgRRT::OAAlgRRT(CNC::CNCInterface *cnc) : BaseAlg(cnc) {
+    init();
+}
 
 OAAlgRRT::~OAAlgRRT() {
-
+    CMDQueue_.clear();
 }
 
 void OAAlgRRT::init() {
-
 }
 
 bool OAAlgRRT::collect() {
-
+    // Collect data directly from interface as required
+    //! @todo WIP
+    if (!mpCNC) {
+        ROS_ERROR("[OAAlgFGM] Missing CNC pointer !!!");
+        return false;
+    }
+    //! @todo remain false until implemented
+    return true;
 }
 
 bool OAAlgRRT::plan() {
-
+    CMDQueue_.clear();
+    DATAQueue_.clear();
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_RRT));
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(0.0f)));
+    //! @todo remain false until implemented
+    return true;
 }
 
 }  // namespace OAC

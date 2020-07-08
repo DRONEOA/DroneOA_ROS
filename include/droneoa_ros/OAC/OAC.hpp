@@ -32,6 +32,7 @@
 #include <droneoa_ros/OAC/CAAlgLidar.hpp>
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
 #include <droneoa_ros/OAC/OAAlgFGM.hpp>
+#include <droneoa_ros/OAC/OAAlgRRT.hpp>
 #include <droneoa_ros/OAC/CMDParser.hpp>
 #include <droneoa_ros/PDN.hpp>
 
@@ -65,14 +66,14 @@ static const char* SYS_STATE_NAME[] {
  * @brief Supported Algorithms
  */
 enum SYS_Algs {
-    ALG_BUG,  // S2 If time allows
-    ALG_VFF,  // S2 If time allows
+    ALG_BUG,  // Future
+    ALG_VFF,  // Future
     ALG_FGM,  // S2
     ALG_VISION,  // S2
     ALG_COLLISION_LIDAR,  // S1
     ALG_COLLISION_DEPTH,  // S1
-    ALG_AI,  // S3
-    ALG_SLAM  // Wishlist :)
+    ALG_AI,  // Future
+    ALG_RRT  // Concept Proof
 };
 
 /**

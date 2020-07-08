@@ -28,7 +28,7 @@ namespace OAC {
 class OAAlgRRT : public BaseAlg {
     OMPLPlanner mPlanner;
  public:
-    OAAlgRRT(CNC::CNCInterface *cnc);
+    explicit OAAlgRRT(CNC::CNCInterface *cnc);
     ~OAAlgRRT() override;
     void init();  // For restart
     bool collect() override;  // Collect required sensor data
