@@ -27,9 +27,11 @@
 #include <utility>
 #include <map>
 
+#include <droneoa_ros/GUI/GUISubject.hpp>
+
 namespace Lidar {
 
-class LidarInterface {
+class LidarInterface : public GUI::GUISubject {
  public:
     virtual ~LidarInterface() {}
 

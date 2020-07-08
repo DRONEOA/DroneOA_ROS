@@ -39,8 +39,6 @@
 
 namespace Depth {
 
-class RSCPopup;
-
 class RSC : public DepthCamInterface {
  public:
     RSC(ros::NodeHandle node, ros::Rate rate);
@@ -95,7 +93,6 @@ class RSC : public DepthCamInterface {
      * Debug
      */
     void printImgInfo() override;
-    void registerGUIPopup(RSCPopup* gui);
 
  private:
     ros::NodeHandle mNodeHandle;
@@ -127,10 +124,6 @@ class RSC : public DepthCamInterface {
     // Subscriber
     ros::Subscriber mDepthSub;
     ros::Subscriber mPC2Sub;
-
-    // GUI
-    std::vector<RSCPopup*> popupList;
-    void notifyGUIPopups();
 };
 
 }  // namespace Depth

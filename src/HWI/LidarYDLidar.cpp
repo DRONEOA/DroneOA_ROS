@@ -37,7 +37,7 @@ void LidarYDLidar::printLidarInfo() {
 void LidarYDLidar::initWatcherThread() {
     mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
     mpThreadWatchLidar = new boost::thread(boost::bind(&LidarYDLidar::watchLidarThread, this));
-    notifyGUIPopups();
+    GUI::GUISubject::notifyGUIPopups();
     ROS_INFO("[LIDAR YDLidar] init");
 }
 

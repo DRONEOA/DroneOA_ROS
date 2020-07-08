@@ -34,8 +34,6 @@ namespace Lidar {
 
 typedef std::vector<float> degreeSector;
 
-class LidarPopup;
-
 class LidarGeneric : public LidarInterface {
  public:
     LidarGeneric(ros::NodeHandle node, ros::Rate rate);
@@ -73,7 +71,6 @@ class LidarGeneric : public LidarInterface {
      * Debug
      */
     void printLidarInfo() override;
-    virtual void registerGUIPopup(LidarPopup* gui);
 
     /***************************************************************************
      * Callback
@@ -103,10 +100,6 @@ class LidarGeneric : public LidarInterface {
     // Processor
     virtual void generateDataMap();
     virtual void generateDegreeSector();
-
-    // Debug popup
-    std::vector<LidarPopup*> popupList;  // Subscriber
-    virtual void notifyGUIPopups();
 };
 
 }  // namespace Lidar

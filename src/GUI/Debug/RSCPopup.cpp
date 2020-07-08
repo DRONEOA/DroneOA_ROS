@@ -22,17 +22,16 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-namespace Depth {
+namespace GUI {
 
 cv::Point RSCPopup::mDebugMousePos = cv::Point(0, 0);
 
-RSCPopup::RSCPopup(std::string windowName, RSC* rsc, bool enableViewer) {
-    OPENCV_WINDOW_RSC = windowName;
+RSCPopup::RSCPopup(std::string windowName, Depth::RSC* rsc, bool enableViewer) : GUISubscriber(windowName) {
     mpRSC = rsc;
     mIsViewerEnabled = enableViewer;
     cv::startWindowThread();  // DEBUG
-    cv::setMouseCallback(OPENCV_WINDOW_RSC, RSCPopup::mouseCallback, NULL);  // DEBUG
-    cv::namedWindow(OPENCV_WINDOW_RSC);
+    cv::setMouseCallback(OPENCV_WINDOW_NAME, RSCPopup::mouseCallback, NULL);  // DEBUG
+    cv::namedWindow(OPENCV_WINDOW_NAME);
     if (mIsViewerEnabled) {
         viewer = new pcl::visualization::CloudViewer("Depth Cloud Viewer");
         if (!thread_pointcloud_viewer_) {
@@ -40,7 +39,7 @@ RSCPopup::RSCPopup(std::string windowName, RSC* rsc, bool enableViewer) {
                 new boost::thread(boost::bind(&RSCPopup::updatePointCloudViewerThread, this));
         }
     }
-    mpRSC->registerGUIPopup(this);
+    mpRSC->GUI::GUISubject::registerGUIPopup(this);
 }
 
 RSCPopup::~RSCPopup() {
@@ -48,7 +47,7 @@ RSCPopup::~RSCPopup() {
         delete viewer;
     }
     try {
-        cv::destroyWindow(OPENCV_WINDOW_RSC);
+        cv::destroyWindow(OPENCV_WINDOW_NAME);
     } catch(...) {
         ROS_INFO("cv::destroyWindow warn");
     }
@@ -57,7 +56,8 @@ RSCPopup::~RSCPopup() {
     }
 }
 
-void RSCPopup::UpdateView() {
+void RSCPopup::UpdateView(GUISubject *subject) {
+    if (subject && dynamic_cast<Depth::DepthCamInterface*>(subject))
     mPclPointCloud = mpRSC->getPCLCloud();
     mDepthFrame = mpRSC->getDepthCVFrame();
     drawDebugOverlay();
@@ -87,7 +87,7 @@ void RSCPopup::drawDebugOverlay() {
             cv::Point(mDebugMousePos.x + 7, mDebugMousePos.y + 7), cv::Scalar(0xffff), 2);
     cv::line(debugImage255, cv::Point(mDebugMousePos.x - 7, mDebugMousePos.y + 7),
             cv::Point(mDebugMousePos.x + 7, mDebugMousePos.y - 7), cv::Scalar(0xffff), 2);
-    cv::imshow(OPENCV_WINDOW_RSC, debugImage255);
+    cv::imshow(OPENCV_WINDOW_NAME, debugImage255);
 }
 
 void RSCPopup::updatePointCloudViewerThread() {
@@ -138,4 +138,4 @@ cv::Mat RSCPopup::getBetterImageDebug(cv::Mat input) {
     return adjMap;
 }
 
-}  // namespace Depth
+}  // namespace GUI

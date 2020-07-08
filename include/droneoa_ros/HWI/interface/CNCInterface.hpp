@@ -22,14 +22,16 @@
 
 #include <sensor_msgs/Imu.h>
 #include <mavros_msgs/VFR_HUD.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include <string>
 
 #include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
+#include <droneoa_ros/GUI/GUISubject.hpp>
 
 namespace CNC {
 
-class CNCInterface {
+class CNCInterface : public GUI::GUISubject {
  public:
     virtual ~CNCInterface() {}
 
@@ -59,6 +61,7 @@ class CNCInterface {
     virtual uint8_t getSysStatus() = 0;
     virtual bool checkFModeExist(std::string modeName) = 0;
     virtual GPSPoint getTargetWaypoint() = 0;
+    virtual geometry_msgs::PoseStamped getLocalPosition() = 0;
     /* IMU */
     virtual sensor_msgs::Imu getIMUData() = 0;
     virtual geometry_msgs::Vector3 getIMURawAttitude() = 0;
