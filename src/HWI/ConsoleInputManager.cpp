@@ -244,9 +244,11 @@ bool ConsoleInputManager::buildCNCCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DESCEND, std::to_string(deltaAlt)});
         } else if (cmdType == "info") {
             GPSPoint tmpGPSPoint = mpCNC->getCurrentGPSPoint();
+            geometry_msgs::Point localPose = mpCNC->getLocalPosition().pose.position;
             geometry_msgs::Vector3 RPY = CNC::CNCUtility::quaternionToRPY(mpCNC->getIMUData().orientation);
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
-            ROS_INFO("[DISPLAY] gps: %f %f", tmpGPSPoint.latitude_, tmpGPSPoint.longitude_);
+            ROS_INFO("[DISPLAY] gps: %f %f %f", tmpGPSPoint.latitude_, tmpGPSPoint.longitude_, tmpGPSPoint.altitude_);
+            ROS_INFO("[DISPLAY] local: %f %f %f", localPose.x, localPose.y, localPose.z);
             ROS_INFO("[DISPLAY] altitude: %f", mpCNC->getRelativeAltitude());
             ROS_INFO("[DISPLAY] mode: %s", mpCNC->getMode().c_str());
             ROS_INFO("[DISPLAY] voltage: %f", mpCNC->getBatteryVoltage());
@@ -506,6 +508,8 @@ void ConsoleInputManager::printModuleHelper() {
     ROS_WARN("    RSC:    Realsense Camera HS Interface");
     ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
     ROS_WARN("    !:      Quick Commands");
+    ROS_WARN("Give Queue Commands:");
+    ROS_WARN("    START [CMD] THEN [CMD] TEHN [CMD] ... END");
 }
 
 void ConsoleInputManager::printQueueHelper() {

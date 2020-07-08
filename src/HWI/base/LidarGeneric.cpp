@@ -40,7 +40,7 @@ LidarGeneric::~LidarGeneric() {
 void LidarGeneric::initWatcherThread() {
     mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
     mpThreadWatchLidar = new boost::thread(boost::bind(&LidarGeneric::watchLidarThread, this));
-    notifyGUIPopups();
+    GUI::GUISubject::notifyGUIPopups();
     ROS_INFO("[LIDAR Generic] init");
 }
 
@@ -49,7 +49,7 @@ void LidarGeneric::lidar_callback(const sensor_msgs::LaserScanConstPtr& msg) {
     mScannerData = *msg;
     // Pre-processing
     generateDataMap();
-    notifyGUIPopups();
+    GUI::GUISubject::notifyGUIPopups();
 }
 
 /* Thread */
@@ -107,8 +107,8 @@ sensor_msgs::LaserScan LidarGeneric::getRawDataMap() {
 
 std::map<float, degreeSector> LidarGeneric::getSectorDataMap() {
     if (mSectorDataMap.size() <= 0) {
-        ROS_WARN("Imcomplete Lidar Data Map !!!");
-        // @todo should we try to regenerate OR populate with "safe" data set ?
+        // ROS_WARN("Incomplete Lidar Data Map !!!");
+        //! @todo should we try to regenerate OR populate with "safe" data set ?
     }
     return mSectorDataMap;
 }
@@ -169,19 +169,6 @@ void LidarGeneric::printLidarInfo() {
         getMaxAngle(), getMinAngle(), getAngleIncreament());
     ROS_INFO("[LIDAR GENERIC] time_increment: %f, scan_time: %f",
         getTimeIncreament(), getScanTime());
-}
-
-void LidarGeneric::registerGUIPopup(LidarPopup* gui) {
-    //! @todo check for duplication
-    popupList.push_back(gui);
-}
-
-void LidarGeneric::notifyGUIPopups() {
-    for (auto popup : popupList) {
-        if (popup) {
-            popup->UpdateView();
-        }  // else remove from subscriber list ?
-    }
 }
 
 }  // namespace Lidar

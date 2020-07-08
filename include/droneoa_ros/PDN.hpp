@@ -95,7 +95,7 @@ static const bool ENABLE_NGN = true;  /**< @brief enable Non-GPS Navigation */
 static const float LIDAR_ORIENTATION_CW = 180;  /**< @brief unit: degree */
 static const float LIDAR_FILTER_LOW = 0.1;  /**< @brief unit: m */
 static const float LIDAR_FILTER_HIGH = 10;  /**< @brief unit: m */
-static const int32_t LIDAR_POPUP_SCALE = 100;
+static const int32_t LIDAR_POPUP_SCALE = 50;
 // Lidar sources
 static const char* LIDAR_SOURCE_YDLIDAR = "/scan";
 static const char* LIDAR_SOURCE_UE4 = "/sitl_lidar_test";
@@ -121,6 +121,7 @@ static const float UE4_SITL_SCALE = 1000.0f;
 
 // Defines
 #define ENABLE_POINTCLOUD
+// #define DEBUG_CNC_POPUP
 // #define DEBUG_DEPTH_IMG_POPUP
 // #define DEBUG_PCL_VIEWER  // Enable image popup first
 // #define DEBUG_LIDAR_POPUP

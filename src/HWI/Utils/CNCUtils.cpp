@@ -61,6 +61,14 @@ std::pair<float, float> CNCUtility::getNorthEastDistanceFromHeading(float headin
     return std::pair<float, float>(dNorth, dEast);
 }
 
+std::pair<float, float> CNCUtility::getNorthEastFromPoints(GPSPoint point1, GPSPoint point2) {
+    float bearing = getBearing(point1, point2);
+    float distance = getDistanceMeter(point1, point2);
+    double dNorth = distance * cos(bearing * M_PI / 180.0);
+    double dEast = distance * sin(bearing * M_PI / 180.0);
+    return std::pair<float, float>(dNorth, dEast);
+}
+
 float CNCUtility::validAltitudeCMD(float targetAltitude) {
     if (targetAltitude > VEHICLE_MAX_ALTITUDE_RELATIVE) {
         ROS_WARN("target altitude exceed max allowed altitude !");

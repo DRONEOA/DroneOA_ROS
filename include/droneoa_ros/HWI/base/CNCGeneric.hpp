@@ -29,14 +29,17 @@
 #include <sensor_msgs/BatteryState.h>
 #include <sensor_msgs/MagneticField.h>
 #include <std_msgs/Float64.h>
+#include <geometry_msgs/PoseStamped.h>
 
 #include <string>
+#include <vector>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 
 #include <droneoa_ros/PDN.hpp>
 #include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+#include <droneoa_ros/GUI/GUISubject.hpp>
 
 namespace CNC {
 
@@ -110,6 +113,8 @@ class CNCGeneric : public CNCInterface {
     sensor_msgs::Imu getIMUData() override;
     geometry_msgs::Vector3 getIMURawAttitude() override;
     mavros_msgs::VFR_HUD getHUDData() override;
+    /* Local Position */
+    geometry_msgs::PoseStamped getLocalPosition() override;
 
     /***************************************************************************
      * Callback
@@ -122,6 +127,7 @@ class CNCGeneric : public CNCInterface {
     void IMU_callback(const sensor_msgs::ImuConstPtr& msg);
     void Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg);
     void HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg);
+    void LocalPosition_callback(const geometry_msgs::PoseStampedConstPtr& msg);
 
  protected:
     ros::NodeHandle mNodeHandle;
@@ -142,6 +148,7 @@ class CNCGeneric : public CNCInterface {
     sensor_msgs::MagneticField mCurrentMag;
     std_msgs::Float64 mCurrentRelativeAltitude;
     sensor_msgs::Imu mCurrentIMUData;
+    geometry_msgs::PoseStamped mLocalPosition;
 
     /***************************************************************************
      * Threads
@@ -150,11 +157,13 @@ class CNCGeneric : public CNCInterface {
     boost::thread* mpThreadWatchGPSFix = nullptr;
     boost::thread* mpThreadWatchAltitude = nullptr;
     boost::thread* mpThreadWatchIMU = nullptr;
+    boost::thread* mpThreadWatchLocalPosition = nullptr;
     void watchStateThread();
     void watchGPSFixThread();
     void watchHomePosThread();
     void watchAltitudeThread();
     void watchIMUThread();
+    void watchLocalPositionThread();
 
     // GUI Data Publisher
     ros::Publisher mGuiInfoPub;

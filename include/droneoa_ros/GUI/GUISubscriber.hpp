@@ -14,35 +14,25 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ * Written by Bohan Shi <b34shi@uwaterloo.ca>, July 2020
  */
 
-#ifndef HWI_INTERFACE_DEPTHCAMINTERFACE_HPP_  // NOLINT
-#define HWI_INTERFACE_DEPTHCAMINTERFACE_HPP_  // NOLINT
+#ifndef GUI_SUBSCRIBER_  // NOLINT
+#define GUI_SUBSCRIBER_  // NOLINT
 
-#include <sensor_msgs/Image.h>
-#include <sensor_msgs/PointCloud2.h>
+#include <string>
 #include <droneoa_ros/GUI/GUISubject.hpp>
 
-namespace Depth {
+namespace GUI {
 
-class DepthCamInterface : public GUI::GUISubject {
+class GUISubscriber {
  public:
-    virtual ~DepthCamInterface() {}
-
-    // Init
-    virtual void initWatcherThread() = 0;
-
-    // Accessor
-    virtual float getMaxRange() = 0;
-    virtual float getMinRange() = 0;
-    virtual sensor_msgs::Image getDepthImage() = 0;
-    virtual sensor_msgs::PointCloud2 getPC2Cloud() = 0;
-
-    // Debug Print
-    virtual void printImgInfo() = 0;
+    std::string OPENCV_WINDOW_NAME = "";
+    explicit GUISubscriber(std::string windowName);
+    virtual ~GUISubscriber();
+    virtual void UpdateView(GUISubject *subject = nullptr);
 };
 
-}  // namespace Depth
+}  // namespace GUI
 
-#endif  // HWI_INTERFACE_DEPTHCAMINTERFACE_HPP_  // NOLINT
+#endif  // GUI_SUBSCRIBER_  // NOLINT

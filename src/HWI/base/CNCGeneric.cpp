@@ -55,6 +55,10 @@ CNCGeneric::~CNCGeneric() {
         mpThreadWatchIMU->join();
         delete mpThreadWatchIMU;
     }
+    if (mpThreadWatchLocalPosition) {
+        mpThreadWatchLocalPosition->join();
+        delete mpThreadWatchLocalPosition;
+    }
     ROS_INFO("Destroy CNCGeneric");
 }
 
@@ -67,6 +71,7 @@ void CNCGeneric::initWatcherThread() {
     mpThreadWatchGPSFix = new boost::thread(boost::bind(&CNCGeneric::watchGPSFixThread, this));
     mpThreadWatchAltitude = new boost::thread(boost::bind(&CNCGeneric::watchAltitudeThread, this));
     mpThreadWatchIMU = new boost::thread(boost::bind(&CNCGeneric::watchIMUThread, this));
+    mpThreadWatchLocalPosition = new boost::thread(boost::bind(&CNCGeneric::watchLocalPositionThread, this));
     mGuiInfoPub = mNodeHandle.advertise<std_msgs::String>("droneoa/gui_data", 1000);
     ROS_INFO("[CNC] init threads done");
 }
@@ -223,30 +228,43 @@ bool CNCGeneric::isReady(std::string modeName) {
 /* State */
 void CNCGeneric::state_callback(const mavros_msgs::State::ConstPtr& msg) {
     mCurrentState = *msg;
+    GUI::GUISubject::notifyGUIPopups();
 }
 /* GPS Fix */
 void CNCGeneric::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
     mCurrentGpsFix = *msg;
+    GUI::GUISubject::notifyGUIPopups();
 }
+
+void CNCGeneric::LocalPosition_callback(const geometry_msgs::PoseStampedConstPtr& msg) {
+    mLocalPosition = *msg;
+    GUI::GUISubject::notifyGUIPopups();
+}
+
 /* Home Position */
 void CNCGeneric::homePos_callback(const mavros_msgs::HomePositionConstPtr& msg) {
     mIsHomeSet = true;
     mCurrentHomePos = *msg;
+    GUI::GUISubject::notifyGUIPopups();
 }
 /* Altitude */
 void CNCGeneric::altitude_callback(const std_msgs::Float64ConstPtr& msg) {
     mCurrentRelativeAltitude = *msg;
+    GUI::GUISubject::notifyGUIPopups();
 }
 /* Battery */
 void CNCGeneric::battery_callback(const sensor_msgs::BatteryStateConstPtr& msg) {
     mCurrentBattery = *msg;
+    GUI::GUISubject::notifyGUIPopups();
 }
 /* IMU */
 void CNCGeneric::IMU_callback(const sensor_msgs::ImuConstPtr& msg) {
     mCurrentIMUData = *msg;
+    GUI::GUISubject::notifyGUIPopups();
 }
 void CNCGeneric::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
     mCurrentMag = *msg;
+    GUI::GUISubject::notifyGUIPopups();
 }
 
 void CNCGeneric::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
@@ -258,6 +276,7 @@ void CNCGeneric::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
         << getHUDData().heading << " " << getHUDData().groundspeed << " " << getHUDData().throttle;
     guiMsg.data = ss.str();
     mGuiInfoPub.publish(guiMsg);
+    GUI::GUISubject::notifyGUIPopups();
 }
 
 /*****************************************************
@@ -311,6 +330,18 @@ void CNCGeneric::watchAltitudeThread() {
         mRate.sleep();
     }
 }
+
+void CNCGeneric::watchLocalPositionThread() {
+    auto localPose_sub =
+        mNodeHandle.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 1,
+            boost::bind(&CNCGeneric::LocalPosition_callback, this, _1));
+
+    while (ros::ok()) {
+        ros::spinOnce();
+        mRate.sleep();
+    }
+}
+
 /* IMU */
 void CNCGeneric::watchIMUThread() {
     auto IMU_data_sub =
@@ -384,6 +415,10 @@ geometry_msgs::Vector3 CNCGeneric::getIMURawAttitude() {
 
 mavros_msgs::VFR_HUD CNCGeneric::getHUDData() {
     return mCurrentHudData;
+}
+
+geometry_msgs::PoseStamped CNCGeneric::getLocalPosition() {
+    return mLocalPosition;
 }
 
 /*****************************************************
