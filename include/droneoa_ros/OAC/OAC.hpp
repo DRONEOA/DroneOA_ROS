@@ -64,8 +64,8 @@ static const char* SYS_STATE_NAME[] {
 /**
  * @brief Supported Algorithms
  */
-enum SYS_Algs {
-    ALG_BUG,  // S2 If time allows
+enum SYS_Algs : uint32_t {
+    ALG_BUG = 0,  // S2 If time allows
     ALG_VFF,  // S2 If time allows
     ALG_FGM,  // S2
     ALG_VISION,  // S2
@@ -73,6 +73,20 @@ enum SYS_Algs {
     ALG_COLLISION_DEPTH,  // S1
     ALG_AI,  // S3
     ALG_SLAM  // Wishlist :)
+};
+
+/**
+ * @brief ENUM of supported Algorithms
+ */
+static const char* SYS_Algs_STR[] {
+    "ALG_BUG",
+    "ALG_VFF",
+    "ALG_FGM",
+    "ALG_VISION",
+    "ALG_COLLISION_LIDAR",
+    "ALG_COLLISION_DEPTH",
+    "ALG_AI",
+    "ALG_SLAM"
 };
 
 /**
@@ -122,7 +136,7 @@ class OAController {
     bool plan();  // Plan next waypoint use selected algorithm(s)
     bool execute();  // Execute next waypoint use CNC Interface
     bool abort();  // About execution and "Brake"
-    bool popAlgorithmFromSelected(SYS_Algs algName);
+    bool popAlgorithmFromSelected(SYS_Algs algIndex);
     std::vector<SYS_Algs> selectAlgorithm();  // Determine which algorithm to use
     SYS_SelectedDetermineFun selectDetermineFunction();  // Determine which determine function to use
 
