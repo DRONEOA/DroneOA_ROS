@@ -55,12 +55,13 @@ void OAController::init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Dept
     mpLidar = lidar;
     mpRSC = rsc;
     mCurrState = SYS_State::SYS_IDLE;
-    // init parser
+    // Init command parser and executor
+    // Note: Runner is uniqueue across the system at the moment
     if (mpParserExecuter) {
         delete mpParserExecuter;
     }
     mpParserExecuter = new CMDParser(mpCNC, mpTheRunner);
-    // create algorithm instances
+    // Create algorithm instances
     for (auto tmp : mAlgorithmInstances) {
         if (tmp.second) delete tmp.second;
     }
@@ -142,21 +143,28 @@ void OAController::masterThread() {
 
 bool OAController::evaluate() {
     // Entry state: SYS_IDLE
+#ifdef DEBUG_OAC
+    ROS_INFO("========== CYCLE ==========");
+#endif
+    // Populate Selected Algorithm List
     mSelectedAlgorithm = selectAlgorithm();
-
+    // Call each algorithm instances to collect data and evaluate
     for (SYS_Algs tmp : mSelectedAlgorithm) {
+    #ifdef DEBUG_OAC
+        ROS_INFO("[OAC] Evaluate %s", SYS_Algs_STR[tmp]);
+    #endif
         if (!mAlgorithmInstances[tmp]->collect()) {
             // Remove from selected if collect with error
             popAlgorithmFromSelected(tmp);
         }
     }
-
+    // No valid algorithms left is an Error
     if (mSelectedAlgorithm.size() == 0) {
         mCurrState = SYS_State::SYS_IDLE;
         ROS_ERROR("NO VALID ALGORITHM ENABLED !!!");
         return false;
     }
-
+    // Set next state if success
     mCurrState = SYS_State::SYS_EVALUATED;
     return true;
 }
@@ -165,7 +173,11 @@ bool OAController::plan() {
     // Entry state: SYS_EVALUATED
     mAlgCMDmap.clear();
     mAlgDATAmap.clear();
+    // Call each algorithm to plan for next action(s)
     for (SYS_Algs tmp : mSelectedAlgorithm) {
+    #ifdef DEBUG_OAC
+        ROS_INFO("[OAC] PLAN NODE: %s", SYS_Algs_STR[tmp]);
+    #endif
         if (!mAlgorithmInstances[tmp]->plan()) {
             popAlgorithmFromSelected(tmp);
             continue;
@@ -173,7 +185,6 @@ bool OAController::plan() {
         mAlgCMDmap[tmp] = (mAlgorithmInstances[tmp])->getCommandQueue();
         mAlgDATAmap[tmp] = (mAlgorithmInstances[tmp])->getDataQueue();
     #ifdef DEBUG_OAC
-        ROS_INFO("[OAC] PLAN NODE: %d", tmp);
         for (auto cmdline : mAlgCMDmap[tmp]) {
             ROS_INFO("            CMD: %d with %s", cmdline.first, cmdline.second.c_str());
         }
@@ -182,20 +193,24 @@ bool OAController::plan() {
         }
     #endif
     }
-
+    // No valid algorithms left is an Error
     if (mSelectedAlgorithm.size() == 0) {
         mCurrState = SYS_State::SYS_IDLE;
         ROS_ERROR("NO VALID ALGORITHM ENABLED !!!");
         return false;
     }
-
+    // Set next state if success
     mCurrState = SYS_State::SYS_PLANNED;
     return true;
 }
 
 bool OAController::execute() {
     // Entry state: SYS_PLANNED
+    // Select the determine/voting function based on configuration
     selectDetermineFunction();
+#ifdef DEBUG_OAC
+    ROS_INFO("[OAC] Execute Det: %d", selectedDetermineFun_);
+#endif
     switch (selectedDetermineFun_) {
         case SYS_SelectedDetermineFun::DET_STAGE1:
             determineFunStage1();
@@ -210,12 +225,13 @@ bool OAController::execute() {
             mCurrState = SYS_State::SYS_ABORT;
             return false;
     }
-
+    // Set next state if success
     mCurrState = SYS_State::SYS_EXEC;
     return true;
 }
 
 void OAController::determineFunStage1() {
+    // Collision Avoidance only have  one action BRAKE
     double lidarConf, depthConf;
     try {
         mAlgDATAmap.at(SYS_Algs::ALG_COLLISION_LIDAR);
@@ -255,6 +271,11 @@ void OAController::determineFunStage3() {
 }
 
 bool OAController::abort() {
+    // Entry state: ANY
+#ifdef DEBUG_OAC
+    ROS_WARN("[OAC] ABORT");
+#endif
+    // Attempt to stop the aircraft
     if (mpCNC->getMode() == FLT_MODE_BRAKE) {
         // Re-init is required to re-enable the OAC
         mIsTerminated = true;
@@ -270,17 +291,18 @@ bool OAController::abort() {
     return false;
 }
 
-bool OAController::popAlgorithmFromSelected(SYS_Algs algName) {
-    auto it = std::find(mSelectedAlgorithm.begin(), mSelectedAlgorithm.end(), algName);
+bool OAController::popAlgorithmFromSelected(SYS_Algs algIndex) {
+    auto it = std::find(mSelectedAlgorithm.begin(), mSelectedAlgorithm.end(), algIndex);
     if (it != mSelectedAlgorithm.end()) {
         mSelectedAlgorithm.erase(it);
+        ROS_WARN("%s Is Removed From Selected Algorithms", SYS_Algs_STR[algIndex]);
         return true;
     }
     return false;
 }
 
 std::vector<SYS_Algs> OAController::selectAlgorithm() {
-    // @todo select algorthm according to environment
+    //! @todo Automatically select algorthm according to environment, then we don't need config any more
     mSelectedAlgorithm.clear();
     if (OAC_STAGE_SETTING == 1) {
         if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_COLLISION_LIDAR);

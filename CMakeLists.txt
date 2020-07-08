@@ -171,6 +171,9 @@ add_library(droneoa_ros_libhwi
 add_library(droneoa_ros_libgui
   src/GUI/Debug/LidarPopup.cpp
   src/GUI/Debug/RSCPopup.cpp
+  src/GUI/Debug/CNCPopup.cpp
+  src/GUI/GUISubscriber.cpp
+  src/GUI/GUISubject.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -283,6 +286,8 @@ add_executable(droneoa_ros_commandtest
   src/OAC/Command.cpp
   src/Utils/GeneralUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
+  src/GUI/GUISubscriber.cpp
+  src/GUI/GUISubject.cpp
 )
 
 target_link_libraries(droneoa_ros_commandtest

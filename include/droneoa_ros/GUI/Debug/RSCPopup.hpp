@@ -28,14 +28,19 @@
 #include <boost/thread/thread.hpp>
 #include <opencv2/core/core.hpp>
 
+#include <droneoa_ros/GUI/GUISubscriber.hpp>
+
 namespace Depth {
 
 class RSC;
 
-class RSCPopup {
+}  // namespace Depth
+
+namespace GUI {
+
+class RSCPopup : public GUISubscriber {
     bool mIsViewerEnabled;
-    RSC* mpRSC;
-    std::string OPENCV_WINDOW_RSC = "";
+    Depth::RSC* mpRSC;
     // Data
     pcl::PointCloud<pcl::PointXYZRGB> mPclPointCloud;
     cv::Mat mDepthFrame;
@@ -48,9 +53,9 @@ class RSCPopup {
     boost::thread* thread_pointcloud_viewer_ = nullptr;
 
  public:
-    RSCPopup(std::string windowName, RSC* rsc, bool enableViewer = false);
+    RSCPopup(std::string windowName, Depth::RSC* rsc, bool enableViewer = false);
     ~RSCPopup();
-    void UpdateView();
+    void UpdateView(GUISubject *subject);
 
     static void mouseCallback(int32_t event, int32_t x, int32_t y, int32_t flags, void* userdata);
     static void drawText(cv::Mat targetImg, cv::Point origin, std::string text, double font_scale = 1,
@@ -58,6 +63,6 @@ class RSCPopup {
     static cv::Mat getBetterImageDebug(cv::Mat input);
 };
 
-}  // namespace Depth
+}  // namespace GUI
 
 #endif  // GUI_DEBUG_RSCPOPUP_  // NOLINT

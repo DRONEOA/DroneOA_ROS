@@ -62,16 +62,6 @@ static const bool ENABLE_SAFETY_GPS = true;
 // OA Controller
 static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz suggest to be same as GLOBAL_ROS_RATE */
 
-static const char* ALG_STR_BUG = "ALG_BUG";
-static const char* ALG_STR_VFF = "ALG_VFF";
-static const char* ALG_STR_FGM = "ALG_FGM";
-static const char* ALG_STR_VISION = "ALG_VISION";
-static const char* ALG_STR_COLLISION_LIDAR = "ALG_CA_LIDAR";
-static const char* ALG_STR_COLLISION_DEPTH = "ALG_CA_DEPTH";
-static const char* ALG_STR_AI = "ALG_AI";
-static const char* ALG_STR_SLAM = "ALG_SLAM";
-static const char* ALG_STR_RRT = "ALG_RRT";
-
 /**
  * @brief Enabled feature stage 1-3
  * 1: COllision Avoidance
@@ -100,7 +90,7 @@ static const bool ENABLE_OCTOMAP = true;
 static const float LIDAR_ORIENTATION_CW = 180;  /**< @brief unit: degree */
 static const float LIDAR_FILTER_LOW = 0.1;  /**< @brief unit: m */
 static const float LIDAR_FILTER_HIGH = 10;  /**< @brief unit: m */
-static const int32_t LIDAR_POPUP_SCALE = 100;
+static const int32_t LIDAR_POPUP_SCALE = 50;
 // Lidar sources
 static const char* LIDAR_SOURCE_YDLIDAR = "/scan";
 static const char* LIDAR_SOURCE_UE4 = "/sitl_lidar_test";
@@ -126,6 +116,7 @@ static const float UE4_SITL_SCALE = 1000.0f;
 
 // Defines
 #define ENABLE_POINTCLOUD
+// #define DEBUG_CNC_POPUP
 // #define DEBUG_DEPTH_IMG_POPUP
 // #define DEBUG_PCL_VIEWER  // Enable image popup first
 // #define DEBUG_LIDAR_POPUP

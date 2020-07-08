@@ -64,6 +64,14 @@ class CNCUtility {
     static std::pair<float, float> getNorthEastDistanceFromHeading(float heading, float distance);
 
     /**
+     * @brief Get relative dNorth, dEast with heading and distancegiven 2 GPS points
+     * @param point1 start point
+     * @param point2 end point 
+     * @return std::pair<float, float> North axis distance, East axis distance
+     */
+    static std::pair<float, float> getNorthEastFromPoints(GPSPoint point1, GPSPoint point2);
+
+    /**
      * @brief Chack target altitude, if exceed max allowed, set to max
      * @param targetAltitude 
      * @return float 

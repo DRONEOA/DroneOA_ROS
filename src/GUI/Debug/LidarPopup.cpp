@@ -20,25 +20,31 @@
 #include <droneoa_ros/GUI/Debug/LidarPopup.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <droneoa_ros/HWI/base/LidarGeneric.hpp>
+#include <droneoa_ros/HWI/CNCArdupilot.hpp>
+#include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
 
-namespace Lidar {
+namespace GUI {
 
-LidarPopup::LidarPopup(std::string windowName, LidarGeneric* lidar) {
+LidarPopup::LidarPopup(std::string windowName, Lidar::LidarGeneric* lidar, CNC::CNCArdupilot* cnc) :
+        GUISubscriber(windowName) {
     mpLidar = lidar;
-    OPENCV_WINDOW_LIDAR = windowName;
-    cv::namedWindow(OPENCV_WINDOW_LIDAR);
-    cv::startWindowThread();  //! @todo do we need delay
-    mpLidar->registerGUIPopup(this);
+    mpCNC = cnc;
+    cv::namedWindow(OPENCV_WINDOW_NAME);
+    cv::startWindowThread();
+    mpLidar->GUI::GUISubject::registerGUIPopup(this);
+    // mpCNC->GUI::GUISubject::registerGUIPopup(this);  //! @todo cause random crash over time. Maybe concurrency issue?
 }
 
 LidarPopup::~LidarPopup() {
-    cv::destroyWindow(OPENCV_WINDOW_LIDAR);
+    cv::destroyWindow(OPENCV_WINDOW_NAME);
     ROS_INFO("Destroy LidarPopup");
 }
 
-void LidarPopup::UpdateView() {
-    mSectorDataMap = mpLidar->getSectorDataMap();
-    mClosestPoint = mpLidar->getClosestSectorData();
+void LidarPopup::UpdateView(GUISubject *subject) {
+    if (subject && dynamic_cast<Lidar::LidarGeneric*>(subject)) {
+        mSectorDataMap = mpLidar->getSectorDataMap();
+        mClosestPoint = mpLidar->getClosestSectorData();
+    }
     drawLidarData();
 }
 
@@ -55,22 +61,50 @@ void LidarPopup::drawLidarData() {
     }
     // Draw closest
     drawLidarPoint(lidarDisk, center, mClosestPoint.first, mClosestPoint.second, true);
+    cv::putText(lidarDisk, "Closest Sector: " + std::to_string(mClosestPoint.first) + " Degree  " +
+            std::to_string(mClosestPoint.second) + " Meter", cv::Point(20, 20), cv::FONT_HERSHEY_COMPLEX,
+            0.5, cv::Scalar(0, 100, 100), 1, 8, 0);
 
-    cv::imshow(OPENCV_WINDOW_LIDAR, lidarDisk);
+    if (mpCNC) {
+        lidarDisk = drawWPList(lidarDisk, center);
+    }
+
+    cv::imshow(OPENCV_WINDOW_NAME, lidarDisk);
 }
 
 void LidarPopup::drawLidarPoint(const cv::Mat &img, const cv::Point &center, float angle, float range, bool isLine) {
+    if (isLine) {
+        cv::line(img, center, getPointFromBearingDistance(center, angle, range), cv::Scalar(0, 100, 100), 2);
+    } else {
+        cv::circle(img, getPointFromBearingDistance(center, angle, range), 2, cv::Scalar(0, 0, 200));
+    }
+}
+
+cv::Point LidarPopup::getPointFromBearingDistance(const cv::Point &center, float bearing, float range) {
     range *= LIDAR_POPUP_SCALE;  // zoom up to draw better radar map
-    double angleradians = angle * M_PI / 180.0f;
+    double angleradians = bearing * M_PI / 180.0f;
     double x = range * std::sin(angleradians);
     double y = range * std::cos(angleradians);
     x += center.x;
     y = center.y - y;
-    if (isLine) {
-        cv::line(img, center, cv::Point(x, y), cv::Scalar(0, 100, 100), 2);
-    } else {
-        cv::circle(img, cv::Point(x, y), 2, cv::Scalar(0, 0, 200));
-    }
+    return cv::Point(x, y);
 }
 
-}  // namespace Lidar
+cv::Mat LidarPopup::drawWPList(const cv::Mat & lidarDisk, const cv::Point &center) {
+    GPSPoint currectPos = mpCNC->getCurrentGPSPoint();
+    cv::Point previousWPPoint = center;
+    int index = 0;
+    for (auto wp : mpCNC->getWaypointList().waypoints) {
+        GPSPoint wpGPS = GPSPoint(wp.x_lat, wp.y_long, wp.z_alt);
+        float bearing = CNC::CNCUtility::getBearing(currectPos, wpGPS);
+        float distance = CNC::CNCUtility::getDistanceMeter(currectPos, wpGPS);
+        // Draw the waypoint
+        cv::Point currentWPPoint = getPointFromBearingDistance(center, bearing, distance);
+        cv::line(lidarDisk, previousWPPoint, currentWPPoint, cv::Scalar(0, 255, 0), 3);
+        previousWPPoint = currentWPPoint;
+        index++;
+    }
+    return lidarDisk;
+}
+
+}  // namespace GUI

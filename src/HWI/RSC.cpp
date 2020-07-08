@@ -95,7 +95,7 @@ void RSC::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
         }
     }
 
-    notifyGUIPopups();
+    GUI::GUISubject::notifyGUIPopups();
 }
 
 void RSC::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
@@ -105,7 +105,7 @@ void RSC::pointcloud_callback(const sensor_msgs::PointCloud2ConstPtr& msg) {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(mPointCloud, pcl_pc2);
     pcl::fromPCLPointCloud2(pcl_pc2, mPclPointCloud);
-    notifyGUIPopups();
+    GUI::GUISubject::notifyGUIPopups();
 
     // @TODO need to change coordinates if needed
     /***
@@ -239,18 +239,6 @@ sensor_msgs::PointCloud2 RSC::getPC2Cloud() {
 
 pcl::PointCloud<pcl::PointXYZRGB> RSC::getPCLCloud() {
     return mPclPointCloud;
-}
-
-void RSC::registerGUIPopup(RSCPopup* gui) {
-    popupList.push_back(gui);
-}
-
-void RSC::notifyGUIPopups() {
-    for (auto popup : popupList) {
-        if (popup) {
-            popup->UpdateView();
-        }  // else remove from subscriber list ?
-    }
 }
 
 }  // namespace Depth
