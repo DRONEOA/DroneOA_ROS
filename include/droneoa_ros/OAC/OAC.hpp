@@ -87,7 +87,7 @@ static const char* SYS_Algs_STR[] {
     "ALG_COLLISION_LIDAR",
     "ALG_COLLISION_DEPTH",
     "ALG_AI",
-    "ALG_SLAM"
+    "ALG_RRT"
 };
 
 /**

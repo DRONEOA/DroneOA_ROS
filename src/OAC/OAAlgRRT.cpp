@@ -17,8 +17,9 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, July 2020
  */
 
-#include <droneoa_ros/OAC/OAAlgRRT.hpp>
 #include <ros/ros.h>
+#include <droneoa_ros/OAC/OAAlgRRT.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
 
 namespace OAC {
 
@@ -35,19 +36,24 @@ void OAAlgRRT::init() {
 
 bool OAAlgRRT::collect() {
     // Collect data directly from interface as required
-    //! @todo WIP
     if (!mpCNC) {
         ROS_ERROR("[OAAlgFGM] Missing CNC pointer !!!");
         return false;
     }
-    //! @todo remain false until implemented
+    //! @todo if current location is very different from previous one. Update start. (face -y axis)
+    Position3D startPos(0.0, 0.0, 3.0);
+    //! @todo if goal changed. Update goal. (face -y axis)
+    Position3D targetPos(0.0, -6.0, 3.0);
+    mPlanner.setStartPos(startPos);
+    mPlanner.setTargetPos(targetPos);
     return true;
 }
 
 bool OAAlgRRT::plan() {
+    //! @todo get data from planner
     CMDQueue_.clear();
     DATAQueue_.clear();
-    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, ALG_STR_RRT));
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, SYS_Algs_STR[SYS_Algs::ALG_RRT]));
     DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(0.0f)));
     //! @todo remain false until implemented
     return true;

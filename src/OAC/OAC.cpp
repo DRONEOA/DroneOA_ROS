@@ -66,14 +66,14 @@ void OAController::init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Dept
         if (tmp.second) delete tmp.second;
     }
     // Collision are alwayse enable as safety gurantee
-    mAlgorithmInstances[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(mpCNC, mpLidar);
-    mAlgorithmInstances[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(mpCNC, mpRSC);
+    if (ENABLE_LIDAR) mAlgorithmInstances[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(mpCNC, mpLidar);
+    if (ENABLE_RSC) mAlgorithmInstances[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(mpCNC, mpRSC);
     if (OAC_STAGE_SETTING == 2) {
         // Add FGM for stage 2, Obstacle Avoidance (Local Path Planning)
-        mAlgorithmInstances[SYS_Algs::ALG_FGM] = new OAAlgFGM(mpCNC, mpLidar);
+        if (ENABLE_LIDAR) mAlgorithmInstances[SYS_Algs::ALG_FGM] = new OAAlgFGM(mpCNC, mpLidar);
     } else if (OAC_STAGE_SETTING == 3) {
         // Add RRT for stage 3, Obstacle Avoidance (Global Path Planning)
-        mAlgorithmInstances[SYS_Algs::ALG_RRT] = new OAAlgRRT(mpCNC);
+        if (ENABLE_OCTOMAP) mAlgorithmInstances[SYS_Algs::ALG_RRT] = new OAAlgRRT(mpCNC);
     }
     //! @todo create new alg instance here
     ROS_INFO("[OAC] init");
