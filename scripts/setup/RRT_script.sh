@@ -8,6 +8,7 @@ sudo chmod u+x install-ompl-ubuntu.sh
 sudo cp -r /usr/local/include/ompl-1.5/ompl /usr/local/include/ompl
 sudo rm -r /usr/local/include/ompl-1.5
 echo "---------- Install FCL ----------"
+sudo apt install libccd-dev
 git clone https://github.com/flexible-collision-library/fcl.git
 cd fcl
 git checkout 0.6.1
