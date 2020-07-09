@@ -13,10 +13,7 @@ apt-get install ros-melodic-nodelet -y
 apt-get install ros-melodic-perception -y
 apt-get install ros-melodic-pcl-ros -y
 apt-get install ros-melodic-pcl-conversions -y
-sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
-wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-apt-get update
-apt-get install ros-melodic-ompl
+bash ./src/droneoa_ros/scripts/setup/RRT_script.sh
 cd src
 git clone https://github.com/IntelRealSense/realsense-ros.git
 git clone http://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
