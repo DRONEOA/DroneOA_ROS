@@ -320,10 +320,16 @@ bool OMPLPlanner::isStateValid(const ompl::base::State *state) {
 ompl::base::OptimizationObjectivePtr OMPLPlanner::getPathLengthObjWithCostToGo(
         const ompl::base::SpaceInformationPtr& si) {
     //! @todo Need a balanced Optimization Objective
+    // // Option 1
     // ob::OptimizationObjectivePtr lengthObj(new ob::PathLengthOptimizationObjective(si));
     // ob::OptimizationObjectivePtr clearObj(new ClearanceObjective(si));
     // return 10.0*lengthObj + clearObj;
+    // Option 2
     ompl::base::OptimizationObjectivePtr obj(new ompl::base::PathLengthOptimizationObjective(si));
+    // obj->setCostThreshold(ob::Cost(1.51));
+    // // Option 3
+    // ob::OptimizationObjectivePtr obj(new ob::PathLengthOptimizationObjective(si));
+    // obj->setCostToGoHeuristic(&ob::goalRegionCostToGo);
     return obj;
 }
 
