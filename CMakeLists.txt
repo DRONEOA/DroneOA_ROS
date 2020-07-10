@@ -122,7 +122,7 @@ catkin_package(
 #  LIBRARIES droneoa_ros
   CATKIN_DEPENDS nodelet mavros roscpp rospy std_msgs sensor_msgs cv_bridge
 #  DEPENDS system_lib
-   DEPENDS OMPL
+  DEPENDS OMPL
 )
 
 ###########
@@ -210,9 +210,9 @@ target_link_libraries(droneoa_ros
   ${OpenCV_LIBRARIES}
   ${PCL_LIBRARIES}
   ${FCL_LIBRARIES}
+  ${OMPL_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
   readline
-  ompl
 )
 
 #############

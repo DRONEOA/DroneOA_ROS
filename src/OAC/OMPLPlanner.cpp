@@ -243,46 +243,46 @@ bool OMPLPlanner::plan() {
                 msg.poses.push_back(pose);
             }
             traj_pub.publish(msg);
-            /**************************************
-             * Path smoothing using bspline
-             **************************************/
-            // Optimize / Smooth the path
-            ompl::geometric::PathSimplifier* pathBSpline = new ompl::geometric::PathSimplifier(mpSpaceInfo);
-            mpPathSmooth = new ompl::geometric::PathGeometric(dynamic_cast<const ompl::geometric::PathGeometric&>(
-                    *mpProblem->getSolutionPath()));
-            pathBSpline->smoothBSpline(*mpPathSmooth, 3);
-            // Publish path as markers
-            nav_msgs::Path smooth_msg;
-            smooth_msg.header.stamp = ros::Time::now();
-            smooth_msg.header.frame_id = "world";
-            for (std::size_t idx = 0; idx < mpPathSmooth->getStateCount(); idx++) {
-                // cast the abstract state type to the type we expect
-                const ompl::base::SE3StateSpace::StateType *se3state =
-                        mpPathSmooth->getState(idx)->as<ompl::base::SE3StateSpace::StateType>();
-                // extract the first component of the state and cast it to what we expect
-                const ompl::base::RealVectorStateSpace::StateType *pos =
-                        se3state->as<ompl::base::RealVectorStateSpace::StateType>(0);
-                // extract the second component of the state and cast it to what we expect
-                const ompl::base::SO3StateSpace::StateType *rot =
-                        se3state->as<ompl::base::SO3StateSpace::StateType>(1);
-                geometry_msgs::PoseStamped point;
-                // pose.header.frame_id = "/world" // @todo ???
-                point.pose.position.x = pos->values[0];
-                point.pose.position.y = pos->values[1];
-                point.pose.position.z = pos->values[2];
-                point.pose.orientation.x = rot->x;
-                point.pose.orientation.y = rot->y;
-                point.pose.orientation.z = rot->z;
-                point.pose.orientation.w = rot->w;
-                smooth_msg.poses.push_back(point);
-            #ifdef RRT_DEBUG_PLANNER
-                std::cout << "Published marker: " << idx << std::endl;
-            #endif
-            }
+            // /**************************************
+            //  * Path smoothing using bspline
+            //  **************************************/
+            // // Optimize / Smooth the path
+            // ompl::geometric::PathSimplifier* pathBSpline = new ompl::geometric::PathSimplifier(mpSpaceInfo);
+            // mpPathSmooth = new ompl::geometric::PathGeometric(dynamic_cast<const ompl::geometric::PathGeometric&>(
+            //         *mpProblem->getSolutionPath()));
+            // pathBSpline->smoothBSpline(*mpPathSmooth, 3);
+            // // Publish path as markers
+            // nav_msgs::Path smooth_msg;
+            // smooth_msg.header.stamp = ros::Time::now();
+            // smooth_msg.header.frame_id = "world";
+            // for (std::size_t idx = 0; idx < mpPathSmooth->getStateCount(); idx++) {
+            //     // cast the abstract state type to the type we expect
+            //     const ompl::base::SE3StateSpace::StateType *se3state =
+            //             mpPathSmooth->getState(idx)->as<ompl::base::SE3StateSpace::StateType>();
+            //     // extract the first component of the state and cast it to what we expect
+            //     const ompl::base::RealVectorStateSpace::StateType *pos =
+            //             se3state->as<ompl::base::RealVectorStateSpace::StateType>(0);
+            //     // extract the second component of the state and cast it to what we expect
+            //     const ompl::base::SO3StateSpace::StateType *rot =
+            //             se3state->as<ompl::base::SO3StateSpace::StateType>(1);
+            //     geometry_msgs::PoseStamped point;
+            //     // pose.header.frame_id = "/world" // @todo ???
+            //     point.pose.position.x = pos->values[0];
+            //     point.pose.position.y = pos->values[1];
+            //     point.pose.position.z = pos->values[2];
+            //     point.pose.orientation.x = rot->x;
+            //     point.pose.orientation.y = rot->y;
+            //     point.pose.orientation.z = rot->z;
+            //     point.pose.orientation.w = rot->w;
+            //     smooth_msg.poses.push_back(point);
+            // #ifdef RRT_DEBUG_PLANNER
+            //     std::cout << "Published marker: " << idx << std::endl;
+            // #endif
+            // }
 
-            vis_pub.publish(smooth_msg);
-            // ros::Duration(0.1).sleep();
-            // Clear memory
+            // vis_pub.publish(smooth_msg);
+            // // ros::Duration(0.1).sleep();
+            // // Clear memory
             mpProblem->clearSolutionPaths();
             replan_flag = false;
     } else {
@@ -319,6 +319,10 @@ bool OMPLPlanner::isStateValid(const ompl::base::State *state) {
 
 ompl::base::OptimizationObjectivePtr OMPLPlanner::getPathLengthObjWithCostToGo(
         const ompl::base::SpaceInformationPtr& si) {
+    //! @todo Need a balanced Optimization Objective
+    // ob::OptimizationObjectivePtr lengthObj(new ob::PathLengthOptimizationObjective(si));
+    // ob::OptimizationObjectivePtr clearObj(new ClearanceObjective(si));
+    // return 10.0*lengthObj + clearObj;
     ompl::base::OptimizationObjectivePtr obj(new ompl::base::PathLengthOptimizationObjective(si));
     return obj;
 }
