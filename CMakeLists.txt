@@ -135,6 +135,7 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
   ${FCL_INCLUDE_DIRS}
+  ${ompl_INCLUDE_DIRS}
   ${OCTOMAP_INCLUDE_DIRS}
 )
 
