@@ -25,6 +25,8 @@
 
 namespace OAC {
 
+static const double DIST_COMPARE_DIFF_MAX = 0.2;
+
 class OAAlgRRT : public BaseAlg {
     OMPLPlanner mPlanner;
     Position3D previousStart;

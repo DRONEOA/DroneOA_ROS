@@ -333,4 +333,11 @@ ompl::base::OptimizationObjectivePtr OMPLPlanner::getPathLengthObjWithCostToGo(
     return obj;
 }
 
+float OMPLPlanner::getDistBetweenPos3D(Position3D &pos1, Position3D& pos2) {
+    float dx = pos1.mX - pos2.mX;
+    float dy = pos1.mY - pos2.mY;
+    float dz = pos1.mZ - pos2.mZ;
+    return sqrt((dx*dx) + (dy*dy) + (dz*dz));
+}
+
 }  // namespace OAC

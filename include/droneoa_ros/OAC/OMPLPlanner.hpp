@@ -75,6 +75,8 @@ class OMPLPlanner {
     // Threads Callback
     void Octomap_callback(const octomap_msgs::OctomapConstPtr& msg);
     void Click_callback(const geometry_msgs::PointStampedConstPtr& msg);
+    // Helper
+    static float getDistBetweenPos3D(Position3D &pos1, Position3D& pos2);
 
  private:
     std::mutex mutex_;
