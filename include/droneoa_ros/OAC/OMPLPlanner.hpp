@@ -28,7 +28,7 @@
 // OMPL
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/planners/rrt/InformedRRTstar.h>
-// #include <ompl/geometric/PathSimplifier.h>
+#include <ompl/geometric/PathSimplifier.h>
 #include <ompl/base/objectives/PathLengthOptimizationObjective.h>
 // FCL
 #include <fcl/config.h>
@@ -88,7 +88,6 @@ class OMPLPlanner {
     // OMPL Planner
     ompl::base::PlannerPtr mpPlanner;
     // Solution
-    ompl::geometric::PathGeometric *mpPathGeo;
     ompl::geometric::PathGeometric *mpPathSmooth = nullptr;
     ompl::base::PathPtr mPath;
     // FCL

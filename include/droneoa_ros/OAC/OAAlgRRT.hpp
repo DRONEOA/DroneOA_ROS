@@ -27,6 +27,8 @@ namespace OAC {
 
 class OAAlgRRT : public BaseAlg {
     OMPLPlanner mPlanner;
+    Position3D previousStart;
+    Position3D previousGoal;
  public:
     explicit OAAlgRRT(CNC::CNCInterface *cnc);
     ~OAAlgRRT() override;

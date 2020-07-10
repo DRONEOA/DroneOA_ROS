@@ -42,9 +42,11 @@ bool OAAlgRRT::collect() {
     }
     //! @todo if current location is very different from previous one. Update start. (face -y axis)
     Position3D startPos(0.0, 0.0, 3.0);
+    previousStart = startPos;
+    mPlanner.setStartPos(startPos);
     //! @todo if goal changed. Update goal. (face -y axis)
     Position3D targetPos(0.0, -6.0, 3.0);
-    mPlanner.setStartPos(startPos);
+    previousGoal = targetPos;
     mPlanner.setTargetPos(targetPos);
     return true;
 }
