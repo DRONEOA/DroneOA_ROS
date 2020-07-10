@@ -210,9 +210,9 @@ target_link_libraries(droneoa_ros
   ${OpenCV_LIBRARIES}
   ${PCL_LIBRARIES}
   ${FCL_LIBRARIES}
-  ${OMPL_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
   readline
+  ompl
 )
 
 #############
