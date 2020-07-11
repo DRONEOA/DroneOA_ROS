@@ -54,24 +54,18 @@ bool OAAlgRRT::collect() {
     //! @note -X axis is facing East (UE4 Verified)
     GPSPoint goalGPS = (mpCNC->getLocalMissionQueue()).front();
     GPSPoint currentGPS = mpCNC->getCurrentGPSPoint();
-    if (goalGPS == currentGPS) {
-        //! @todo arrived
-        //! @todo should this be checked in OAC
-        ROS_WARN("ARRIVED!!!");
-    } else {
-        // Target position need to be different from start position
-        Position3D targetPos;
-        // Check if GPSPoint data is valid
-        if (CNC::CNCUtility::getDistanceMeter(currentGPS, goalGPS) < MAX_PLANNING_DISTANCE) {
-            std::pair<float, float> targetXY = CNC::CNCUtility::getNorthEastFromPoints(currentGPS, goalGPS);
-            targetPos.mX = -targetXY.second;
-            targetPos.mY = -targetXY.first;
-            targetPos.mZ = goalGPS.altitude_;
-        }
-        if (OMPLPlanner::getDistBetweenPos3D(targetPos, previousGoal) > DIST_COMPARE_DIFF_MAX) {
-            previousGoal = targetPos;
-            mPlanner.setTargetPos(targetPos);
-        }
+    // Target position need to be different from start position
+    Position3D targetPos;
+    // Check if GPSPoint data is valid
+    if (CNC::CNCUtility::getDistanceMeter(currentGPS, goalGPS) < MAX_PLANNING_DISTANCE) {
+        std::pair<float, float> targetXY = CNC::CNCUtility::getNorthEastFromPoints(currentGPS, goalGPS);
+        targetPos.mX = -targetXY.second;
+        targetPos.mY = -targetXY.first;
+        targetPos.mZ = goalGPS.altitude_;
+    }
+    if (OMPLPlanner::getDistBetweenPos3D(targetPos, previousGoal) > DIST_COMPARE_DIFF_MAX) {
+        previousGoal = targetPos;
+        mPlanner.setTargetPos(targetPos);
     }
     return true;
 }

@@ -166,6 +166,10 @@ class OAController {
     SYS_SelectedDetermineFun selectedDetermineFun_;
     std::map<SYS_Algs, Command::CommandQueue> mAlgCMDmap;
     std::map<SYS_Algs, Command::DataQueue> mAlgDATAmap;
+
+    // Helper
+    bool isMissionLeftAndCheckArrival();
+    bool isValidAlgorithmLeft(SYS_State newState);
 };
 
 }  // namespace OAC
