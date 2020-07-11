@@ -93,6 +93,7 @@ void OAController::masterSwitch(bool isOn) {
     }
     ACTIVE_OAC_LEVEL = 0;
     mpCNC->clearLocalMissionQueue();
+    mpCNC->clearFCUWaypoint();
     ROS_WARN("[OAC] MASTER PAUSED");
 }
 
