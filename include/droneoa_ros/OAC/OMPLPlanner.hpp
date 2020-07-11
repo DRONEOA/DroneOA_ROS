@@ -40,6 +40,7 @@
 #include <geometry_msgs/PointStamped.h>
 
 #include <mutex>  // NOLINT
+#include <string>
 #include <memory>
 
 #include <boost/bind.hpp>
@@ -57,6 +58,11 @@ struct Position3D {
     double mX;
     double mY;
     double mZ;
+    std::string AsString() {
+        std::string result = "Position3D: x: " + std::to_string(mX) + " y: " +
+                std::to_string(mY) + " z: " + std::to_string(mZ);
+        return result;
+    }
 };
 
 class OMPLPlanner {
@@ -76,7 +82,7 @@ class OMPLPlanner {
     void Octomap_callback(const octomap_msgs::OctomapConstPtr& msg);
     void Click_callback(const geometry_msgs::PointStampedConstPtr& msg);
     // Helper
-    static float getDistBetweenPos3D(Position3D &pos1, Position3D& pos2);
+    static float getDistBetweenPos3D(const Position3D &pos1, const Position3D& pos2);
 
  private:
     std::mutex mutex_;

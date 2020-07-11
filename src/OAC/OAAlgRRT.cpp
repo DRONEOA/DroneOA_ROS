@@ -18,8 +18,10 @@
  */
 
 #include <ros/ros.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <droneoa_ros/OAC/OAAlgRRT.hpp>
 #include <droneoa_ros/OAC/OAC.hpp>
+#include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
 
 namespace OAC {
 
@@ -41,7 +43,6 @@ bool OAAlgRRT::collect() {
         return false;
     }
     // If current location is different from previous one. Update start. (face -y axis)
-    // Position3D startPos(0.0, 0.0, 3.0);
     Position3D startPos(mpCNC->getLocalPosition().pose.position.x,
             -mpCNC->getLocalPosition().pose.position.y,
             mpCNC->getLocalPosition().pose.position.z);
@@ -49,10 +50,35 @@ bool OAAlgRRT::collect() {
         previousStart = startPos;
         mPlanner.setStartPos(startPos);
     }
-    //! @todo if goal changed. Update goal. (face -y axis)
-    Position3D targetPos(0.0, -6.0, 3.0);
-    previousGoal = targetPos;
-    mPlanner.setTargetPos(targetPos);
+    //! @note -Y axis is facing North (UE4 Verified)
+    //! @note -X axis is facing East (UE4 Verified)
+    GPSPoint goalGPS = (mpCNC->getLocalMissionQueue()).front();
+    GPSPoint currentGPS = mpCNC->getCurrentGPSPoint();
+    if (goalGPS == currentGPS) {
+        //! @todo arrived
+        //! @todo should this be checked in OAC
+        ROS_WARN("ARRIVED!!!");
+    } else {
+        // Target position need to be different from start position
+        Position3D targetPos;
+        // Check if GPSPoint data is valid
+        if (CNC::CNCUtility::getDistanceMeter(currentGPS, goalGPS) < MAX_PLANNING_DISTANCE) {
+            std::pair<float, float> targetXY = CNC::CNCUtility::getNorthEastFromPoints(currentGPS, goalGPS);
+            targetPos.mX = -targetXY.second;
+            targetPos.mY = -targetXY.first;
+            targetPos.mZ = goalGPS.altitude_;
+        }
+        if (OMPLPlanner::getDistBetweenPos3D(targetPos, previousGoal) > DIST_COMPARE_DIFF_MAX) {
+            previousGoal = targetPos;
+            mPlanner.setTargetPos(targetPos);
+        }
+    }
+    //! @note Test block
+    // Position3D startPos(0.0, 0.0, 3.0);
+    // mPlanner.setStartPos(startPos);
+    // Position3D targetPos(5.0, 0.0, 3.0);
+    // previousGoal = targetPos;
+    // mPlanner.setTargetPos(targetPos);
     return true;
 }
 

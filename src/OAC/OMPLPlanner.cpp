@@ -333,7 +333,7 @@ ompl::base::OptimizationObjectivePtr OMPLPlanner::getPathLengthObjWithCostToGo(
     return obj;
 }
 
-float OMPLPlanner::getDistBetweenPos3D(Position3D &pos1, Position3D& pos2) {
+float OMPLPlanner::getDistBetweenPos3D(const Position3D &pos1, const Position3D& pos2) {
     float dx = pos1.mX - pos2.mX;
     float dy = pos1.mY - pos2.mY;
     float dz = pos1.mZ - pos2.mZ;
