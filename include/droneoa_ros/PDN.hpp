@@ -115,6 +115,7 @@ static const double ALT_COMPARE_DIFF_MAX = 0.1;  /**< @brief max distance consid
 static const float UE4_SITL_SCALE = 1000.0f;
 
 // RRT
+#define ENABLE_SMOOTHER
 static const float MAX_PLANNING_DISTANCE = 1000.0f;
 
 // Defines

@@ -73,12 +73,6 @@ bool OAAlgRRT::collect() {
             mPlanner.setTargetPos(targetPos);
         }
     }
-    //! @note Test block
-    // Position3D startPos(0.0, 0.0, 3.0);
-    // mPlanner.setStartPos(startPos);
-    // Position3D targetPos(5.0, 0.0, 3.0);
-    // previousGoal = targetPos;
-    // mPlanner.setTargetPos(targetPos);
     return true;
 }
 

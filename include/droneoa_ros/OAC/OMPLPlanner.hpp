@@ -28,8 +28,8 @@
 // OMPL
 #include <ompl/base/spaces/SE3StateSpace.h>
 #include <ompl/geometric/planners/rrt/InformedRRTstar.h>
-#include <ompl/geometric/PathSimplifier.h>
 #include <ompl/base/objectives/PathLengthOptimizationObjective.h>
+#include <ompl/base/objectives/StateCostIntegralObjective.h>
 // FCL
 #include <fcl/config.h>
 #include <fcl/fcl.h>
@@ -39,12 +39,17 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PointStamped.h>
 
-#include <mutex>  // NOLINT
 #include <string>
 #include <memory>
 
 #include <boost/bind.hpp>
+#include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
+
+#include <droneoa_ros/PDN.hpp>
+#ifdef ENABLE_SMOOTHER
+#include <ompl/geometric/PathSimplifier.h>
+#endif
 
 // #define RRT_DEBUG
 // #define RRT_DEBUG_PLANNER
@@ -78,16 +83,35 @@ class OMPLPlanner {
     bool plan();
     bool rePlan();
     bool getIsSolving();
+    bool getForcePlanFlag();
+    void setForcePlanFlag(bool newflag);
+    bool getForceReplanFlag();
+    void setForceReplanFlag(bool newflag);
     // Threads Callback
     void Octomap_callback(const octomap_msgs::OctomapConstPtr& msg);
     void Click_callback(const geometry_msgs::PointStampedConstPtr& msg);
     // Helper
     static float getDistBetweenPos3D(const Position3D &pos1, const Position3D& pos2);
+    // Clearance Objective
+    class ClearanceObjective : public ompl::base::StateCostIntegralObjective {
+     public:
+        explicit ClearanceObjective(const ompl::base::SpaceInformationPtr& si) :
+            ompl::base::StateCostIntegralObjective(si, true) {
+        }
+
+        ompl::base::Cost stateCost(const ompl::base::State* s) const {
+            return ompl::base::Cost(1 / si_->getStateValidityChecker()->clearance(s));
+        }
+    };
 
  private:
-    std::mutex mutex_;
+    boost::mutex mutex_;
+    boost::shared_mutex forcePlanFlag_mutex_;
+    boost::shared_mutex forceReplanFlag_mutex_;
     bool mIsSolving;
     bool replan_flag;
+    bool force_plan_flag;
+    bool force_replan_flag;
     // OMPL space
     ompl::base::StateSpacePtr mpSpace;
     ompl::base::SpaceInformationPtr mpSpaceInfo;
@@ -107,7 +131,7 @@ class OMPLPlanner {
     ompl::base::OptimizationObjectivePtr getPathLengthObjWithCostToGo(const ompl::base::SpaceInformationPtr& si);
     // Threads
     boost::thread* mpThreadWatchOctomap = nullptr;
-    void watchOctomapThread();
+    void RRTMainThread();
     // Path Publisher
     ros::NodeHandle n;
     ros::Publisher vis_pub;

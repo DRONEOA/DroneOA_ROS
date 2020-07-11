@@ -23,8 +23,6 @@
 #include <nav_msgs/Path.h>
 #include <iostream>
 #include <droneoa_ros/OAC/OMPLPlanner.hpp>
-#include <droneoa_ros/PDN.hpp>
-
 
 namespace OAC {
 
@@ -52,10 +50,33 @@ bool OMPLPlanner::setTargetPos(Position3D pos) {
     mpProblem->clearGoal();
     mpProblem->setGoalState(goal);
     ROS_WARN("[RRT] Set Goal Pos: %lf %lf %lf", pos.mX, pos.mY, pos.mZ);
-    return plan();
+    setForcePlanFlag(true);
+    return true;
 }
 
-OMPLPlanner::OMPLPlanner() : mIsSolving(false), replan_flag(false) {
+bool OMPLPlanner::getForcePlanFlag() {
+    boost::shared_lock<boost::shared_mutex> lock(forcePlanFlag_mutex_);
+    return force_plan_flag;
+}
+
+void OMPLPlanner::setForcePlanFlag(bool newflag) {
+    boost::upgrade_lock<boost::shared_mutex> lock(forcePlanFlag_mutex_);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+    force_plan_flag = newflag;
+}
+
+bool OMPLPlanner::getForceReplanFlag() {
+    boost::shared_lock<boost::shared_mutex> lock(forceReplanFlag_mutex_);
+    return force_replan_flag;
+}
+
+void OMPLPlanner::setForceReplanFlag(bool newflag) {
+    boost::upgrade_lock<boost::shared_mutex> lock(forceReplanFlag_mutex_);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+    force_replan_flag = newflag;
+}
+
+OMPLPlanner::OMPLPlanner() : mIsSolving(false), replan_flag(false), force_replan_flag(false) {
     //四旋翼的障碍物几何形状
     mpAircraftObject = std::shared_ptr<fcl::CollisionGeometry<double>>(new fcl::Box<double>(0.8, 0.8, 0.3));
     //分辨率参数设置
@@ -102,7 +123,7 @@ OMPLPlanner::OMPLPlanner() : mIsSolving(false), replan_flag(false) {
     ROS_WARN("[RRT] Planner Initialized");
 
     // Init Octomap Watcher
-    mpThreadWatchOctomap = new boost::thread(boost::bind(&OMPLPlanner::watchOctomapThread, this));
+    mpThreadWatchOctomap = new boost::thread(boost::bind(&OMPLPlanner::RRTMainThread, this));
     // Setup Publisher
     vis_pub = n.advertise<nav_msgs::Path>("visualization_marker", 0);
     traj_pub = n.advertise<nav_msgs::Path>("waypoints", 1);
@@ -143,7 +164,7 @@ bool OMPLPlanner::rePlan() {
     }
 }
 
-void OMPLPlanner::watchOctomapThread() {
+void OMPLPlanner::RRTMainThread() {
     ros::Rate rt(GLOBAL_ROS_RATE);
     auto node = boost::make_shared<ros::NodeHandle>();
     auto octomap_sub =
@@ -152,18 +173,28 @@ void OMPLPlanner::watchOctomapThread() {
     auto goal_sub =
         node->subscribe<geometry_msgs::PointStamped>("/clicked_point", 1,
                 boost::bind(&OMPLPlanner::Click_callback, this, _1));
+
     while (ros::ok()) {
+        if (getForcePlanFlag()) {
+            setForcePlanFlag(false);
+            setForceReplanFlag(false);
+            plan();
+        }
+        if (getForceReplanFlag()) {
+            setForceReplanFlag(false);
+            rePlan();
+        }
         ros::spinOnce();
         rt.sleep();
     }
 }
 
 void OMPLPlanner::Octomap_callback(const octomap_msgs::OctomapConstPtr& msg) {
-    std::lock_guard<std::mutex> lock(mutex_);
+    boost::lock_guard<boost::mutex> lock(mutex_);
     octomap::OcTree* tree_oct = dynamic_cast<octomap::OcTree*>(octomap_msgs::msgToMap(*msg));
     fcl::OcTree<double>* tree = new fcl::OcTree<double>(std::shared_ptr<const octomap::OcTree>(tree_oct));
     updateMap(std::shared_ptr<fcl::CollisionGeometry<double>>(tree));
-    rePlan();
+    setForceReplanFlag(true);
 }
 
 void OMPLPlanner::Click_callback(const geometry_msgs::PointStampedConstPtr& msg) {
@@ -247,9 +278,12 @@ bool OMPLPlanner::plan() {
              * Path smoothing using bspline
              **************************************/
             // Optimize / Smooth the path
+        #ifdef ENABLE_SMOOTHER
             ompl::geometric::PathSimplifier* pathBSpline = new ompl::geometric::PathSimplifier(mpSpaceInfo);
+        #endif
             mpPathSmooth = new ompl::geometric::PathGeometric(dynamic_cast<const ompl::geometric::PathGeometric&>(
                     *mpProblem->getSolutionPath()));
+        #ifdef ENABLE_SMOOTHER
             pathBSpline->smoothBSpline(*mpPathSmooth, 3);
             // Publish path as markers
             nav_msgs::Path smooth_msg;
@@ -275,12 +309,14 @@ bool OMPLPlanner::plan() {
                 point.pose.orientation.z = rot->z;
                 point.pose.orientation.w = rot->w;
                 smooth_msg.poses.push_back(point);
+        #endif
             #ifdef RRT_DEBUG_PLANNER
                 std::cout << "Published marker: " << idx << std::endl;
             #endif
             }
-
+        #ifdef ENABLE_SMOOTHER
             vis_pub.publish(smooth_msg);
+        #endif
             // ros::Duration(0.1).sleep();
             // Clear memory
             mpProblem->clearSolutionPaths();
@@ -321,16 +357,17 @@ ompl::base::OptimizationObjectivePtr OMPLPlanner::getPathLengthObjWithCostToGo(
         const ompl::base::SpaceInformationPtr& si) {
     //! @todo Need a balanced Optimization Objective
     // // Option 1
-    // ob::OptimizationObjectivePtr lengthObj(new ob::PathLengthOptimizationObjective(si));
-    // ob::OptimizationObjectivePtr clearObj(new ClearanceObjective(si));
-    // return 10.0*lengthObj + clearObj;
+    ompl::base::OptimizationObjectivePtr lengthObj(new ompl::base::PathLengthOptimizationObjective(si));
+    ompl::base::OptimizationObjectivePtr clearObj(new ClearanceObjective(si));
+    return 10.0*lengthObj + clearObj;
     // Option 2
-    ompl::base::OptimizationObjectivePtr obj(new ompl::base::PathLengthOptimizationObjective(si));
+    // ompl::base::OptimizationObjectivePtr obj(new ompl::base::PathLengthOptimizationObjective(si));
+    // return obj;
     // obj->setCostThreshold(ob::Cost(1.51));
     // // Option 3
     // ob::OptimizationObjectivePtr obj(new ob::PathLengthOptimizationObjective(si));
     // obj->setCostToGoHeuristic(&ob::goalRegionCostToGo);
-    return obj;
+    // return obj;
 }
 
 float OMPLPlanner::getDistBetweenPos3D(const Position3D &pos1, const Position3D& pos2) {
