@@ -73,7 +73,7 @@ class CNCArdupilot : public CNCGeneric{
     bool pushWaypoints(std::vector<GPSPoint> wpList, uint8_t isCurrent = 2,
         uint16_t command = mavros_msgs::CommandCode::NAV_WAYPOINT);
     mavros_msgs::WaypointPull pullWaypoints();
-    bool clearWaypoint();
+    bool clearFCUWaypoint() override;
     void registForReachEvent(std::function<void()> callback);
     mavros_msgs::WaypointList getWaypointList();
 
@@ -90,7 +90,7 @@ class CNCArdupilot : public CNCGeneric{
      * @param z_alt in meter
      * @return client send response
      */
-    bool gotoGlobal(float x_lat, float y_long, float z_alt) override;
+    bool gotoGlobal(float x_lat, float y_long, float z_alt, bool isFromOAC = false) override;
     /**
      * @brief Goto Relative Waypoint (North+, East+)
      * @param x_lat North+ in meter
@@ -99,7 +99,8 @@ class CNCArdupilot : public CNCGeneric{
      * @param isAltDelta not used
      * @return client send response
      */
-    bool gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta = false) override;
+    bool gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta = false,
+            bool isFromOAC = false) override;
     /**
      * @brief Goto Target Head
      * @param heading in degree
@@ -107,7 +108,12 @@ class CNCArdupilot : public CNCGeneric{
      * @param z_alt in meter
      * @return client send response
      */
-    bool gotoHeading(float heading, float distance, float z_alt) override;
+    bool gotoHeading(float heading, float distance, float z_alt, bool isFromOAC = false) override;
+
+    /**
+     * @brief Move missions in FCU queue to local mission queue. (For OA Operation)
+     */
+    void moveMissionToLocalQueue() override;
 
     /***************************************************************************
      * Public Helper

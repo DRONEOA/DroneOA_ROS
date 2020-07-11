@@ -124,7 +124,7 @@ std::vector<std::string> getDataListFromString(std::string data);
  * @param cmdline the source CommandLine
  * @return whether the operation is successful
  */
-bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline);
+bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC = false);
 
 }  // namespace Command
 

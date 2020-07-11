@@ -24,6 +24,7 @@
 #include <gmock/gmock.h>
 
 #include <string>
+#include <queue>
 
 #include "../../include/droneoa_ros/HWI/interface/CNCInterface.hpp"
 
@@ -40,12 +41,19 @@ class CNCMock : public CNCInterface {
     MOCK_METHOD0(armVehicle, bool());
     MOCK_METHOD1(takeoff, bool(float targetAltitude));
     MOCK_METHOD1(land, bool(int32_t minAboutAltitude));
-    MOCK_METHOD2(setYaw, bool(float targetYaw, bool isRelative));
+    MOCK_METHOD3(setYaw, bool(float targetYaw, bool isRelative, bool isFromOAC));
     MOCK_METHOD3(setMaxSpeed, bool(float speedType, float speed, float isRelative));
     MOCK_METHOD3(setHome, bool(float targetLatitude, float targetLongitude, float targetAltitude));
-    MOCK_METHOD3(gotoGlobal, bool(float x_lat, float y_long, float z_alt));
-    MOCK_METHOD4(gotoRelative, bool(float x_lat, float y_long, float z_alt, bool isAltDelta));
-    MOCK_METHOD3(gotoHeading, bool(float heading, float distance, float z_alt));
+    MOCK_METHOD4(gotoGlobal, bool(float x_lat, float y_long, float z_alt, bool isFromOAC));
+    MOCK_METHOD5(gotoRelative, bool(float x_lat, float y_long, float z_alt, bool isAltDelta, bool isFromOAC));
+    MOCK_METHOD4(gotoHeading, bool(float heading, float distance, float z_alt, bool isFromOAC));
+    // Local Mission
+    MOCK_METHOD0(clearFCUWaypoint, bool());
+    MOCK_METHOD0(clearLocalMissionQueue, void());
+    MOCK_METHOD0(getLocalMissionQueue, std::queue<GPSPoint>());
+    MOCK_METHOD1(pushLocalMissionQueue, void(GPSPoint wp));
+    MOCK_METHOD0(popLocalMissionQueue, GPSPoint());
+    MOCK_METHOD0(moveMissionToLocalQueue, void());
     // Status & Checks
     MOCK_METHOD1(isReady, bool(std::string modeName));
     MOCK_METHOD0(isConnected, bool());

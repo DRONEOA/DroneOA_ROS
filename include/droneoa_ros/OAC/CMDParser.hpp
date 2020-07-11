@@ -40,9 +40,10 @@ class CMDParser {
      * @brief Parse and execute the command queue
      * @param cmdqueue a queue of command
      * @param isInstant true if all command can be executed at the same time, false will use the runner
+     * @param isFromOAC (default Flase) whether the request is from OAC. Some commands behave different when OAC is on.
      * @return whether the operation is successful
      */
-    bool parseCMDQueue(const Command::CommandQueue& cmdqueue);
+    bool parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isFromOAC = false);
 };
 
 }  // namespace OAC

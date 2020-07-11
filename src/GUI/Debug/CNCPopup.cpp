@@ -71,6 +71,7 @@ void CNCPopup::drawCNCInfoPanel(cv::Mat *cncPanel) {
     startPos = drawHUDStatus(cncPanel, startPos, padding);
     if (dynamic_cast<CNC::CNCArdupilot*>(mpCNC)) {
         startPos = drawWPStatus(cncPanel, startPos, padding);
+        startPos = drawLocalMissionQueueStatus(cncPanel, startPos, padding);
     }
     //! @todo RC Channel Information
     //! @todo setpoint data
@@ -190,9 +191,41 @@ std::pair<int, int> CNCPopup::drawWPStatus(cv::Mat *cncPanel, std::pair<int, int
     return startPos;
 }
 
+std::pair<int, int> CNCPopup::drawLocalMissionQueueStatus(
+        cv::Mat *cncPanel, std::pair<int, int> startPos, float padding) {
+            CNC::CNCArdupilot* ardupilotPtr = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
+    if (!ardupilotPtr) return startPos;
+    // Draw all waypoints
+    startPos.second += 2 * padding;  // Extra padding for section spacing
+    drawText(cncPanel, cv::Point(startPos.first, startPos.second), "=== Local WP List ================", 0.5, 1,
+            cv::Scalar(238, 238, 238, 255));
+        startPos.second += padding;
+    std::string localPosDisplay = "Local Position: " + std::to_string(mpCNC->getLocalPosition().pose.position.x) + " "
+            + std::to_string(mpCNC->getLocalPosition().pose.position.y) + " "
+            + std::to_string(mpCNC->getLocalPosition().pose.position.z);
+    drawText(cncPanel, cv::Point(startPos.first, startPos.second), localPosDisplay, 0.5, 1,
+            cv::Scalar(238, 238, 238, 255));
+    startPos.second += padding;
+    drawText(cncPanel, cv::Point(startPos.first, startPos.second), "Idx Current Lat            Long            Alt",
+            0.5, 1, cv::Scalar(238, 238, 238, 255));
+    std::queue<GPSPoint> localWPList = ardupilotPtr->getLocalMissionQueue();
+    int index = 0;
+    while (!localWPList.empty()) {
+        std::string lineStr = std::to_string(index) + "   X        ";
+        lineStr += std::to_string(localWPList.front().latitude_) + "    " +
+                std::to_string(localWPList.front().longitude_) + "    " +
+                std::to_string(localWPList.front().altitude_);
+        startPos.second += padding;
+        drawText(cncPanel, cv::Point(startPos.first, startPos.second), lineStr, 0.5, 1, cv::Scalar(238, 238, 238, 255));
+        localWPList.pop();
+        index++;
+    }
+    return startPos;
+}
+
 void CNCPopup::draw() {
     int32_t winWidth = 500;
-    int32_t winHeight = 800;
+    int32_t winHeight = 1000;
     cv::Mat cncPanel(winHeight, winWidth, CV_8UC3, cv::Scalar(0, 0, 0, 255));
 
     drawCNCInfoPanel(&cncPanel);

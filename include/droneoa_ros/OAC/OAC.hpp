@@ -101,6 +101,8 @@ enum SYS_SelectedDetermineFun {
     DET_INVALID
 };
 
+extern int ACTIVE_OAC_LEVEL;
+
 class OAController {
     CMDParser *mpParserExecuter = nullptr;
     CMDRunner *mpTheRunner = nullptr;

@@ -19,6 +19,7 @@
 
 #include <ros/ros.h>
 #include <droneoa_ros/OAC/CMDParser.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
 
 namespace OAC {
 
@@ -33,7 +34,7 @@ CMDParser::~CMDParser() {
  * - Input: command queue
  * - Output: whether operation is succesuful
  */
-bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue) {
+bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isFromOAC) {
     if (cmdqueue.size() == 0) {
         return true;
     }
@@ -49,14 +50,19 @@ bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue) {
         }
         //! @todo Merge continuous move wp command to single move wp list command
     }
+    std::cout << "parseCMDQueue isInstant: " << isInstant << std::endl;
     if (isInstant) {
         for (auto cmdline : cmdqueue) {
-            if (!Command::parseCMD(mpCNC, cmdline)) {
+            if (!Command::parseCMD(mpCNC, cmdline, isFromOAC)) {
                 ROS_ERROR("[CMD PARSER] Queue Parser Terminated With ERROR !!!");
                 return false;
             }
         }
     } else {
+        if (!isFromOAC && ACTIVE_OAC_LEVEL > 1) {
+            ROS_ERROR("This Command Queue Is NOT Supported When Obstacle Avoidance Is ON !!!");
+            return false;
+        }
         //! @todo(shibohan) should we wait for previous queue to finish in some cases?
         cmdRunner_->setupRunner(cmdqueue);
     }
