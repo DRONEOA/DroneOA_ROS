@@ -32,7 +32,7 @@
 #include <geometry_msgs/PoseStamped.h>
 
 #include <string>
-#include <vector>
+#include <queue>
 
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
@@ -75,7 +75,7 @@ class CNCGeneric : public CNCInterface {
      * @param isRelative (default false)
      * @return client send response
      */
-    bool setYaw(float targetYaw, bool isRelative = false) override;
+    bool setYaw(float targetYaw, bool isRelative = false, bool isFromOAC = false) override;
     /**
      * @brief Set Maximum Speed Command
      * @param speedType (0=Airspeed, 1=Ground Speed, 2=Climb Speed, 3=Descent Speed)
@@ -92,6 +92,15 @@ class CNCGeneric : public CNCInterface {
      * @return client send response
      */
     bool setHome(float targetLatitude, float targetLongitude, float targetAltitude) override;
+
+    /***************************************************************************
+     * Local Mission Queue
+     */
+
+    void clearLocalMissionQueue() override;
+    std::queue<GPSPoint> getLocalMissionQueue() override;
+    void pushLocalMissionQueue(GPSPoint wp) override;
+    GPSPoint popLocalMissionQueue() override;
 
     /***************************************************************************
      * Status & Checks
@@ -149,6 +158,7 @@ class CNCGeneric : public CNCInterface {
     std_msgs::Float64 mCurrentRelativeAltitude;
     sensor_msgs::Imu mCurrentIMUData;
     geometry_msgs::PoseStamped mLocalPosition;
+    std::queue<GPSPoint> mLocalMissionQueue;
 
     /***************************************************************************
      * Threads

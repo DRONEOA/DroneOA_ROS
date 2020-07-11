@@ -69,32 +69,32 @@ TEST_F(CommandTest, SetMaxVelocityCommand_negative_speed) {
 }
 
 TEST_F(CommandTest, SetYawCommand_success) {
-    EXPECT_CALL(cnc, setYaw(30, false)).WillOnce(Return(true));
+    EXPECT_CALL(cnc, setYaw(30, false, false)).WillOnce(Return(true));
     Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "30"));
 }
 
 TEST_F(CommandTest, GotoRelativeCommand_success) {
     EXPECT_CALL(cnc, getRelativeAltitude()).WillOnce(Return(5));
-    EXPECT_CALL(cnc, gotoRelative(5, -2, 10, false));
+    EXPECT_CALL(cnc, gotoRelative(5, -2, 10, false, false));
     Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, "5 -2 10"));
 }
 
 TEST_F(CommandTest, GotoGlobalCommand_success) {
     EXPECT_CALL(cnc, getRelativeAltitude()).WillOnce(Return(5));
-    EXPECT_CALL(cnc, gotoGlobal(5, -2, 10));
+    EXPECT_CALL(cnc, gotoGlobal(5, -2, 10, false));
     Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL, "5 -2 10"));
 }
 
 TEST_F(CommandTest, GotoHeadingCommand_success) {
     EXPECT_CALL(cnc, getRelativeAltitude()).WillOnce(Return(10));
-    EXPECT_CALL(cnc, setYaw(30, false)).WillOnce(Return(true));
-    EXPECT_CALL(cnc, gotoHeading(30, 1.0, 5)).WillOnce(Return(true));
+    EXPECT_CALL(cnc, setYaw(30, false, false)).WillOnce(Return(true));
+    EXPECT_CALL(cnc, gotoHeading(30, 1.0, 5, false)).WillOnce(Return(true));
     Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_GOTO_HEADING, "30 1.0 5"));
 }
 
 TEST_F(CommandTest, GotoHeadingCommand_yaw_set_failed) {
     EXPECT_CALL(cnc, getRelativeAltitude()).WillOnce(Return(10));
-    EXPECT_CALL(cnc, setYaw(30, false)).WillOnce(Return(false));
+    EXPECT_CALL(cnc, setYaw(30, false, false)).WillOnce(Return(false));
     Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_GOTO_HEADING, "30 1.0 5"));
 }
 
@@ -103,7 +103,7 @@ TEST_F(CommandTest, ClimbCommand_success) {
     mavros_msgs::VFR_HUD msgs{};
     msgs.heading = 10;
     EXPECT_CALL(cnc, getHUDData()).WillOnce(Return(msgs));
-    EXPECT_CALL(cnc, gotoHeading(10, 0.0f, 15)).WillOnce(Return(true));
+    EXPECT_CALL(cnc, gotoHeading(10, 0.0f, 15, false)).WillOnce(Return(true));
     Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_CLIMB, "10"));
 }
 
@@ -112,6 +112,6 @@ TEST_F(CommandTest, DescendCommand_success) {
     mavros_msgs::VFR_HUD msgs{};
     msgs.heading = 10;
     EXPECT_CALL(cnc, getHUDData()).WillOnce(Return(msgs));
-    EXPECT_CALL(cnc, gotoHeading(10, 0.0f, 15)).WillOnce(Return(true));
+    EXPECT_CALL(cnc, gotoHeading(10, 0.0f, 15, false)).WillOnce(Return(true));
     Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_DESCEND, "20"));
 }

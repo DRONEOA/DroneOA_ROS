@@ -118,7 +118,8 @@ void CMDRunner::runnerRoutine() {
             handleUntilCommand();
         } else {
             // Common Instant Commands
-            Command::parseCMD(mpCNC, theCMDQueue.front());
+            // Using OAC privilege by default
+            Command::parseCMD(mpCNC, theCMDQueue.front(), true);
             theCMDQueue.erase(theCMDQueue.begin());
         }
     }

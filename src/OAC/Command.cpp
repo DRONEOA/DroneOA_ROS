@@ -21,6 +21,7 @@
 
 #include <droneoa_ros/OAC/Command.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
+#include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
 
 namespace Command {
 
@@ -37,7 +38,7 @@ std::vector<std::string> getDataListFromString(std::string data) {
     return dataList;
 }
 
-bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
+bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC) {
     try {
         switch (cmdline.first) {
             case CMD_QUEUE_TYPES::CMD_CHMOD:
@@ -72,7 +73,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
             case CMD_QUEUE_TYPES::CMD_SET_YAW:
             {
                 float targetYaw = std::stof(cmdline.second);
-                return cnc->setYaw(targetYaw);
+                return cnc->setYaw(targetYaw, false, isFromOAC);
             }
             case CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE:
             {
@@ -84,7 +85,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
                 if (dataList.size() == 3) {
                     alt = std::stof(dataList.at(2));
                 }
-                return cnc->gotoRelative(northAxis, eastAxis, alt);
+                return cnc->gotoRelative(northAxis, eastAxis, alt, false, isFromOAC);
             }
             case CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL:
             {
@@ -96,7 +97,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
                 if (dataList.size() == 3) {
                     alt = std::stof(dataList.at(2));
                 }
-                return cnc->gotoGlobal(latPos, longPos, alt);
+                return cnc->gotoGlobal(latPos, longPos, alt, isFromOAC);
             }
             case CMD_QUEUE_TYPES::CMD_GOTO_HEADING:
             {
@@ -108,10 +109,10 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
                 if (dataList.size() == 3) {
                     alt = std::stof(dataList.at(2));
                 }
-                if (!cnc->setYaw(heading)) {
+                if (!cnc->setYaw(heading, false, isFromOAC)) {
                     return false;
                 }
-                return cnc->gotoHeading(heading, dist, alt);
+                return cnc->gotoHeading(heading, dist, alt, isFromOAC);
             }
             case CMD_QUEUE_TYPES::CMD_CLIMB:
             {
@@ -123,7 +124,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
                 float dist = 0.0f;
                 float alt = cnc->getRelativeAltitude();
                 //! @TODO To prevent slight heading change, try magnetic compass?
-                return cnc->gotoHeading(heading, dist, deltaAlt+alt);
+                return cnc->gotoHeading(heading, dist, deltaAlt+alt, isFromOAC);
             }
             case CMD_QUEUE_TYPES::CMD_DESCEND:
             {
@@ -135,7 +136,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline) {
                 float dist = 0.0f;
                 float alt = cnc->getRelativeAltitude();
                 //! @TODO To prevent slight heading change, try magnetic compass?
-                return cnc->gotoHeading(heading, dist, deltaAlt-alt);
+                return cnc->gotoHeading(heading, dist, deltaAlt-alt, isFromOAC);
             }
             default:
                 throw 1;

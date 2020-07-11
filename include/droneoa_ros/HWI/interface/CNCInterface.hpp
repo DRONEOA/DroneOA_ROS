@@ -25,6 +25,7 @@
 #include <geometry_msgs/PoseStamped.h>
 
 #include <string>
+#include <queue>
 
 #include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
 #include <droneoa_ros/GUI/GUISubject.hpp>
@@ -43,12 +44,21 @@ class CNCInterface : public GUI::GUISubject {
     virtual bool armVehicle() = 0;
     virtual bool takeoff(float targetAltitude) = 0;
     virtual bool land(int32_t minAboutAltitude) = 0;
-    virtual bool setYaw(float targetYaw, bool isRelative = false) = 0;
+    virtual bool setYaw(float targetYaw, bool isRelative = false, bool isFromOAC = false) = 0;
     virtual bool setMaxSpeed(float speedType, float speed, float isRelative) = 0;
     virtual bool setHome(float targetLatitude, float targetLongitude, float targetAltitude) = 0;
-    virtual bool gotoGlobal(float x_lat, float y_long, float z_alt) = 0;
-    virtual bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false) = 0;
-    virtual bool gotoHeading(float heading, float distance, float z_alt) = 0;
+    virtual bool gotoGlobal(float x_lat, float y_long, float z_alt, bool isFromOAC = false) = 0;
+    virtual bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false,
+            bool isFromOAC = false) = 0;
+    virtual bool gotoHeading(float heading, float distance, float z_alt, bool isFromOAC = false) = 0;
+
+    // Local Mission
+    virtual bool clearFCUWaypoint() = 0;
+    virtual void clearLocalMissionQueue() = 0;
+    virtual std::queue<GPSPoint> getLocalMissionQueue() = 0;
+    virtual void pushLocalMissionQueue(GPSPoint wp) = 0;
+    virtual GPSPoint popLocalMissionQueue() = 0;
+    virtual void moveMissionToLocalQueue() = 0;
 
     // Status & Checks
     virtual bool isReady(std::string modeName) = 0;

@@ -32,6 +32,7 @@
 #include <droneoa_ros/PDN.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 #include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
 
 namespace CNC {
 
@@ -144,7 +145,7 @@ mavros_msgs::WaypointPull CNCArdupilot::pullWaypoints() {
     }
 }
 
-bool CNCArdupilot::clearWaypoint() {
+bool CNCArdupilot::clearFCUWaypoint() {
     ros::ServiceClient clearWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointClear>("mavros/mission/clear");
     mavros_msgs::WaypointClear wp_clear_srv;
     if (clearWP_cl.call(wp_clear_srv)) {
@@ -170,9 +171,14 @@ mavros_msgs::WaypointList CNCArdupilot::getWaypointList() {
  * User Simple Functions
  */
 // Goto Global Waypoint
-bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt) {
+bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt, bool isFromOAC) {
     // @TODO: check Guided mode
-    if (!clearWaypoint()) {
+    if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1) {
+        clearLocalMissionQueue();
+        pushLocalMissionQueue(GPSPoint(x_lat, y_long, z_alt));
+        return true;
+    }
+    if (!clearFCUWaypoint()) {
         return false;
     }
     if (pushWaypoints(x_lat, y_long, z_alt)) {
@@ -183,17 +189,25 @@ bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt) {
 }
 
 // Goto Relative Waypoint (North+, East+)
-bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta) {
+bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta, bool isFromOAC) {
     // @TODO: check GPS available
     // @TODO: consider changing altitude first
     GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
-    return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt);
+    return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt, isFromOAC);
 }
 
 // Goto Target Head
-bool CNCArdupilot::gotoHeading(float heading, float distance, float z_alt) {
+bool CNCArdupilot::gotoHeading(float heading, float distance, float z_alt, bool isFromOAC) {
     std::pair<float, float> tempRelative = CNCUtility::getNorthEastDistanceFromHeading(heading, distance);
-    return gotoRelative(tempRelative.first, tempRelative.second, z_alt);
+    return gotoRelative(tempRelative.first, tempRelative.second, z_alt, false, isFromOAC);
+}
+
+// Move Mission
+void CNCArdupilot::moveMissionToLocalQueue() {
+    clearLocalMissionQueue();
+    for (auto waypoint : mWaypointList.waypoints) {
+        pushLocalMissionQueue(GPSPoint(waypoint.x_lat, waypoint.y_long, waypoint.z_alt));
+    }
 }
 
 /***************************************************************************

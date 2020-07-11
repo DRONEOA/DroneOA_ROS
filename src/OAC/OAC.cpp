@@ -22,6 +22,8 @@
 
 namespace OAC {
 
+int ACTIVE_OAC_LEVEL = 0;
+
 OAController::OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc,
         CMDRunner *runner, ros::Rate r) {
     mpTheRunner = runner;
@@ -83,9 +85,14 @@ std::string OAController::getStatus() {
 void OAController::masterSwitch(bool isOn) {
     mIsOn = isOn;
     if (mIsOn) {
+        ACTIVE_OAC_LEVEL = OAC_STAGE_SETTING;
+        mpCNC->moveMissionToLocalQueue();
+        mpCNC->clearFCUWaypoint();
         ROS_WARN("[OAC] MASTER RESUMED");
         return;
     }
+    ACTIVE_OAC_LEVEL = 0;
+    mpCNC->clearLocalMissionQueue();
     ROS_WARN("[OAC] MASTER PAUSED");
 }
 
@@ -248,9 +255,9 @@ void OAController::determineFunStage1() {
     }
     if (depthConf >= 0.9 || lidarConf >= 0.9) {
         if (depthConf >= lidarConf) {
-            mpParserExecuter->parseCMDQueue(mAlgCMDmap[SYS_Algs::ALG_COLLISION_DEPTH]);
+            mpParserExecuter->parseCMDQueue(mAlgCMDmap[SYS_Algs::ALG_COLLISION_DEPTH], true);
         } else {
-            mpParserExecuter->parseCMDQueue(mAlgCMDmap[SYS_Algs::ALG_COLLISION_LIDAR]);
+            mpParserExecuter->parseCMDQueue(mAlgCMDmap[SYS_Algs::ALG_COLLISION_LIDAR], true);
         }
     }
 }

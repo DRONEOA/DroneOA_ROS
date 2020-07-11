@@ -65,7 +65,7 @@ static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz suggest to be s
 /**
  * @brief Enabled feature stage 1-3
  */
-static const int32_t OAC_STAGE_SETTING = 1;
+static const int32_t OAC_STAGE_SETTING = 3;
 
 // Vehicle Data
 static const int32_t VEHICLE_BOUNDBOX_WIDTH = 1200;  /**< @brief unit: mm */

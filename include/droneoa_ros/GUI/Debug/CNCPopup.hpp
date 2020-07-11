@@ -42,6 +42,7 @@ class CNCPopup : public GUISubscriber {
     std::pair<int, int> drawAttitudeStatus(cv::Mat *cncPanel, std::pair<int, int> startPos, float padding);
     std::pair<int, int> drawHUDStatus(cv::Mat *cncPanel, std::pair<int, int> startPos, float padding);
     std::pair<int, int> drawWPStatus(cv::Mat *cncPanel, std::pair<int, int> startPos, float padding);
+    std::pair<int, int> drawLocalMissionQueueStatus(cv::Mat *cncPanel, std::pair<int, int> startPos, float padding);
     void drawCNCInfoPanel(cv::Mat *cncPanel);
     void drawText(cv::Mat *targetImg, cv::Point origin, std::string text, double font_scale, int32_t thickness,
         cv::Scalar color = cv::Scalar(94, 206, 165, 255));
