@@ -32,6 +32,7 @@
 #include <droneoa_ros/PDN.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 #include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
+#include <droneoa_ros/OAC/OAC.hpp>
 
 namespace CNC {
 
@@ -149,7 +150,11 @@ bool CNCGeneric::land(int32_t minAboutAltitude) {
     }
 }
 
-bool CNCGeneric::setYaw(float targetYaw, bool isRelative) {
+bool CNCGeneric::setYaw(float targetYaw, bool isRelative, bool isFromOAC) {
+    if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1) {
+        ROS_WARN("SetYaw is ignored from non-OAC requester to ensure snesor facing forward !");
+        return true;
+    }
     ros::ServiceClient cmdLong_cl = mNodeHandle.serviceClient<mavros_msgs::CommandLong>("/mavros/cmd/command");
     mavros_msgs::CommandLong srv_cmdLong;
     srv_cmdLong.request.command = mavros_msgs::CommandCode::CONDITION_YAW;
@@ -434,6 +439,26 @@ bool CNCGeneric::generalLongCommand(mavros_msgs::CommandLong commandMessage) {
         ROS_ERROR("Failed set Yaw");
         return false;
     }
+}
+
+/***************************************************************************
+ * Local Mission Queue
+ */
+
+void CNCGeneric::clearLocalMissionQueue() {
+    mLocalMissionQueue = std::queue<GPSPoint>();
+}
+
+std::queue<GPSPoint> CNCGeneric::getLocalMissionQueue() {
+    return mLocalMissionQueue;
+}
+
+void CNCGeneric::pushLocalMissionQueue(GPSPoint wp) {
+    mLocalMissionQueue.push(wp);
+}
+
+GPSPoint CNCGeneric::popLocalMissionQueue() {
+    mLocalMissionQueue.pop();
 }
 
 }  // namespace CNC
