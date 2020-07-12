@@ -27,10 +27,18 @@
 namespace OAC {
 
 bool OMPLPlanner::updateMap(std::shared_ptr<fcl::CollisionGeometry<double>> map) {
+    boost::upgrade_lock<boost::shared_mutex> lock(octomap_mutex_);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
     mpTreeObj = map;
     fcl::CollisionObject<double> *treeObj = new fcl::CollisionObject<double>(mpTreeObj);
+    if (mpTreeObj_obj) delete mpTreeObj_obj;
     mpTreeObj_obj = treeObj;
     return true;
+}
+
+fcl::CollisionObject<double> *OMPLPlanner::getOcTreeCollisionObj() {
+    boost::shared_lock<boost::shared_mutex> lock(octomap_mutex_);
+    return mpTreeObj_obj;
 }
 
 bool OMPLPlanner::setStartPos(Position3D pos) {
@@ -125,7 +133,9 @@ OMPLPlanner::OMPLPlanner() : mIsSolving(false), replan_flag(false), force_replan
     // Init Octomap Watcher
     mpThreadWatchOctomap = new boost::thread(boost::bind(&OMPLPlanner::RRTMainThread, this));
     // Setup Publisher
+#ifdef ENABLE_SMOOTHER
     vis_pub = n.advertise<nav_msgs::Path>("visualization_marker", 0);
+#endif
     traj_pub = n.advertise<nav_msgs::Path>("waypoints", 1);
 }
 
@@ -135,6 +145,7 @@ OMPLPlanner::~OMPLPlanner() {
         delete mpThreadWatchOctomap;
     }
     if (mpTreeObj_obj) delete mpTreeObj_obj;
+    if (mpPathSmooth) delete mpPathSmooth;
 }
 
 bool OMPLPlanner::rePlan() {
@@ -281,6 +292,7 @@ bool OMPLPlanner::plan() {
         #ifdef ENABLE_SMOOTHER
             ompl::geometric::PathSimplifier* pathBSpline = new ompl::geometric::PathSimplifier(mpSpaceInfo);
         #endif
+            if (mpPathSmooth) delete mpPathSmooth;
             mpPathSmooth = new ompl::geometric::PathGeometric(dynamic_cast<const ompl::geometric::PathGeometric&>(
                     *mpProblem->getSolutionPath()));
         #ifdef ENABLE_SMOOTHER
@@ -309,13 +321,12 @@ bool OMPLPlanner::plan() {
                 point.pose.orientation.z = rot->z;
                 point.pose.orientation.w = rot->w;
                 smooth_msg.poses.push_back(point);
-        #endif
             #ifdef RRT_DEBUG_PLANNER
                 std::cout << "Published marker: " << idx << std::endl;
             #endif
             }
-        #ifdef ENABLE_SMOOTHER
             vis_pub.publish(smooth_msg);
+            delete pathBSpline;
         #endif
             // ros::Duration(0.1).sleep();
             // Clear memory
@@ -349,7 +360,7 @@ bool OMPLPlanner::isStateValid(const ompl::base::State *state) {
     aircraftObject.setTranslation(translation);
     fcl::CollisionRequest<double> requestType(1, false, 1, false);
     fcl::CollisionResult<double> collisionResult;
-    fcl::collide(&aircraftObject, mpTreeObj_obj, requestType, collisionResult);
+    fcl::collide(&aircraftObject, getOcTreeCollisionObj(), requestType, collisionResult);
     return(!collisionResult.isCollision());
 }
 

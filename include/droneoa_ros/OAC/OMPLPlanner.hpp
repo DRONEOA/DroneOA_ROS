@@ -106,6 +106,7 @@ class OMPLPlanner {
 
  private:
     boost::mutex mutex_;
+    boost::shared_mutex octomap_mutex_;
     boost::shared_mutex forcePlanFlag_mutex_;
     boost::shared_mutex forceReplanFlag_mutex_;
     bool mIsSolving;
@@ -129,12 +130,15 @@ class OMPLPlanner {
     // Helpers
     bool isStateValid(const ompl::base::State *state);
     ompl::base::OptimizationObjectivePtr getPathLengthObjWithCostToGo(const ompl::base::SpaceInformationPtr& si);
+    fcl::CollisionObject<double> *getOcTreeCollisionObj();
     // Threads
     boost::thread* mpThreadWatchOctomap = nullptr;
     void RRTMainThread();
     // Path Publisher
     ros::NodeHandle n;
+#ifdef ENABLE_SMOOTHER
     ros::Publisher vis_pub;
+#endif
     ros::Publisher traj_pub;
 };
 
