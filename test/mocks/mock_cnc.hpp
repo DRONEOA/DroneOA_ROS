@@ -60,6 +60,8 @@ class CNCMock : public CNCInterface {
     MOCK_METHOD0(isArmed, bool());
     MOCK_METHOD0(getMode, std::string());
     MOCK_METHOD0(getCurrentGPSPoint, GPSPoint());
+    MOCK_METHOD0(getHomeGPSPoint, GPSPoint());
+    MOCK_METHOD0(isHomeGPSSet, bool());
     MOCK_METHOD0(getRelativeAltitude, float());
     MOCK_METHOD0(getBatteryVoltage, float());
     MOCK_METHOD0(getSysStatus, uint8_t());

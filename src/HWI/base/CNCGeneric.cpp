@@ -112,6 +112,8 @@ bool CNCGeneric::armVehicle() {
 
     if (arming_cl.call(srv)) {
         ROS_INFO("ARM send ok %d", srv.response.success);
+        mHomeGPS = getCurrentGPSPoint();
+        mIsHomeGPSSet = true;
         return true;
     } else {
         ROS_ERROR("Failed arming or disarming");
@@ -393,6 +395,14 @@ uint8_t CNCGeneric::getSysStatus() {
 /* GPS Fix */
 GPSPoint CNCGeneric::getCurrentGPSPoint() {
     return GPSPoint(mCurrentGpsFix.latitude, mCurrentGpsFix.longitude, mCurrentGpsFix.altitude);
+}
+
+GPSPoint CNCGeneric::getHomeGPSPoint() {
+    return mHomeGPS;
+}
+
+bool CNCGeneric::isHomeGPSSet() {
+    return mIsHomeGPSSet;
 }
 
 /* Altitude */

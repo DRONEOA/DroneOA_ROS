@@ -42,13 +42,23 @@ bool OAAlgRRT::collect() {
         ROS_ERROR("[OAAlgFGM] Missing CNC pointer !!!");
         return false;
     }
+    GPSPoint currentGPS = mpCNC->getCurrentGPSPoint();
     /***************************************************
      * Set Start Position
      ***************************************************/
-    // If current location is different from previous one. Update start. (face -y axis)
+    //! @note -Y axis is facing North (UE4 Verified)
+    //! @note -X axis is facing East (UE4 Verified)
     Position3D startPos(-mpCNC->getLocalPosition().pose.position.x,
             -mpCNC->getLocalPosition().pose.position.y,
             mpCNC->getLocalPosition().pose.position.z);
+    if (mpCNC->isHomeGPSSet())  {
+        //! @note GPS Location appear to be more accurate in simulator or with tracking camera
+        //!       So we use GPS home location is available
+        std::pair<float, float> fromHomeXY =
+                CNC::CNCUtility::getNorthEastFromPoints(mpCNC->getHomeGPSPoint(), currentGPS);
+        startPos.mX = -fromHomeXY.second;
+        startPos.mY = -fromHomeXY.first;
+    }
     if (OMPLPlanner::getDistBetweenPos3D(startPos, previousStart) > DIST_COMPARE_DIFF_MAX) {
         previousStart = startPos;
         mPlanner.setStartPos(startPos);
@@ -59,11 +69,17 @@ bool OAAlgRRT::collect() {
     //! @note -Y axis is facing North (UE4 Verified)
     //! @note -X axis is facing East (UE4 Verified)
     GPSPoint goalGPS = (mpCNC->getLocalMissionQueue()).front();
-    GPSPoint currentGPS = mpCNC->getCurrentGPSPoint();
-    geometry_msgs::PoseStamped posToHome = mpCNC->getLocalPosition();
     std::pair<float, float> targetXY = CNC::CNCUtility::getNorthEastFromPoints(currentGPS, goalGPS);
-    targetXY.first += posToHome.pose.position.y;
-    targetXY.second += posToHome.pose.position.x;
+    if (mpCNC->isHomeGPSSet()) {
+        std::pair<float, float> fromHomeXY =
+                CNC::CNCUtility::getNorthEastFromPoints(mpCNC->getHomeGPSPoint(), currentGPS);
+        targetXY.second += fromHomeXY.second;
+        targetXY.first += fromHomeXY.first;
+    } else {
+        geometry_msgs::PoseStamped posToHome = mpCNC->getLocalPosition();
+        targetXY.first += posToHome.pose.position.y;
+        targetXY.second += posToHome.pose.position.x;
+    }
     // Target position need to be different from start position
     Position3D targetPos;
     // Check if GPSPoint data is valid

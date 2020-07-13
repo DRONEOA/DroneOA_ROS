@@ -66,6 +66,8 @@ class CNCInterface : public GUI::GUISubject {
     virtual bool isArmed() = 0;
     virtual std::string getMode() = 0;
     virtual GPSPoint getCurrentGPSPoint() = 0;
+    virtual GPSPoint getHomeGPSPoint() = 0;
+    virtual bool isHomeGPSSet() = 0;
     virtual float getRelativeAltitude() = 0;
     virtual float getBatteryVoltage() = 0;
     virtual uint8_t getSysStatus() = 0;

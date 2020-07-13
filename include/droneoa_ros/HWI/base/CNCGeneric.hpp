@@ -115,6 +115,8 @@ class CNCGeneric : public CNCInterface {
     bool isArmed() override;
     std::string getMode() override;
     GPSPoint getCurrentGPSPoint() override;
+    GPSPoint getHomeGPSPoint() override;
+    bool isHomeGPSSet() override;
     float getRelativeAltitude() override;
     float getBatteryVoltage() override;
     uint8_t getSysStatus() override;
@@ -147,6 +149,8 @@ class CNCGeneric : public CNCInterface {
      */
     float mTargetAltitude;
     GPSPoint mRecentWaypoint;
+    GPSPoint mHomeGPS;
+    bool mIsHomeGPSSet = false;
 
     bool mIsHomeSet = false;  // Note: this value will NOT be updated after becomeing true
     mavros_msgs::State mCurrentState;
