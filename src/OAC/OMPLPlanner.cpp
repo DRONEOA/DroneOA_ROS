@@ -243,8 +243,10 @@ bool OMPLPlanner::plan() {
 #ifdef RRT_DEBUG_PLANNER
     std::cout << "END SOLVING" << std::endl;
 #endif
-    mSolutionExist = solved ? true : false;
     if (solved) {
+        /**************************************
+         * Solution Found :)
+         **************************************/
         // get the goal representation from the problem definition (not the same as the goal state)
         // and inquire about the found path
     #ifdef RRT_DEBUG_PLANNER
@@ -252,7 +254,7 @@ bool OMPLPlanner::plan() {
     #endif
         ompl::base::PathPtr path = mpProblem->getSolutionPath();
         ompl::geometric::PathGeometric* pth = mpProblem->getSolutionPath()->as<ompl::geometric::PathGeometric>();
-        mCostOfPath = rrt->bestCost();
+        setPathCost(true, rrt->bestCost());
     #ifdef RRT_DEBUG_PLANNER
         pth->printAsMatrix(std::cout);
     #endif
@@ -333,9 +335,13 @@ bool OMPLPlanner::plan() {
             mpProblem->clearSolutionPaths();
             replan_flag = false;
     } else {
+        /**************************************
+         * NO Solution Found :(
+         **************************************/
     #ifdef RRT_DEBUG_NOSOLUTION
         ROS_ERROR("[RRT] No solution found");
     #endif
+        setPathCost(false, ompl::base::Cost(std::numeric_limits<double>::infinity()));
         return false;
     }
     return true;
@@ -397,13 +403,20 @@ std::vector<Position3D> OMPLPlanner::getPath() {
 }
 
 double OMPLPlanner::getPathCost() {
-    //! @todo do we need read write lock?
+    boost::shared_lock<boost::shared_mutex> lock(solution_mutex_);
     return mCostOfPath.value();
 }
 
 bool OMPLPlanner::isSolutionExist() {
-    //! @todo do we need read write lock?
+    boost::shared_lock<boost::shared_mutex> lock(solution_mutex_);
     return mSolutionExist;
+}
+
+void OMPLPlanner::setPathCost(bool pathExist, ompl::base::Cost cost) {
+    boost::upgrade_lock<boost::shared_mutex> lock(solution_mutex_);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+    mSolutionExist = pathExist;
+    mCostOfPath = cost;
 }
 
 float OMPLPlanner::getDistBetweenPos3D(const Position3D &pos1, const Position3D& pos2) {

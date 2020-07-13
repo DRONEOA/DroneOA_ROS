@@ -73,7 +73,7 @@ static const int32_t OAC_STAGE_SETTING = 3;
 // Vehicle Data
 static const int32_t VEHICLE_BOUNDBOX_WIDTH = 1200;  /**< @brief unit: mm */
 static const int32_t VEHICLE_BOUNDBOX_LENGTH = 1200;  /**< @brief unit: mm */
-static const int32_t VEHICLE_BOUNDBOX_HEIGHT = 1000;  /**< @brief unit: mm */
+static const int32_t VEHICLE_BOUNDBOX_HEIGHT = 800;  /**< @brief unit: mm */
 static const int32_t VEHICLE_MAX_SPEED_HORIZONTAL = 12;  /**< @brief unit: m/s */
 static const float VEHICLE_MAX_ALTITUDE_RELATIVE = 10;  /**< @brief unit: m */
 static const float VEHICLE_MAX_ACCELEATION = 0.4f;  /**< @brief unit: m/s^2 */

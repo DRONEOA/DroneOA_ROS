@@ -113,6 +113,7 @@ class OMPLPlanner {
     boost::shared_mutex octomap_mutex_;
     boost::shared_mutex forcePlanFlag_mutex_;
     boost::shared_mutex forceReplanFlag_mutex_;
+    boost::shared_mutex solution_mutex_;
     bool mSolutionExist;
     bool replan_flag;
     bool force_plan_flag;
@@ -136,6 +137,7 @@ class OMPLPlanner {
     bool isStateValid(const ompl::base::State *state);
     ompl::base::OptimizationObjectivePtr getPathLengthObjWithCostToGo(const ompl::base::SpaceInformationPtr& si);
     fcl::CollisionObject<double> *getOcTreeCollisionObj();
+    void setPathCost(bool pathExist, ompl::base::Cost cost);
     // Threads
     boost::thread* mpThreadWatchOctomap = nullptr;
     void RRTMainThread();
