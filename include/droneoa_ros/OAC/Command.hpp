@@ -94,6 +94,7 @@ typedef std::vector<CommandLine> CommandQueue;
 enum DATA_QUEUE_TYPES : uint32_t {
     DATA_CONFIDENCE = 0,  /*!< DATA: confidence */
     DATA_ALG_NAME,  /*!< DATA: algorithm name */
+    DATA_SOLUTION_COST,  /*!< DATA: cost of the solution */
 };
 
 /**
@@ -101,7 +102,8 @@ enum DATA_QUEUE_TYPES : uint32_t {
  */
 static const char* DATA_QUEUE_TYPES_NAME[] {
     "DATA_CONFIDENCE",
-    "DATA_ALG_NAME"
+    "DATA_ALG_NAME",
+    "DATA_SOLUTION_COST"
 };
 
 /**

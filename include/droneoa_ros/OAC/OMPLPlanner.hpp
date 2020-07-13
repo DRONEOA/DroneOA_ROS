@@ -41,6 +41,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include <boost/bind.hpp>
 #include <boost/thread/mutex.hpp>
@@ -87,6 +88,9 @@ class OMPLPlanner {
     void setForcePlanFlag(bool newflag);
     bool getForceReplanFlag();
     void setForceReplanFlag(bool newflag);
+    std::vector<Position3D> getPath();
+    double getPathCost();
+    bool isSolutionExist();
     // Threads Callback
     void Octomap_callback(const octomap_msgs::OctomapConstPtr& msg);
     void Click_callback(const geometry_msgs::PointStampedConstPtr& msg);
@@ -109,7 +113,7 @@ class OMPLPlanner {
     boost::shared_mutex octomap_mutex_;
     boost::shared_mutex forcePlanFlag_mutex_;
     boost::shared_mutex forceReplanFlag_mutex_;
-    bool mIsSolving;
+    bool mSolutionExist;
     bool replan_flag;
     bool force_plan_flag;
     bool force_replan_flag;
@@ -123,6 +127,7 @@ class OMPLPlanner {
     // Solution
     ompl::geometric::PathGeometric *mpPathSmooth = nullptr;
     ompl::base::PathPtr mPath;
+    ompl::base::Cost mCostOfPath;
     // FCL
     fcl::CollisionObject<double> *mpTreeObj_obj;
     std::shared_ptr<fcl::CollisionGeometry<double>> mpTreeObj;

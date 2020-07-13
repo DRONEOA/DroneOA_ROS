@@ -84,7 +84,7 @@ void OMPLPlanner::setForceReplanFlag(bool newflag) {
     force_replan_flag = newflag;
 }
 
-OMPLPlanner::OMPLPlanner() : mIsSolving(false), replan_flag(false), force_replan_flag(false) {
+OMPLPlanner::OMPLPlanner() : mSolutionExist(true), replan_flag(false), force_replan_flag(false) {
     //四旋翼的障碍物几何形状
     mpAircraftObject = std::shared_ptr<fcl::CollisionGeometry<double>>(new fcl::Box<double>(0.8, 0.8, 0.3));
     //分辨率参数设置
@@ -112,10 +112,8 @@ OMPLPlanner::OMPLPlanner() : mIsSolving(false), replan_flag(false), force_replan
     mpSpaceInfo = ompl::base::SpaceInformationPtr(new ompl::base::SpaceInformation(mpSpace));
     start->setXYZ(0, 0, 0);
     start->as<ompl::base::SO3StateSpace::StateType>(1)->setIdentity();
-    // start.random();
     goal->setXYZ(0, -1, 1);
     goal->as<ompl::base::SO3StateSpace::StateType>(1)->setIdentity();
-    // goal.random();
     // set state validity checking for this space
     mpSpaceInfo->setStateValidityChecker(std::bind(&OMPLPlanner::isStateValid, this, std::placeholders::_1));
     // create a problem instance
@@ -245,6 +243,7 @@ bool OMPLPlanner::plan() {
 #ifdef RRT_DEBUG_PLANNER
     std::cout << "END SOLVING" << std::endl;
 #endif
+    mSolutionExist = solved ? true : false;
     if (solved) {
         // get the goal representation from the problem definition (not the same as the goal state)
         // and inquire about the found path
@@ -253,6 +252,7 @@ bool OMPLPlanner::plan() {
     #endif
         ompl::base::PathPtr path = mpProblem->getSolutionPath();
         ompl::geometric::PathGeometric* pth = mpProblem->getSolutionPath()->as<ompl::geometric::PathGeometric>();
+        mCostOfPath = rrt->bestCost();
     #ifdef RRT_DEBUG_PLANNER
         pth->printAsMatrix(std::cout);
     #endif
@@ -367,18 +367,43 @@ bool OMPLPlanner::isStateValid(const ompl::base::State *state) {
 ompl::base::OptimizationObjectivePtr OMPLPlanner::getPathLengthObjWithCostToGo(
         const ompl::base::SpaceInformationPtr& si) {
     //! @todo Need a balanced Optimization Objective
-    // // Option 1
-    ompl::base::OptimizationObjectivePtr lengthObj(new ompl::base::PathLengthOptimizationObjective(si));
-    ompl::base::OptimizationObjectivePtr clearObj(new ClearanceObjective(si));
-    return 10.0*lengthObj + clearObj;
+    // // Option 1 Bug?
+    // ompl::base::OptimizationObjectivePtr lengthObj(new ompl::base::PathLengthOptimizationObjective(si));
+    // ompl::base::OptimizationObjectivePtr clearObj(new ClearanceObjective(si));
+    // return 10.0*lengthObj + clearObj;
     // Option 2
-    // ompl::base::OptimizationObjectivePtr obj(new ompl::base::PathLengthOptimizationObjective(si));
-    // return obj;
-    // obj->setCostThreshold(ob::Cost(1.51));
+    ompl::base::OptimizationObjectivePtr obj(new ompl::base::PathLengthOptimizationObjective(si));
+    obj->setCostThreshold(ompl::base::Cost(1.51));
+    return obj;
     // // Option 3
-    // ob::OptimizationObjectivePtr obj(new ob::PathLengthOptimizationObjective(si));
-    // obj->setCostToGoHeuristic(&ob::goalRegionCostToGo);
+    // ompl::base::OptimizationObjectivePtr obj(new ompl::base::PathLengthOptimizationObjective(si));
+    // obj->setCostToGoHeuristic(&ompl::base::goalRegionCostToGo);
     // return obj;
+}
+
+std::vector<Position3D> OMPLPlanner::getPath() {
+    //! @todo do we need read write lock for mpPathSmooth?
+    std::vector<Position3D> results;
+    for (std::size_t idx = 0; idx < mpPathSmooth->getStateCount(); idx++) {
+        // cast the abstract state type to the type we expect
+        const ompl::base::SE3StateSpace::StateType *se3state =
+                mpPathSmooth->getState(idx)->as<ompl::base::SE3StateSpace::StateType>();
+        // extract the first component of the state and cast it to what we expect
+        const ompl::base::RealVectorStateSpace::StateType *pos =
+                se3state->as<ompl::base::RealVectorStateSpace::StateType>(0);
+        results.push_back(Position3D(pos->values[0], pos->values[1], pos->values[2]));
+    }
+    return results;
+}
+
+double OMPLPlanner::getPathCost() {
+    //! @todo do we need read write lock?
+    return mCostOfPath.value();
+}
+
+bool OMPLPlanner::isSolutionExist() {
+    //! @todo do we need read write lock?
+    return mSolutionExist;
 }
 
 float OMPLPlanner::getDistBetweenPos3D(const Position3D &pos1, const Position3D& pos2) {

@@ -100,6 +100,11 @@ bool CNCGeneric::armVehicle() {
     mavros_msgs::CommandBool srv;
     srv.request.value = true;
 
+    if (isArmed()) {
+        ROS_WARN("Vehicle Already Armed");
+        return true;
+    }
+
     if (!isReady(getMode())) {
         ROS_ERROR("NOT READY TO ARM UNDER MODE: %s", getMode().c_str());
         return false;

@@ -187,10 +187,12 @@ bool OAController::plan() {
         mAlgDATAmap[tmp] = (mAlgorithmInstances[tmp])->getDataQueue();
     #ifdef DEBUG_OAC
         for (auto cmdline : mAlgCMDmap[tmp]) {
-            ROS_INFO("            CMD: %d with %s", cmdline.first, cmdline.second.c_str());
+            ROS_INFO("            CMD: %s with %s",
+                    Command::CMD_QUEUE_TYPES_NAME[cmdline.first], cmdline.second.c_str());
         }
         for (auto dataline : mAlgDATAmap[tmp]) {
-            ROS_INFO("            DATA: %d with %s", dataline.first, dataline.second.c_str());
+            ROS_INFO("            DATA: %s with %s",
+                    Command::DATA_QUEUE_TYPES_NAME[dataline.first], dataline.second.c_str());
         }
     #endif
     }

@@ -42,23 +42,33 @@ bool OAAlgRRT::collect() {
         ROS_ERROR("[OAAlgFGM] Missing CNC pointer !!!");
         return false;
     }
+    /***************************************************
+     * Set Start Position
+     ***************************************************/
     // If current location is different from previous one. Update start. (face -y axis)
-    Position3D startPos(mpCNC->getLocalPosition().pose.position.x,
+    Position3D startPos(-mpCNC->getLocalPosition().pose.position.x,
             -mpCNC->getLocalPosition().pose.position.y,
             mpCNC->getLocalPosition().pose.position.z);
     if (OMPLPlanner::getDistBetweenPos3D(startPos, previousStart) > DIST_COMPARE_DIFF_MAX) {
         previousStart = startPos;
         mPlanner.setStartPos(startPos);
     }
+    /***************************************************
+     * Set Goal Position
+     ***************************************************/
     //! @note -Y axis is facing North (UE4 Verified)
     //! @note -X axis is facing East (UE4 Verified)
     GPSPoint goalGPS = (mpCNC->getLocalMissionQueue()).front();
     GPSPoint currentGPS = mpCNC->getCurrentGPSPoint();
+    geometry_msgs::PoseStamped posToHome = mpCNC->getLocalPosition();
+    std::pair<float, float> targetXY = CNC::CNCUtility::getNorthEastFromPoints(currentGPS, goalGPS);
+    targetXY.first += posToHome.pose.position.y;
+    targetXY.second += posToHome.pose.position.x;
     // Target position need to be different from start position
     Position3D targetPos;
     // Check if GPSPoint data is valid
-    if (CNC::CNCUtility::getDistanceMeter(currentGPS, goalGPS) < MAX_PLANNING_DISTANCE) {
-        std::pair<float, float> targetXY = CNC::CNCUtility::getNorthEastFromPoints(currentGPS, goalGPS);
+    if (goalGPS.altitude_ >= MIN_GOAL_HEIGHT &&
+            std::sqrt(targetXY.first*targetXY.first + targetXY.second*targetXY.second) < MAX_PLANNING_DISTANCE) {
         targetPos.mX = -targetXY.second;
         targetPos.mY = -targetXY.first;
         targetPos.mZ = goalGPS.altitude_;
@@ -75,8 +85,12 @@ bool OAAlgRRT::plan() {
     CMDQueue_.clear();
     DATAQueue_.clear();
     DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, SYS_Algs_STR[SYS_Algs::ALG_RRT]));
-    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE, std::to_string(0.0f)));
-    //! @todo remain false until implemented
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE,
+            mPlanner.isSolutionExist() ? std::to_string(1.0f) : std::to_string(0.0f)));
+    DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_SOLUTION_COST,
+            mPlanner.isSolutionExist() ?
+            std::to_string(mPlanner.getPathCost()) :
+            std::to_string(std::numeric_limits<float>::infinity())));
     return true;
 }
 

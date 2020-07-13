@@ -116,7 +116,8 @@ static const float UE4_SITL_SCALE = 1000.0f;
 
 // RRT
 // #define ENABLE_SMOOTHER
-static const float MAX_PLANNING_DISTANCE = 1000.0f;
+static const float MAX_PLANNING_DISTANCE = 100.0f;
+static const float MIN_GOAL_HEIGHT = 1.0f;
 
 // Defines
 #define ENABLE_POINTCLOUD
