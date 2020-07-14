@@ -88,7 +88,7 @@ class OMPLPlanner {
     void setForcePlanFlag(bool newflag);
     bool getForceReplanFlag();
     void setForceReplanFlag(bool newflag);
-    std::vector<Position3D> getPath();
+    int32_t getPathAndRevision(std::vector<Position3D> *results);
     double getPathCost();
     bool isSolutionExist();
     // Threads Callback
@@ -114,6 +114,7 @@ class OMPLPlanner {
     boost::shared_mutex forcePlanFlag_mutex_;
     boost::shared_mutex forceReplanFlag_mutex_;
     boost::shared_mutex solution_mutex_;
+    boost::shared_mutex solution_revision_mutex_;
     bool mSolutionExist;
     bool replan_flag;
     bool force_plan_flag;
@@ -126,6 +127,7 @@ class OMPLPlanner {
     // OMPL Planner
     ompl::base::PlannerPtr mpPlanner;
     // Solution
+    int32_t mSolutionRevision;
     ompl::geometric::PathGeometric *mpPathSmooth = nullptr;
     ompl::base::PathPtr mPath;
     ompl::base::Cost mCostOfPath;
@@ -138,6 +140,7 @@ class OMPLPlanner {
     ompl::base::OptimizationObjectivePtr getPathLengthObjWithCostToGo(const ompl::base::SpaceInformationPtr& si);
     fcl::CollisionObject<double> *getOcTreeCollisionObj();
     void setPathCost(bool pathExist, ompl::base::Cost cost);
+    void setNewPathAndRevision(ompl::geometric::PathGeometric *newPath);
     // Threads
     boost::thread* mpThreadWatchOctomap = nullptr;
     void RRTMainThread();

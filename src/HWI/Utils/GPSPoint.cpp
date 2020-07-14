@@ -43,3 +43,11 @@ bool GPSPoint::operator==(const GPSPoint& other) const {
     }
     return false;
 }
+
+std::string GPSPoint::AsString() {
+    std::string result = "GPSPoint: ";
+    result += std::to_string(latitude_) + " ";
+    result += std::to_string(longitude_) + " ";
+    result += std::to_string(altitude_);
+    return result;
+}

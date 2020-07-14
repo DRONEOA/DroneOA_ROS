@@ -48,9 +48,10 @@ class CNCInterface : public GUI::GUISubject {
     virtual bool setMaxSpeed(float speedType, float speed, float isRelative) = 0;
     virtual bool setHome(float targetLatitude, float targetLongitude, float targetAltitude) = 0;
     virtual bool gotoGlobal(float x_lat, float y_long, float z_alt, bool isFromOAC = false) = 0;
-    virtual bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false,
+    virtual bool gotoRelative(float north, float east, float z_alt, bool isAltDelta = false,
             bool isFromOAC = false) = 0;
     virtual bool gotoHeading(float heading, float distance, float z_alt, bool isFromOAC = false) = 0;
+    virtual bool pushMission(const std::vector<GPSPoint> &wpList, bool isGlobal = true) = 0;
 
     // Local Mission
     virtual bool clearFCUWaypoint() = 0;

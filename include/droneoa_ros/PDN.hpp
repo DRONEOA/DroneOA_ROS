@@ -118,6 +118,8 @@ static const float UE4_SITL_SCALE = 1000.0f;
 // #define ENABLE_SMOOTHER
 static const float MAX_PLANNING_DISTANCE = 100.0f;
 static const float MIN_GOAL_HEIGHT = 1.0f;
+static const float MAX_SPEED = 0.2f;
+static const int CMD_MODE = 0;  /**< @brief 0: use mission queue; 1: use auto mode; 2: use setpoint */
 
 // Defines
 #define ENABLE_POINTCLOUD

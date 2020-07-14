@@ -31,8 +31,11 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
 #include <droneoa_ros/PDN.hpp>
+
+namespace CNC {
+    class CNCInterface;
+}  // namespace CNC
 
 namespace Command {
 
@@ -55,6 +58,7 @@ enum CMD_QUEUE_TYPES : uint32_t {
     CMD_CLIMB,  /*!< DATA: float Delta Altitude */
     CMD_DESCEND,  /*!< DATA: float Delta Altitude */
     CMD_UNTIL,  /*!< DATA: mode (arrwp: arrive at way point; clrwp: clear all waypoints; More to be added) */
+    CMD_PUSH_MISSION_QUEUE,
 };
 
 /**
@@ -74,6 +78,7 @@ static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_CLIMB",
     "CMD_DESCEND",
     "CMD_UNTIL",
+    "CMD_PUSH_MISSION_QUEUE",
 };
 
 /**

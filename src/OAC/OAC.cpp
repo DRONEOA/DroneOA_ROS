@@ -262,7 +262,10 @@ void OAController::determineFunStage2() {
 }
 
 void OAController::determineFunStage3() {
-    //! @todo
+    //! @todo test only one alg
+    for (auto algCommand : mAlgCMDmap) {
+        mpParserExecuter->parseCMDQueue(algCommand.second, true);
+    }
 }
 
 bool OAController::abort() {

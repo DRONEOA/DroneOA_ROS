@@ -45,8 +45,9 @@ class CNCMock : public CNCInterface {
     MOCK_METHOD3(setMaxSpeed, bool(float speedType, float speed, float isRelative));
     MOCK_METHOD3(setHome, bool(float targetLatitude, float targetLongitude, float targetAltitude));
     MOCK_METHOD4(gotoGlobal, bool(float x_lat, float y_long, float z_alt, bool isFromOAC));
-    MOCK_METHOD5(gotoRelative, bool(float x_lat, float y_long, float z_alt, bool isAltDelta, bool isFromOAC));
+    MOCK_METHOD5(gotoRelative, bool(float north, float east, float z_alt, bool isAltDelta, bool isFromOAC));
     MOCK_METHOD4(gotoHeading, bool(float heading, float distance, float z_alt, bool isFromOAC));
+    MOCK_METHOD2(pushMission, bool(const std::vector<GPSPoint> &wpList, bool isGlobal));
     // Local Mission
     MOCK_METHOD0(clearFCUWaypoint, bool());
     MOCK_METHOD0(clearLocalMissionQueue, void());

@@ -14,7 +14,9 @@ sudo apt-get update
 sudo apt-get install ros-melodic-ompl -y
 echo "---------- Install FCL ----------"
 sudo apt install libccd-dev -y
+sudo apt install liboctomap-dev -y
 sudo apt install ros-melodic-octomap -y
+sudo apt install ros-melodic-octomap-server -y
 sudo apt install ros-melodic-octomap-msgs -y
 git clone https://github.com/flexible-collision-library/fcl.git
 cd fcl

@@ -19,9 +19,12 @@
 
 #include <ros/ros.h>
 
+#include <sstream>
+
 #include <droneoa_ros/OAC/Command.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
 #include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
+#include <droneoa_ros/HWI/CNCArdupilot.hpp>
 
 namespace Command {
 
@@ -137,6 +140,27 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
                 float alt = cnc->getRelativeAltitude();
                 //! @TODO To prevent slight heading change, try magnetic compass?
                 return cnc->gotoHeading(heading, dist, deltaAlt-alt, isFromOAC);
+            }
+            case CMD_QUEUE_TYPES::CMD_PUSH_MISSION_QUEUE:
+            {
+                std::istringstream iss(cmdline.second);
+                std::vector<std::string> results((std::istream_iterator<std::string>(iss)),
+                        std::istream_iterator<std::string>());
+                //! @todo this depends on type of FCU
+                std::vector<GPSPoint> wps;
+                for (auto gps : results) {
+                    std::istringstream singleWPss(gps);
+                    std::vector<float> resultWPBreak;
+                    while (singleWPss.good()) {
+                        std::string singleWPStr;
+                        getline(singleWPss, singleWPStr, ',' );
+                        resultWPBreak.push_back(std::stof(singleWPStr));
+                    }
+                    if (resultWPBreak.size() != 3) throw 1;
+                    wps.push_back(GPSPoint(resultWPBreak.at(0), resultWPBreak.at(1), resultWPBreak.at(2)));
+                }
+                cnc->clearFCUWaypoint();
+                return cnc->pushMission(wps, true);
             }
             default:
                 throw 1;

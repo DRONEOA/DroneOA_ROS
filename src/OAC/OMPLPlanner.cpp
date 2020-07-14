@@ -84,7 +84,7 @@ void OMPLPlanner::setForceReplanFlag(bool newflag) {
     force_replan_flag = newflag;
 }
 
-OMPLPlanner::OMPLPlanner() : mSolutionExist(true), replan_flag(false), force_replan_flag(false) {
+OMPLPlanner::OMPLPlanner() : mSolutionExist(true), replan_flag(false), force_replan_flag(false), mSolutionRevision(0) {
     //四旋翼的障碍物几何形状
     mpAircraftObject = std::shared_ptr<fcl::CollisionGeometry<double>>(new fcl::Box<double>(0.8, 0.8, 0.3));
     //分辨率参数设置
@@ -219,7 +219,7 @@ bool OMPLPlanner::plan() {
     // create a planner for the defined space
     ompl::geometric::InformedRRTstar* rrt = new ompl::geometric::InformedRRTstar(mpSpaceInfo);
     // RRT range (Path resolution)
-    rrt->setRange(1.0);
+    rrt->setRange(2.0);
     ompl::base::PlannerPtr plan(rrt);
     // set the problem we are trying to solve for the planner
     plan->setProblemDefinition(mpProblem);
@@ -294,9 +294,8 @@ bool OMPLPlanner::plan() {
         #ifdef ENABLE_SMOOTHER
             ompl::geometric::PathSimplifier* pathBSpline = new ompl::geometric::PathSimplifier(mpSpaceInfo);
         #endif
-            if (mpPathSmooth) delete mpPathSmooth;
-            mpPathSmooth = new ompl::geometric::PathGeometric(dynamic_cast<const ompl::geometric::PathGeometric&>(
-                    *mpProblem->getSolutionPath()));
+            setNewPathAndRevision(new ompl::geometric::PathGeometric(
+                    dynamic_cast<const ompl::geometric::PathGeometric&>(*mpProblem->getSolutionPath())));
         #ifdef ENABLE_SMOOTHER
             pathBSpline->smoothBSpline(*mpPathSmooth, 3);
             // Publish path as markers
@@ -387,9 +386,13 @@ ompl::base::OptimizationObjectivePtr OMPLPlanner::getPathLengthObjWithCostToGo(
     // return obj;
 }
 
-std::vector<Position3D> OMPLPlanner::getPath() {
+int32_t OMPLPlanner::getPathAndRevision(std::vector<Position3D> *results) {
     //! @todo do we need read write lock for mpPathSmooth?
-    std::vector<Position3D> results;
+    //! @todo consider using callback
+    boost::shared_lock<boost::shared_mutex> lock(solution_revision_mutex_);
+    if (!mpPathSmooth) {
+        return mSolutionRevision;
+    }
     for (std::size_t idx = 0; idx < mpPathSmooth->getStateCount(); idx++) {
         // cast the abstract state type to the type we expect
         const ompl::base::SE3StateSpace::StateType *se3state =
@@ -397,9 +400,20 @@ std::vector<Position3D> OMPLPlanner::getPath() {
         // extract the first component of the state and cast it to what we expect
         const ompl::base::RealVectorStateSpace::StateType *pos =
                 se3state->as<ompl::base::RealVectorStateSpace::StateType>(0);
-        results.push_back(Position3D(pos->values[0], pos->values[1], pos->values[2]));
+        results->push_back(Position3D(pos->values[0], pos->values[1], pos->values[2]));
     }
-    return results;
+    // for (auto wp : *results) {
+    //     std::cout << wp.AsString() << std::endl;
+    // }
+    return mSolutionRevision;
+}
+
+void OMPLPlanner::setNewPathAndRevision(ompl::geometric::PathGeometric *newPath) {
+    boost::upgrade_lock<boost::shared_mutex> lock(solution_revision_mutex_);
+    boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+    if (mpPathSmooth) delete mpPathSmooth;
+    mpPathSmooth = newPath;
+    mSolutionRevision++;
 }
 
 double OMPLPlanner::getPathCost() {

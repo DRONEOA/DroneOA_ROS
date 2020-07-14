@@ -20,6 +20,8 @@
 #ifndef HWI_GPSPOINT_HPP_  // NOLINT
 #define HWI_GPSPOINT_HPP_  // NOLINT
 
+#include <string>
+
 class GPSPoint {
  public:
     GPSPoint();
@@ -27,6 +29,8 @@ class GPSPoint {
     virtual ~GPSPoint() = default;
 
     bool operator==(const GPSPoint& other) const;
+
+    std::string AsString();
 
     float latitude_;
     float longitude_;

@@ -58,6 +58,7 @@ sudo apt-get install ros-melodic-perception -y
 sudo apt-get install ros-melodic-pcl-ros -y
 sudo apt-get install ros-melodic-pcl-conversions -y
 sudo apt-get install ros-melodic-mavros -y
+sudo apt-get install liboctomap-dev -y
 sudo apt-get install ros-melodic-octomap -y
 sudo apt-get install ros-melodic-octomap-server -y
 sudo apt-get install ros-melodic-octomap-rviz-plugins -y

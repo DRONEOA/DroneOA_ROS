@@ -25,7 +25,7 @@
 
 namespace OAC {
 
-OAAlgRRT::OAAlgRRT(CNC::CNCInterface *cnc) : BaseAlg(cnc) {
+OAAlgRRT::OAAlgRRT(CNC::CNCInterface *cnc) : BaseAlg(cnc), mCurrentSolutionRevision(0) {
     init();
 }
 
@@ -97,17 +97,112 @@ bool OAAlgRRT::collect() {
 }
 
 bool OAAlgRRT::plan() {
-    //! @todo get data from planner
     CMDQueue_.clear();
     DATAQueue_.clear();
+    // Populate Command Queue
+    if (CMD_MODE == 0) {
+        populateCMD_MQueue();
+    } else if (CMD_MODE == 1) {
+        populateCMD_AUTO();
+    } else {
+        populateCMD_Setpoint();
+    }
+    // Populate Data Queue
+    populateDATA();
+    return true;
+}
+
+void OAAlgRRT::populateDATA() {
+    // Populate Data Queue
+    bool solutionExist = mPlanner.isSolutionExist();
     DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_ALG_NAME, SYS_Algs_STR[SYS_Algs::ALG_RRT]));
     DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_CONFIDENCE,
-            mPlanner.isSolutionExist() ? std::to_string(1.0f) : std::to_string(0.0f)));
+            solutionExist ? std::to_string(1.0f) : std::to_string(0.0f)));
     DATAQueue_.push_back(Command::DataLine(Command::DATA_QUEUE_TYPES::DATA_SOLUTION_COST,
-            mPlanner.isSolutionExist() ?
+            solutionExist ?
             std::to_string(mPlanner.getPathCost()) :
             std::to_string(std::numeric_limits<float>::infinity())));
-    return true;
+}
+
+void OAAlgRRT::populateCMD_AUTO() {
+    // Populate Command Queue
+    bool solutionExist = mPlanner.isSolutionExist();
+    if (solutionExist) {
+        std::vector<Position3D> wpLocal;
+        int32_t newSolVersion = mPlanner.getPathAndRevision(&wpLocal);
+        std::string dataStr = "";
+        if (mCurrentSolutionRevision < newSolVersion) {
+            // Reduce max speed
+            CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_SET_MAX_VELOCITY,
+                    std::to_string(MAX_SPEED)));
+            CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_CHMOD,
+                    FLT_MODE_AUTO));
+            //! @note -x is east
+            //! @note -y is north
+            bool first = true;
+            for (auto wp : wpLocal) {
+                if (first) {
+                    first = false;
+                    continue;
+                }
+                GPSPoint homeGPS = mpCNC->getCurrentGPSPoint();
+                if (mpCNC->isHomeGPSSet()) {
+                    homeGPS = mpCNC->getHomeGPSPoint();
+                } else {
+                    mpCNC->getLocalPosition();
+                    wp.mX += mpCNC->getLocalPosition().pose.position.x;
+                    wp.mY += mpCNC->getLocalPosition().pose.position.y;
+                }
+                GPSPoint wpGPS = CNC::CNCUtility::getLocationMeter(homeGPS, -(wp.mY), -(wp.mX));
+                dataStr += std::to_string(wpGPS.latitude_) + "," + std::to_string(wpGPS.longitude_)
+                        + "," + std::to_string(wp.mZ) + " ";
+            }
+            CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_PUSH_MISSION_QUEUE, dataStr));
+            mCurrentSolutionRevision = newSolVersion;
+        }
+    }
+}
+
+void OAAlgRRT::populateCMD_MQueue() {
+    // Populate Command Queue
+    bool solutionExist = mPlanner.isSolutionExist();
+    if (solutionExist) {
+        std::vector<Position3D> wpLocal;
+        int32_t newSolVersion = mPlanner.getPathAndRevision(&wpLocal);
+        if (mCurrentSolutionRevision < newSolVersion) {
+            // Reduce max speed
+            CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_SET_MAX_VELOCITY,
+                    std::to_string(MAX_SPEED)));
+            //! @note -x is east
+            //! @note -y is north
+            bool first = true;
+            for (auto wp : wpLocal) {
+                if (first) {
+                    first = false;
+                    continue;
+                }
+                GPSPoint homeGPS = mpCNC->getCurrentGPSPoint();
+                if (mpCNC->isHomeGPSSet()) {
+                    homeGPS = mpCNC->getHomeGPSPoint();
+                } else {
+                    mpCNC->getLocalPosition();
+                    wp.mX += mpCNC->getLocalPosition().pose.position.x;
+                    wp.mY += mpCNC->getLocalPosition().pose.position.y;
+                }
+                GPSPoint wpGPS = CNC::CNCUtility::getLocationMeter(homeGPS, -(wp.mY), -(wp.mX));
+                CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL,
+                        std::to_string(wpGPS.latitude_) + " " + std::to_string(wpGPS.longitude_)
+                        + " " + std::to_string(wp.mZ)));
+                CMDQueue_.push_back(Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_UNTIL, "arrwp"));
+            }
+            mCurrentSolutionRevision = newSolVersion;
+        }
+    }
+}
+
+void OAAlgRRT::populateCMD_Setpoint() {
+    //! @todo Blocked until setpoint function is implemented
+    ROS_ERROR("Set Point Function Is WIP !!!");
 }
 
 }  // namespace OAC

@@ -31,6 +31,12 @@ class OAAlgRRT : public BaseAlg {
     OMPLPlanner mPlanner;
     Position3D previousStart;
     Position3D previousGoal;
+    int32_t mCurrentSolutionRevision;
+    // Helper
+    void populateCMD_AUTO();
+    void populateCMD_MQueue();
+    void populateCMD_Setpoint();
+    void populateDATA();
  public:
     explicit OAAlgRRT(CNC::CNCInterface *cnc);
     ~OAAlgRRT() override;

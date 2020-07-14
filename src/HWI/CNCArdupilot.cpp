@@ -85,7 +85,7 @@ void CNCArdupilot::WP_list_callback(const mavros_msgs::WaypointListConstPtr& msg
 /***************************************************************************
  * Mission
  */
-bool CNCArdupilot::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
+bool CNCArdupilot::pushWaypoint(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
     z_alt = CNCUtility::validSpeedCMD(z_alt);
     ros::ServiceClient pushWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
     mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
@@ -109,21 +109,23 @@ bool CNCArdupilot::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t
     }
 }
 
-bool CNCArdupilot::pushWaypoints(std::vector<GPSPoint> wpList, uint8_t isCurrent, uint16_t command) {
+bool CNCArdupilot::pushWaypoints(const std::vector<GPSPoint> &wpList, uint8_t isCurrent, uint16_t command) {
     ros::ServiceClient pushWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
     mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
     float z_alt = getRelativeAltitude();
+    bool firstWP = true;
     for (auto tmpWP : wpList) {
         mavros_msgs::Waypoint wp;
         wp.frame          = mavros_msgs::Waypoint::FRAME_GLOBAL_REL_ALT;
         wp.command        = command;
-        wp.is_current     = isCurrent;
+        wp.is_current     = firstWP ? isCurrent : false;
         wp.autocontinue   = true;
         wp.x_lat          = tmpWP.latitude_;
         wp.y_long         = tmpWP.longitude_;
         z_alt = CNCUtility::validSpeedCMD(tmpWP.altitude_);
         wp.z_alt          = z_alt;
         wp_push_srv.request.waypoints.push_back(wp);
+        firstWP = false;
     }
     // Send WPs to Vehicle
     if (pushWP_cl.call(wp_push_srv)) {
@@ -181,7 +183,7 @@ bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt, bool isFro
     if (!clearFCUWaypoint()) {
         return false;
     }
-    if (pushWaypoints(x_lat, y_long, z_alt)) {
+    if (pushWaypoint(x_lat, y_long, z_alt)) {
         mRecentWaypoint = GPSPoint(x_lat, y_long, z_alt);
         return true;
     }
@@ -189,10 +191,10 @@ bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt, bool isFro
 }
 
 // Goto Relative Waypoint (North+, East+)
-bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta, bool isFromOAC) {
+bool CNCArdupilot::gotoRelative(float north, float east, float z_alt, bool isAltDelta, bool isFromOAC) {
     // @TODO: check GPS available
     // @TODO: consider changing altitude first
-    GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), x_lat, y_long);
+    GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), north, east);
     return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt, isFromOAC);
 }
 
@@ -200,6 +202,16 @@ bool CNCArdupilot::gotoRelative(float x_lat, float y_long, float z_alt, bool isA
 bool CNCArdupilot::gotoHeading(float heading, float distance, float z_alt, bool isFromOAC) {
     std::pair<float, float> tempRelative = CNCUtility::getNorthEastDistanceFromHeading(heading, distance);
     return gotoRelative(tempRelative.first, tempRelative.second, z_alt, false, isFromOAC);
+}
+
+// Push mission
+bool CNCArdupilot::pushMission(const std::vector<GPSPoint> &wpList, bool isGlobal) {
+    //! @todo Handle local
+    if (!isGlobal) {
+        ROS_ERROR("Local Mission [Setpoint] is still under develpment.");
+        return false;
+    }
+    return pushWaypoints(wpList);
 }
 
 // Move Mission
