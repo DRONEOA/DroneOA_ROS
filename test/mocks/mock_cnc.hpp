@@ -25,6 +25,7 @@
 
 #include <string>
 #include <queue>
+#include <vector>
 
 #include "../../include/droneoa_ros/HWI/interface/CNCInterface.hpp"
 

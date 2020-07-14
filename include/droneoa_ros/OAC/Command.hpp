@@ -34,7 +34,9 @@
 #include <droneoa_ros/PDN.hpp>
 
 namespace CNC {
-    class CNCInterface;
+
+class CNCInterface;
+
 }  // namespace CNC
 
 namespace Command {

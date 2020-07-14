@@ -26,6 +26,7 @@
 
 #include <string>
 #include <queue>
+#include <vector>
 
 #include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
 #include <droneoa_ros/GUI/GUISubject.hpp>

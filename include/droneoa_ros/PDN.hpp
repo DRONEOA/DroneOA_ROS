@@ -71,9 +71,9 @@ static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz suggest to be s
 static const int32_t OAC_STAGE_SETTING = 3;
 
 // Vehicle Data
-static const int32_t VEHICLE_BOUNDBOX_WIDTH = 1200;  /**< @brief unit: mm */
-static const int32_t VEHICLE_BOUNDBOX_LENGTH = 1200;  /**< @brief unit: mm */
-static const int32_t VEHICLE_BOUNDBOX_HEIGHT = 800;  /**< @brief unit: mm */
+static const int32_t VEHICLE_BOUNDBOX_WIDTH = 1000;  /**< @brief unit: mm */
+static const int32_t VEHICLE_BOUNDBOX_LENGTH = 1000;  /**< @brief unit: mm */
+static const int32_t VEHICLE_BOUNDBOX_HEIGHT = 600;  /**< @brief unit: mm */
 static const int32_t VEHICLE_MAX_SPEED_HORIZONTAL = 12;  /**< @brief unit: m/s */
 static const float VEHICLE_MAX_ALTITUDE_RELATIVE = 10;  /**< @brief unit: m */
 static const float VEHICLE_MAX_ACCELEATION = 0.4f;  /**< @brief unit: m/s^2 */
@@ -120,6 +120,7 @@ static const float MAX_PLANNING_DISTANCE = 100.0f;
 static const float MIN_GOAL_HEIGHT = 1.0f;
 static const float MAX_SPEED = 0.2f;
 static const int CMD_MODE = 0;  /**< @brief 0: use mission queue; 1: use auto mode; 2: use setpoint */
+static const float OCTOMAP_RESOLUTION = 0.2f;
 
 // Defines
 #define ENABLE_POINTCLOUD

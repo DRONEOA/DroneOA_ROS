@@ -153,7 +153,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
                     std::vector<float> resultWPBreak;
                     while (singleWPss.good()) {
                         std::string singleWPStr;
-                        getline(singleWPss, singleWPStr, ',' );
+                        getline(singleWPss, singleWPStr, ',');
                         resultWPBreak.push_back(std::stof(singleWPStr));
                     }
                     if (resultWPBreak.size() != 3) throw 1;

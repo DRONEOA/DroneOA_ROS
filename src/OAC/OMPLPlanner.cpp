@@ -48,7 +48,7 @@ bool OMPLPlanner::setStartPos(Position3D pos) {
     mpProblem->clearStartStates();
     mpProblem->addStartState(start);
     ROS_WARN("[RRT] Set Start Pos: %lf %lf %lf", pos.mX, pos.mY, pos.mZ);
-    return true;  //! @todo do we need replan?
+    return true;
 }
 
 bool OMPLPlanner::setTargetPos(Position3D pos) {
@@ -85,13 +85,16 @@ void OMPLPlanner::setForceReplanFlag(bool newflag) {
 }
 
 OMPLPlanner::OMPLPlanner() : mSolutionExist(true), replan_flag(false), force_replan_flag(false), mSolutionRevision(0) {
-    //四旋翼的障碍物几何形状
-    mpAircraftObject = std::shared_ptr<fcl::CollisionGeometry<double>>(new fcl::Box<double>(0.8, 0.8, 0.3));
-    //分辨率参数设置
+    // Collision box of the drone
+    mpAircraftObject = std::shared_ptr<fcl::CollisionGeometry<double>>(new fcl::Box<double>(
+            static_cast<double>(VEHICLE_BOUNDBOX_WIDTH) / 1000.0f,
+            static_cast<double>(VEHICLE_BOUNDBOX_LENGTH) / 1000.0f,
+            static_cast<double>(VEHICLE_BOUNDBOX_HEIGHT) / 1000.0f));
+    // Octomap tree and it's resolution
     fcl::OcTree<double>* tree =
-            new fcl::OcTree<double>(std::shared_ptr<const octomap::OcTree>(new octomap::OcTree(0.15)));
+            new fcl::OcTree<double>(std::shared_ptr<const octomap::OcTree>(new octomap::OcTree(OCTOMAP_RESOLUTION)));
     mpTreeObj = std::shared_ptr<fcl::CollisionGeometry<double>>(tree);
-    //解的状态空间
+    // State space of the solution
     mpSpace = ompl::base::StateSpacePtr(new ompl::base::SE3StateSpace());
     // create a start state
     ompl::base::ScopedState<ompl::base::SE3StateSpace> start(mpSpace);
