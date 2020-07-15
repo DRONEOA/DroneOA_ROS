@@ -293,9 +293,14 @@ bool OAController::isMissionLeftAndCheckArrival() {
     if (mpCNC->getLocalMissionQueue().size() == 0) {
         return false;
     }
-    GPSPoint goalGPS = (mpCNC->getLocalMissionQueue()).front();
-    GPSPoint currentGPS = mpCNC->getCurrentGPSPoint();
-    if (goalGPS == currentGPS) {
+    Position3D goal = (mpCNC->getLocalMissionQueue()).front();
+    Position3D current;
+    if (OAC_USE_SETPOINT_ENU) {
+        current = mpCNC->getLocalPosition();
+    } else {
+        current = mpCNC->getCurrentGPSPoint();
+    }
+    if (goal == current) {
         ROS_WARN("ARRIVED!!!");
         mpCNC->popLocalMissionQueue();
     }

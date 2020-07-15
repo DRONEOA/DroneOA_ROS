@@ -17,7 +17,7 @@
 
         <!-- Filter out obstacles which are lower than 1 meter -->
         <param name="occupancy_min_z" value="1.0" />
-        <param name="height_map" value="false" />
+        <param name="height_map" value="true" />
         <param name="publish_free_space" value="false" />
     </node>
 </launch>

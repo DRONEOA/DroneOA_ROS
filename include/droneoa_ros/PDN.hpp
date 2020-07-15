@@ -36,7 +36,19 @@
 static const double GLOBAL_ROS_RATE = 20;
 
 /**
- * @brief List of flight modes
+ * @brief List of FCU Type
+ */
+static const char* FCU_PX4 = "PX4";
+static const char* FCU_ARDUPILOT = "ARDUPILOT";
+static const char* CURRENT_FCU_TYPE = FCU_ARDUPILOT;
+
+/**
+ * @brief List of flight modes Ardupilot
+ */
+static const char* FLT_MODE_OFFBOARDD = "OFFBOARD";
+
+/**
+ * @brief List of flight modes Ardupilot
  */
 static const char* FLT_MODE_STABILIZE = "STABILIZE";
 static const char* FLT_MODE_ACRO = "ACRO";
@@ -59,8 +71,16 @@ static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
  */
 static const bool ENABLE_SAFETY_GPS = true;
 
+/**
+ * @brief True if want to use GPS global position for move relative and heading
+ */
+static const bool ENABLE_FORCE_GPS_ON_RELATIVE_MOVE = false;
+
 // OA Controller
+#define ENABLE_POINTCLOUD
 static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz suggest to be same as GLOBAL_ROS_RATE */
+static const bool OAC_USE_SETPOINT_ENU = true;  /**< @brief true to use local ENU [Recommend]; false to use GPS */
+static const bool OAC_CUMULATIVE_WAYPOINT = false;  /**< @brief if true, new waypoint will not overtake previous */
 
 /**
  * @brief Enabled feature stage 1-3
@@ -110,20 +130,21 @@ static const int32_t RUNNER_TIMEOUT_LIMIT = 100000;  /**< @brief unit: msec */
 // Max Error
 static const double GPS_COMPARE_DIFF_MAX = 0.5;  /**< @brief max distance consider to be the same GPS point unit: m */
 static const double ALT_COMPARE_DIFF_MAX = 0.1;  /**< @brief max distance consider to be the same Altitude unit: m */
+static const double POS3D_COMPARE_DIFF_MAX = 0.2;  /**< @brief max diff consider to be the same position 3d unit: m */
 
 // SITL
 static const float UE4_SITL_SCALE = 1000.0f;
 
 // RRT
-// #define ENABLE_SMOOTHER
-static const float MAX_PLANNING_DISTANCE = 100.0f;
-static const float MIN_GOAL_HEIGHT = 1.0f;
-static const float MAX_SPEED = 0.2f;
-static const int CMD_MODE = 0;  /**< @brief 0: use mission queue; 1: use auto mode; 2: use setpoint */
+// #define RRT_ENABLE_SMOOTHER
+static const double RRT_MAX_PLANNING_DISTANCE = 10.0f;
+static const double RRT_MAX_PLANNING_HEIGHT = VEHICLE_MAX_ALTITUDE_RELATIVE;
+static const double RRT_MIN_PLANNING_HEIGHT = 0.0f;
+static const float RRT_MIN_GOAL_HEIGHT = 1.0f;
+static const float RRT_MAX_SPEED = 0.2f;
 static const float OCTOMAP_RESOLUTION = 0.2f;
 
-// Defines
-#define ENABLE_POINTCLOUD
+// Debug Feature Control
 #define DEBUG_CNC_POPUP
 // #define DEBUG_DEPTH_IMG_POPUP
 // #define DEBUG_PCL_VIEWER  // Enable image popup first

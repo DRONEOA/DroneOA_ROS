@@ -47,8 +47,10 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 
+#include <droneoa_ros/HWI/Utils/LocalPoint.hpp>
 #include <droneoa_ros/PDN.hpp>
-#ifdef ENABLE_SMOOTHER
+
+#ifdef RRT_ENABLE_SMOOTHER
 #include <ompl/geometric/PathSimplifier.h>
 #endif
 
@@ -58,28 +60,15 @@
 
 namespace OAC {
 
-struct Position3D {
-    Position3D() : mX(0), mY(0), mZ(0) {}
-    Position3D(double x, double y, double z) : mX(x), mY(y), mZ(z) {}
-    double mX;
-    double mY;
-    double mZ;
-    std::string AsString() {
-        std::string result = "Position3D: x: " + std::to_string(mX) + " y: " +
-                std::to_string(mY) + " z: " + std::to_string(mZ);
-        return result;
-    }
-};
-
 class OMPLPlanner {
  public:
     OMPLPlanner();
     virtual ~OMPLPlanner();
-    bool setStartPos(Position3D pos);
+    bool setStartPos(LocalPoint pos);
     /**
      * Note: Depth Camera is facing -y axis
      */ 
-    bool setTargetPos(Position3D pos);
+    bool setTargetPos(LocalPoint pos);
     bool updateMap(std::shared_ptr<fcl::CollisionGeometry<double>> map);
     bool plan();
     bool rePlan();
@@ -88,14 +77,12 @@ class OMPLPlanner {
     void setForcePlanFlag(bool newflag);
     bool getForceReplanFlag();
     void setForceReplanFlag(bool newflag);
-    int32_t getPathAndRevision(std::vector<Position3D> *results);
+    int32_t getPathAndRevision(std::vector<LocalPoint> *results);
     double getPathCost();
     bool isSolutionExist();
     // Threads Callback
     void Octomap_callback(const octomap_msgs::OctomapConstPtr& msg);
     void Click_callback(const geometry_msgs::PointStampedConstPtr& msg);
-    // Helper
-    static float getDistBetweenPos3D(const Position3D &pos1, const Position3D& pos2);
     // Clearance Objective
     class ClearanceObjective : public ompl::base::StateCostIntegralObjective {
      public:
@@ -146,7 +133,7 @@ class OMPLPlanner {
     void RRTMainThread();
     // Path Publisher
     ros::NodeHandle n;
-#ifdef ENABLE_SMOOTHER
+#ifdef RRT_ENABLE_SMOOTHER
     ros::Publisher vis_pub;
 #endif
     ros::Publisher traj_pub;

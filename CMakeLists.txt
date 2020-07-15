@@ -165,6 +165,8 @@ add_library(droneoa_ros_libhwi
   src/HWI/RSC.cpp
   src/HWI/Utils/CNCUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
+  src/HWI/Utils/LocalPoint.cpp
+  src/HWI/Utils/Position3D.cpp
   src/HWI/Utils/LidarUtils.cpp
   src/HWI/ConsoleInputManager.cpp
 )
@@ -275,6 +277,8 @@ add_executable(droneoa_ros_utiltest
   src/Utils/GeneralUtils.cpp
   src/HWI/Utils/CNCUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
+  src/HWI/Utils/LocalPoint.cpp
+  src/HWI/Utils/Position3D.cpp
 )
 
 target_link_libraries(droneoa_ros_utiltest ${catkin_LIBRARIES} gtest)
@@ -287,6 +291,9 @@ add_executable(droneoa_ros_commandtest
   src/OAC/Command.cpp
   src/Utils/GeneralUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
+  src/HWI/Utils/LocalPoint.cpp
+  src/HWI/Utils/Position3D.cpp
+  src/HWI/Utils/CNCUtils.cpp
   src/GUI/GUISubscriber.cpp
   src/GUI/GUISubject.cpp
 )

@@ -41,7 +41,7 @@ fcl::CollisionObject<double> *OMPLPlanner::getOcTreeCollisionObj() {
     return mpTreeObj_obj;
 }
 
-bool OMPLPlanner::setStartPos(Position3D pos) {
+bool OMPLPlanner::setStartPos(LocalPoint pos) {
     ompl::base::ScopedState<ompl::base::SE3StateSpace> start(mpSpace);
     start->setXYZ(pos.mX, pos.mY, pos.mZ);
     start->as<ompl::base::SO3StateSpace::StateType>(1)->setIdentity();
@@ -51,7 +51,7 @@ bool OMPLPlanner::setStartPos(Position3D pos) {
     return true;
 }
 
-bool OMPLPlanner::setTargetPos(Position3D pos) {
+bool OMPLPlanner::setTargetPos(LocalPoint pos) {
     ompl::base::ScopedState<ompl::base::SE3StateSpace> goal(mpSpace);
     goal->setXYZ(pos.mX, pos.mY, pos.mZ);
     goal->as<ompl::base::SO3StateSpace::StateType>(1)->setIdentity();
@@ -104,12 +104,12 @@ OMPLPlanner::OMPLPlanner() : mSolutionExist(true), replan_flag(false), force_rep
     // Boundary of the search space
     //! @todo Add a set function
     ompl::base::RealVectorBounds bounds(3);
-    bounds.setLow(0, -10);
-    bounds.setHigh(0, 10);
-    bounds.setLow(1, -10);
-    bounds.setHigh(1, 10);
-    bounds.setLow(2, 0);
-    bounds.setHigh(2, 5);
+    bounds.setLow(0, -RRT_MAX_PLANNING_DISTANCE);
+    bounds.setHigh(0, RRT_MAX_PLANNING_DISTANCE);
+    bounds.setLow(1, -RRT_MAX_PLANNING_DISTANCE);
+    bounds.setHigh(1, RRT_MAX_PLANNING_DISTANCE);
+    bounds.setLow(2, RRT_MIN_PLANNING_HEIGHT);
+    bounds.setHigh(2, RRT_MAX_PLANNING_HEIGHT);
     mpSpace->as<ompl::base::SE3StateSpace>()->setBounds(bounds);
     // construct an instance of  space information from this state space
     mpSpaceInfo = ompl::base::SpaceInformationPtr(new ompl::base::SpaceInformation(mpSpace));
@@ -134,7 +134,7 @@ OMPLPlanner::OMPLPlanner() : mSolutionExist(true), replan_flag(false), force_rep
     // Init Octomap Watcher
     mpThreadWatchOctomap = new boost::thread(boost::bind(&OMPLPlanner::RRTMainThread, this));
     // Setup Publisher
-#ifdef ENABLE_SMOOTHER
+#ifdef RRT_ENABLE_SMOOTHER
     vis_pub = n.advertise<nav_msgs::Path>("visualization_marker", 0);
 #endif
     traj_pub = n.advertise<nav_msgs::Path>("waypoints", 1);
@@ -294,12 +294,12 @@ bool OMPLPlanner::plan() {
              * Path smoothing using bspline
              **************************************/
             // Optimize / Smooth the path
-        #ifdef ENABLE_SMOOTHER
+        #ifdef RRT_ENABLE_SMOOTHER
             ompl::geometric::PathSimplifier* pathBSpline = new ompl::geometric::PathSimplifier(mpSpaceInfo);
         #endif
             setNewPathAndRevision(new ompl::geometric::PathGeometric(
                     dynamic_cast<const ompl::geometric::PathGeometric&>(*mpProblem->getSolutionPath())));
-        #ifdef ENABLE_SMOOTHER
+        #ifdef RRT_ENABLE_SMOOTHER
             pathBSpline->smoothBSpline(*mpPathSmooth, 3);
             // Publish path as markers
             nav_msgs::Path smooth_msg;
@@ -389,7 +389,7 @@ ompl::base::OptimizationObjectivePtr OMPLPlanner::getPathLengthObjWithCostToGo(
     // return obj;
 }
 
-int32_t OMPLPlanner::getPathAndRevision(std::vector<Position3D> *results) {
+int32_t OMPLPlanner::getPathAndRevision(std::vector<LocalPoint> *results) {
     //! @todo do we need read write lock for mpPathSmooth?
     //! @todo consider using callback
     boost::shared_lock<boost::shared_mutex> lock(solution_revision_mutex_);
@@ -403,7 +403,7 @@ int32_t OMPLPlanner::getPathAndRevision(std::vector<Position3D> *results) {
         // extract the first component of the state and cast it to what we expect
         const ompl::base::RealVectorStateSpace::StateType *pos =
                 se3state->as<ompl::base::RealVectorStateSpace::StateType>(0);
-        results->push_back(Position3D(pos->values[0], pos->values[1], pos->values[2]));
+        results->push_back(LocalPoint(pos->values[0], pos->values[1], pos->values[2]));
     }
     // for (auto wp : *results) {
     //     std::cout << wp.AsString() << std::endl;
@@ -434,13 +434,6 @@ void OMPLPlanner::setPathCost(bool pathExist, ompl::base::Cost cost) {
     boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
     mSolutionExist = pathExist;
     mCostOfPath = cost;
-}
-
-float OMPLPlanner::getDistBetweenPos3D(const Position3D &pos1, const Position3D& pos2) {
-    float dx = pos1.mX - pos2.mX;
-    float dy = pos1.mY - pos2.mY;
-    float dz = pos1.mZ - pos2.mZ;
-    return sqrt((dx*dx) + (dy*dy) + (dz*dz));
 }
 
 }  // namespace OAC

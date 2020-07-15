@@ -21,6 +21,7 @@
 #include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/SetMode.h>
+#include <mavros_msgs/PositionTarget.h>
 #include <sensor_msgs/NavSatStatus.h>
 #include <std_msgs/String.h>
 #include <tf/tf.h>
@@ -82,6 +83,25 @@ void CNCArdupilot::WP_list_callback(const mavros_msgs::WaypointListConstPtr& msg
     mWaypointList = *msg;
 }
 
+bool CNCArdupilot::isReady(std::string modeName) {
+    if (!isConnected()) {
+        ROS_ERROR("VEHICLE NOT CONNECTED !!!");
+        return false;
+    }
+    if (modeName == FLT_MODE_GUIDED) {
+        if (!mIsHomeSet) {
+            ROS_ERROR("No 3D Fix !!!");
+            return false;
+        }
+        if (getMode() == FLT_MODE_GUIDED) {
+            ROS_INFO("Ready To Arm GUIDED :)");
+            return true;
+        }
+    }
+    ROS_ERROR("NOT READY TO ARM !!!");
+    return false;
+}
+
 /***************************************************************************
  * Mission
  */
@@ -120,9 +140,9 @@ bool CNCArdupilot::pushWaypoints(const std::vector<GPSPoint> &wpList, uint8_t is
         wp.command        = command;
         wp.is_current     = firstWP ? isCurrent : false;
         wp.autocontinue   = true;
-        wp.x_lat          = tmpWP.latitude_;
-        wp.y_long         = tmpWP.longitude_;
-        z_alt = CNCUtility::validSpeedCMD(tmpWP.altitude_);
+        wp.x_lat          = tmpWP.mX;
+        wp.y_long         = tmpWP.mY;
+        z_alt = CNCUtility::validSpeedCMD(tmpWP.mZ);
         wp.z_alt          = z_alt;
         wp_push_srv.request.waypoints.push_back(wp);
         firstWP = false;
@@ -176,9 +196,13 @@ mavros_msgs::WaypointList CNCArdupilot::getWaypointList() {
 bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt, bool isFromOAC) {
     // @TODO: check Guided mode
     if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1) {
-        clearLocalMissionQueue();
-        pushLocalMissionQueue(GPSPoint(x_lat, y_long, z_alt));
-        return true;
+        if (!OAC_USE_SETPOINT_ENU) {
+            if (!OAC_CUMULATIVE_WAYPOINT) clearLocalMissionQueue();
+            pushLocalMissionQueue(GPSPoint(x_lat, y_long, z_alt));
+            return true;
+        }
+        ROS_WARN("GOTO Global Ignored Due to miss matched coordination system");
+        return false;
     }
     if (!clearFCUWaypoint()) {
         return false;
@@ -190,12 +214,22 @@ bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt, bool isFro
     return false;
 }
 
-// Goto Relative Waypoint (North+, East+)
-bool CNCArdupilot::gotoRelative(float north, float east, float z_alt, bool isAltDelta, bool isFromOAC) {
-    // @TODO: check GPS available
-    // @TODO: consider changing altitude first
-    GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), north, east);
-    return gotoGlobal(tmpPoint.latitude_, tmpPoint.longitude_, z_alt, isFromOAC);
+// Goto Relative Waypoint (North+/Forward, East+/Right)
+bool CNCArdupilot::gotoRelative(float x, float y, float z_alt, bool isAltDelta, bool isFromOAC) {
+    // @TODO: check Guided mode
+    LocalPoint localPos = getLocalPosition();
+    // NEU input to ENU
+    LocalPoint localPosFromHome(localPos.mX + y, localPos.mY + x, z_alt);
+    if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1 && OAC_USE_SETPOINT_ENU) {
+        if (!OAC_CUMULATIVE_WAYPOINT) clearLocalMissionQueue();
+        pushLocalMissionQueue(localPosFromHome);
+        return true;
+    }
+    if (ENABLE_FORCE_GPS_ON_RELATIVE_MOVE) {
+        GPSPoint tmpPoint = CNCUtility::getLocationMeter(getCurrentGPSPoint(), x, y);
+        return gotoGlobal(tmpPoint.mX, tmpPoint.mY, z_alt, isFromOAC);
+    }
+    return pushLocalENUWaypoint(localPosFromHome);
 }
 
 // Goto Target Head
@@ -205,7 +239,7 @@ bool CNCArdupilot::gotoHeading(float heading, float distance, float z_alt, bool 
 }
 
 // Push mission
-bool CNCArdupilot::pushMission(const std::vector<GPSPoint> &wpList, bool isGlobal) {
+bool CNCArdupilot::pushGlobalMission(const std::vector<GPSPoint> &wpList, bool isGlobal) {
     //! @todo Handle local
     if (!isGlobal) {
         ROS_ERROR("Local Mission [Setpoint] is still under develpment.");
@@ -217,9 +251,10 @@ bool CNCArdupilot::pushMission(const std::vector<GPSPoint> &wpList, bool isGloba
 // Move Mission
 void CNCArdupilot::moveMissionToLocalQueue() {
     clearLocalMissionQueue();
-    for (auto waypoint : mWaypointList.waypoints) {
-        pushLocalMissionQueue(GPSPoint(waypoint.x_lat, waypoint.y_long, waypoint.z_alt));
-    }
+    ROS_WARN("FCU Queue WPs Will Not Be Moved For Safty Consideration !!! [WIP]");
+    // for (auto waypoint : mWaypointList.waypoints) {
+    //     pushLocalMissionQueue(GPSPoint(waypoint.x_lat, waypoint.y_long, waypoint.z_alt));
+    // }
 }
 
 /***************************************************************************

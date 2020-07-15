@@ -51,7 +51,11 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
             }
             case CMD_QUEUE_TYPES::CMD_ARM:
             {
-                cnc->setMode(FLT_MODE_GUIDED);
+                if (CURRENT_FCU_TYPE == FCU_ARDUPILOT) {
+                    cnc->setMode(FLT_MODE_GUIDED);
+                } else if (CURRENT_FCU_TYPE == FCU_PX4) {
+                    cnc->setMode(FLT_MODE_OFFBOARDD);
+                }
                 return cnc->armVehicle();
             }
             case CMD_QUEUE_TYPES::CMD_TAKEOFF:
@@ -90,7 +94,20 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
                 }
                 return cnc->gotoRelative(northAxis, eastAxis, alt, false, isFromOAC);
             }
-            case CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL:
+            case CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL_ENU:
+            {
+                ROS_WARN("CMD_GOTO_GLOBAL_ENU: %s", cmdline.second.c_str());
+                std::vector<std::string> dataList = getDataListFromString(cmdline.second);
+                if (dataList.size() > 3 || dataList.size() < 2) throw 1;
+                float x = std::stof(dataList.at(0));
+                float y = std::stof(dataList.at(1));
+                float z = cnc->getRelativeAltitude();
+                if (dataList.size() == 3) {
+                    z = std::stof(dataList.at(2));
+                }
+                return cnc->pushLocalENUWaypoint(LocalPoint(x, y, z), isFromOAC);
+            }
+            case CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL_GPS:
             {
                 std::vector<std::string> dataList = getDataListFromString(cmdline.second);
                 if (dataList.size() > 3 || dataList.size() < 2) throw 1;
@@ -160,7 +177,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
                     wps.push_back(GPSPoint(resultWPBreak.at(0), resultWPBreak.at(1), resultWPBreak.at(2)));
                 }
                 cnc->clearFCUWaypoint();
-                return cnc->pushMission(wps, true);
+                return cnc->pushGlobalMission(wps, true);
             }
             default:
                 throw 1;

@@ -22,21 +22,23 @@
 
 #include <droneoa_ros/OAC/BaseAlg.hpp>
 #include <droneoa_ros/OAC/OMPLPlanner.hpp>
+#include <droneoa_ros/HWI/Utils/LocalPoint.hpp>
 
 namespace OAC {
 
-static const double DIST_COMPARE_DIFF_MAX = 0.2;
-
 class OAAlgRRT : public BaseAlg {
     OMPLPlanner mPlanner;
-    Position3D previousStart;
-    Position3D previousGoal;
+    LocalPoint previousStart;
+    LocalPoint previousGoal;
     int32_t mCurrentSolutionRevision;
     // Helper
-    void populateCMD_AUTO();
-    void populateCMD_MQueue();
-    void populateCMD_Setpoint();
+    void populateCMD_GPS();
+    void populateCMD_ENU();
     void populateDATA();
+    void setStartPosGPS();
+    void setStartPosENU();
+    void setGoalPosGPS();
+    void setGoalPosENU();
  public:
     explicit OAAlgRRT(CNC::CNCInterface *cnc);
     ~OAAlgRRT() override;

@@ -59,6 +59,7 @@ bool CMDRunner::isShutDownRequested() {
 }
 
 bool CMDRunner::setupRunner(Command::CommandQueue commands) {
+    mInternalTimmer = 0;
     populateCMDQueue(commands);
 }
 
@@ -203,11 +204,18 @@ bool CMDRunner::recheckUntilCommand() {
             ROS_ERROR("This FCU does not support arrwp command !!!");
             return false;
         }
-        int currentWPListSize = advCNC->getWaypointList().waypoints.size();
-        if ((mWaypointListSize != currentWPListSize) || (currentWPListSize == 1 && checkReachLastWP())) {
-            //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
-            mWaitUntilMode = UNTIL_MODE::NONE;
-            mInternalTimmer = 0;
+        if (OAC_USE_SETPOINT_ENU) {
+            if (mpCNC->getLocalPosition() == mpCNC->getCurrentLocalENUTarget()) {
+                mWaitUntilMode = UNTIL_MODE::NONE;
+                mInternalTimmer = 0;
+            }
+        } else {
+            int currentWPListSize = advCNC->getWaypointList().waypoints.size();
+            if ((mWaypointListSize != currentWPListSize) || (currentWPListSize == 1 && checkReachLastWP())) {
+                //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
+                mWaitUntilMode = UNTIL_MODE::NONE;
+                mInternalTimmer = 0;
+            }
         }
     } else if (mWaitUntilMode == UNTIL_MODE::CLRWP) {
         // Recheck whether wp list size changed for until command
@@ -216,11 +224,20 @@ bool CMDRunner::recheckUntilCommand() {
             ROS_ERROR("This FCU does not support arrwp command !!!");
             return false;
         }
-        int currentWPListSize = advCNC->getWaypointList().waypoints.size();
-        if ((currentWPListSize == 0) || (currentWPListSize == 1 && checkReachLastWP())) {
-            //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
-            mWaitUntilMode = UNTIL_MODE::NONE;
-            mInternalTimmer = 0;
+        if (OAC_USE_SETPOINT_ENU) {
+            //! @note Since we only hold one setpoint goal at the moment, so arrive means clear all.
+            //! @todo consider supporting local NEU waypoint queue ?
+            if (mpCNC->getLocalPosition() == mpCNC->getCurrentLocalENUTarget()) {
+                mWaitUntilMode = UNTIL_MODE::NONE;
+                mInternalTimmer = 0;
+            }
+        } else {
+            int currentWPListSize = advCNC->getWaypointList().waypoints.size();
+            if ((currentWPListSize == 0) || (currentWPListSize == 1 && checkReachLastWP())) {
+                //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
+                mWaitUntilMode = UNTIL_MODE::NONE;
+                mInternalTimmer = 0;
+            }
         }
     } else if (mWaitUntilMode == UNTIL_MODE::ALTEQ) {
         // Recheck whether altitude equal to
