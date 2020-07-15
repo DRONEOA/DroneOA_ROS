@@ -62,8 +62,23 @@ void ConsoleInputManager::watchCommandThread() {
     }
 }
 
+void removeSpaces(std::string *cmd) {
+    std::istringstream iss(*cmd);
+    std::string word;
+    std::string out;
+    while (iss >> word) {
+        if (!out.empty()) {
+            out += ' ';
+        }
+        out += word;
+    }
+    *cmd = out;
+}
+
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
     //! @todo(shibohan) Detect composed commands, use runner in this case
+    removeSpaces(&cmd);
+
     if (!splitModuleCommand(cmd)) {
         ROS_WARN("Command Missing Module Name");
         printFormatHelper();
@@ -240,7 +255,7 @@ bool ConsoleInputManager::buildCNCCommands() {
             if (deltaAlt < 0.0f) {
                 throw 1;
             }
-            ROS_WARN("::DECENT -> -%f::", deltaAlt);
+            ROS_WARN("::DECENT -> %f::", deltaAlt);
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DESCEND, std::to_string(deltaAlt)});
         } else if (cmdType == "info") {
             GPSPoint tmpGPSPoint = mpCNC->getCurrentGPSPoint();
