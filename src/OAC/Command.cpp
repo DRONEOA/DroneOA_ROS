@@ -130,13 +130,13 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
             {
                 float deltaAlt = std::stof(cmdline.second);
                 if (deltaAlt < 0.0f) {
-                    throw 1;
+                    deltaAlt = -deltaAlt;  // To allow both positive and negative input
                 }
                 float heading = cnc->getHUDData().heading;
                 float dist = 0.0f;
                 float alt = cnc->getRelativeAltitude();
                 //! @TODO To prevent slight heading change, try magnetic compass?
-                return cnc->gotoHeading(heading, dist, deltaAlt-alt, isFromOAC);
+                return cnc->gotoHeading(heading, dist, alt-deltaAlt, isFromOAC);
             }
             default:
                 throw 1;
