@@ -108,10 +108,10 @@ TEST_F(CommandTest, ClimbCommand_success) {
 }
 
 TEST_F(CommandTest, DescendCommand_success) {
-    EXPECT_CALL(cnc, getRelativeAltitude()).WillOnce(Return(5));
+    EXPECT_CALL(cnc, getRelativeAltitude()).WillOnce(Return(10));
     mavros_msgs::VFR_HUD msgs{};
     msgs.heading = 10;
     EXPECT_CALL(cnc, getHUDData()).WillOnce(Return(msgs));
-    EXPECT_CALL(cnc, gotoHeading(10, 0.0f, 15, false)).WillOnce(Return(true));
-    Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_DESCEND, "20"));
+    EXPECT_CALL(cnc, gotoHeading(10, 0.0f, 5, false)).WillOnce(Return(true));
+    Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_DESCEND, "5"));
 }

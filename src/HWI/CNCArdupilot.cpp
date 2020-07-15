@@ -86,7 +86,7 @@ void CNCArdupilot::WP_list_callback(const mavros_msgs::WaypointListConstPtr& msg
  * Mission
  */
 bool CNCArdupilot::pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent, uint16_t command) {
-    z_alt = CNCUtility::validSpeedCMD(z_alt);
+    z_alt = CNCUtility::validAltitudeCMD(z_alt);
     ros::ServiceClient pushWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/push");
     mavros_msgs::WaypointPush wp_push_srv;  // List of Waypoints
     mavros_msgs::Waypoint wp;
@@ -121,7 +121,7 @@ bool CNCArdupilot::pushWaypoints(std::vector<GPSPoint> wpList, uint8_t isCurrent
         wp.autocontinue   = true;
         wp.x_lat          = tmpWP.latitude_;
         wp.y_long         = tmpWP.longitude_;
-        z_alt = CNCUtility::validSpeedCMD(tmpWP.altitude_);
+        z_alt = CNCUtility::validAltitudeCMD(tmpWP.altitude_);
         wp.z_alt          = z_alt;
         wp_push_srv.request.waypoints.push_back(wp);
     }
