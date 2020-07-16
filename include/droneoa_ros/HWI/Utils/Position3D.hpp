@@ -22,11 +22,21 @@
 
 #include <string>
 
+/**
+ * @brief Reprsentation of any 3D point
+ */
+
 struct Position3D {
     Position3D();
     Position3D(double x, double y, double z);
     virtual ~Position3D();
     virtual std::string AsString() const;
+    /**
+     * @brief Compare whether 2 positions are equal.
+     * @param other The other point
+     * @return true if the distance between is less than or equal to POS3D_COMPARE_DIFF_MAX
+     * @return false if the distance between is greater than POS3D_COMPARE_DIFF_MAX
+     */
     virtual bool operator==(const Position3D& other) const;
     virtual float getDistanceTo(const Position3D &other) const;
     double mX;

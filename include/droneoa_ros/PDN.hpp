@@ -21,8 +21,8 @@
  * @file PDN.hpp
  * @author DroneOA (Bohan Shi)
  * @brief Pre-defined Names And Values
- * @version 1.0
- * @date 2019-08
+ * @version 1.2
+ * @date 2020-07
  */
 
 #ifndef INCLUDE_DRONEOA_ROS_PDN_HPP_  // NOLINT
@@ -72,19 +72,30 @@ static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 static const bool ENABLE_SAFETY_GPS = true;
 
 /**
- * @brief True if want to use GPS global position for move relative and heading
+ * @brief True if want to use GPS global position for move relative and heading command
+ * @note For Ardupilot, setpoint home position is not reset after intermediate landing. So if use local setpoint on
+ * Ardupilot, the movement control will be INVALID after intermediate landing
+ * @param true to use GPS [Only option if need intermediate stop]
+ * @param false to use local ENU
  */
-static const bool ENABLE_FORCE_GPS_ON_RELATIVE_MOVE = false;
+static const bool ENABLE_FORCE_GPS_ON_RELATIVE_MOVE = true;
 
 // OA Controller
 #define ENABLE_POINTCLOUD
 static const double OAC_REFRESH_FREQ = 20;  /**< @brief unit: Hz suggest to be same as GLOBAL_ROS_RATE */
+/**
+ * @brief Whether to use setpoint ENU in OAC
+ * @note For Ardupilot, setpoint home position is not reset after intermediate landing. So if use local setpoint on
+ * Ardupilot, the movement control will be INVALID after intermediate landing
+ * @param true to use local ENU [Recommend option unless need intermediate stop]
+ * @param false to use GPS
+ */
 static const bool OAC_USE_SETPOINT_ENU = true;  /**< @brief true to use local ENU [Recommend]; false to use GPS */
 static const bool OAC_CUMULATIVE_WAYPOINT = false;  /**< @brief if true, new waypoint will not overtake previous */
 
 /**
  * @brief Enabled feature stage 1-3
- * 1: COllision Avoidance
+ * 1: Collision Avoidance
  * 2: Obstacle Avoidance (Local Path Planning)
  * 3: Obstacle Avoidance (Global Path Planning)
  */
@@ -110,7 +121,7 @@ static const bool ENABLE_OCTOMAP = true;
 static const float LIDAR_ORIENTATION_CW = 180;  /**< @brief unit: degree */
 static const float LIDAR_FILTER_LOW = 0.1;  /**< @brief unit: m */
 static const float LIDAR_FILTER_HIGH = 10;  /**< @brief unit: m */
-static const int32_t LIDAR_POPUP_SCALE = 50;
+static const int32_t LIDAR_POPUP_SCALE = 50;  /**< @brief scaler for the lidar visualizer; Bigger number = Zoom In */
 // Lidar sources
 static const char* LIDAR_SOURCE_YDLIDAR = "/scan";
 static const char* LIDAR_SOURCE_UE4 = "/sitl_lidar_test";
@@ -137,15 +148,24 @@ static const float UE4_SITL_SCALE = 1000.0f;
 
 // RRT
 // #define RRT_ENABLE_SMOOTHER
-static const double RRT_MAX_PLANNING_DISTANCE = 10.0f;
+static const double RRT_MAX_PLANNING_DISTANCE = 10.0f;  /**< @brief RRT search space boundary; Horizontal; unit: m */
 static const double RRT_MAX_PLANNING_HEIGHT = VEHICLE_MAX_ALTITUDE_RELATIVE;
 static const double RRT_MIN_PLANNING_HEIGHT = 0.0f;
+/**
+ * @brief The minimum altitude of the goal for RRT algorithm
+ * This is used to prevent the effect of ground. Which may affect explore result.
+ */
 static const float RRT_MIN_GOAL_HEIGHT = 1.0f;
-static const float RRT_MAX_SPEED = 0.2f;
+static const float RRT_MAX_SPEED = 0.2f;  /**< @brief The max speed the drone travel on a RRT planner path; unit: m */
+/**
+ * @brief Resolution of octomap
+ * Please match the launch file setting. Change this value won't change the generated octomap's resolution.
+ * But both values have to be the same to produce correct path.
+ */
 static const float OCTOMAP_RESOLUTION = 0.2f;
 
 // Debug Feature Control
-#define DEBUG_CNC_POPUP
+// #define DEBUG_CNC_POPUP
 // #define DEBUG_DEPTH_IMG_POPUP
 // #define DEBUG_PCL_VIEWER  // Enable image popup first
 // #define DEBUG_LIDAR_POPUP

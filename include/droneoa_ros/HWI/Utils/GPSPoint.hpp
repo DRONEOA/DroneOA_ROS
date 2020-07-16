@@ -23,10 +23,20 @@
 #include <string>
 #include <droneoa_ros/HWI/Utils/Position3D.hpp>
 
+/**
+ * @brief Reprsentation of local GPS point
+ */
+
 class GPSPoint : public Position3D {
  public:
     GPSPoint();
     GPSPoint(float latitude, float longitude, float altitude);
+    /**
+     * @brief Compare whether 2 GPSPoint are equal.
+     * @param other The other point
+     * @return true if the distance between is less than or equal to GPS_COMPARE_DIFF_MAX
+     * @return false if the distance between is greater than GPS_COMPARE_DIFF_MAX
+     */
     bool operator==(const Position3D& other) const;
     std::string AsString() const override;
 };

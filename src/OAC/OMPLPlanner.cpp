@@ -47,7 +47,9 @@ bool OMPLPlanner::setStartPos(LocalPoint pos) {
     start->as<ompl::base::SO3StateSpace::StateType>(1)->setIdentity();
     mpProblem->clearStartStates();
     mpProblem->addStartState(start);
+#ifdef RRT_DEBUG
     ROS_WARN("[RRT] Set Start Pos: %lf %lf %lf", pos.mX, pos.mY, pos.mZ);
+#endif
     return true;
 }
 
@@ -57,7 +59,9 @@ bool OMPLPlanner::setTargetPos(LocalPoint pos) {
     goal->as<ompl::base::SO3StateSpace::StateType>(1)->setIdentity();
     mpProblem->clearGoal();
     mpProblem->setGoalState(goal);
+#ifdef RRT_DEBUG
     ROS_WARN("[RRT] Set Goal Pos: %lf %lf %lf", pos.mX, pos.mY, pos.mZ);
+#endif
     setForcePlanFlag(true);
     return true;
 }
@@ -157,7 +161,7 @@ bool OMPLPlanner::rePlan() {
     std::cout << "Total Points:" << mpPathSmooth->getStateCount() << std::endl;
 #endif
     if (mpPathSmooth->getStateCount() <= 2) {
-        plan();
+        return plan();
     } else {
         for (std::size_t idx = 0; idx < mpPathSmooth->getStateCount(); idx++) {
             if (!replan_flag) {
@@ -167,13 +171,14 @@ bool OMPLPlanner::rePlan() {
             }
         }
         if (replan_flag) {
-            plan();
+            return plan();
         } else {
         #ifdef RRT_DEBUG
             std::cout << "Replanning not required" << std::endl;
         #endif
         }
     }
+    return true;
 }
 
 void OMPLPlanner::RRTMainThread() {

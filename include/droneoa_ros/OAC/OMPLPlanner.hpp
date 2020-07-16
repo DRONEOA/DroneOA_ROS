@@ -64,19 +64,59 @@ class OMPLPlanner {
  public:
     OMPLPlanner();
     virtual ~OMPLPlanner();
-    bool setStartPos(LocalPoint pos);
     /**
      * Note: Depth Camera is facing -y axis
      */ 
+    /**
+     * @brief Set the Start Position
+     * This will NOT trigger a replan
+     * @param pos The new start position
+     * @return true  
+     */
+    bool setStartPos(LocalPoint pos);
+    /**
+     * @brief Set the Target Position
+     * This will set the force plan flag and trigger a new path planning with the same new goal position.
+     * @param pos The new goal position 
+     * @return true 
+     */
     bool setTargetPos(LocalPoint pos);
+    /**
+     * @brief Update the CollisionGeometry of the environment
+     * Update the CollisionGeometry of the octomap that is used to validate OMPL state. (Descide whether collide)
+     * @param map std::shared_ptr<fcl::CollisionGeometry<double>> The new collisionGeometry of the environment
+     * @return true 
+     */
     bool updateMap(std::shared_ptr<fcl::CollisionGeometry<double>> map);
+    /**
+     * @brief Make a path plan based on current setting
+     * @return whether a path is found
+     */
     bool plan();
+    /**
+     * @brief Replan if the environment is change and blocked the path. The the path is running out.
+     * @return true if noe need to plan OR new plan is performed and a path is found
+     * @return false new plan is performed and a path is NOT found
+     */
     bool rePlan();
     bool getIsSolving();
     bool getForcePlanFlag();
+    /**
+     * @brief Request a full plan without checking whether a replan is required
+     * @param newflag New flag boolean value
+     */
     void setForcePlanFlag(bool newflag);
     bool getForceReplanFlag();
+    /**
+     * @brief Request a replan, whether a replan is required will be checked
+     * @param newflag New flag boolean value
+     */
     void setForceReplanFlag(bool newflag);
+    /**
+     * @brief Get the Path And Revision Number of the Path
+     * @param results the results container will carry the resulting path out. Each waypoint is a LocalPoint.
+     * @return int32_t revision number of the path (increament on each success plan action)
+     */
     int32_t getPathAndRevision(std::vector<LocalPoint> *results);
     double getPathCost();
     bool isSolutionExist();

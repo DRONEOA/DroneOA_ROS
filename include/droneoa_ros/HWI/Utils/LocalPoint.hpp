@@ -26,6 +26,7 @@
 /**
  * @brief Reprsentation of local ENU point
  */
+
 struct LocalPoint : public Position3D {
     LocalPoint();
     LocalPoint(double x, double y, double z);

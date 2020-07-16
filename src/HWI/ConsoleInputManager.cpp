@@ -366,7 +366,8 @@ bool ConsoleInputManager::buildQuickCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "90"});
         } else if (cmdType == "t") {
             ROS_WARN("::CUSTOM TEST CMD::");
-            /* ! @node Add your text command here, trigger with "! t" command */
+            /* ! @node Add your custom command here, trigger with "! t" command */
+            mpCNC->pushLocalENUWaypoint(LocalPoint(0, 0, 3));
         } else {
             ROS_WARN("Unknown Quick command");
             printQuickHelper();

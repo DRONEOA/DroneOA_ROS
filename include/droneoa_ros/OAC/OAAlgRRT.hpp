@@ -39,11 +39,24 @@ class OAAlgRRT : public BaseAlg {
     void setStartPosENU();
     void setGoalPosGPS();
     void setGoalPosENU();
+
  public:
     explicit OAAlgRRT(CNC::CNCInterface *cnc);
     ~OAAlgRRT() override;
     void init();  // For restart
+    /**
+     * @brief Collect Data From CNC.
+     * Set/Update start position and goal position for the OMPL RRT planner if the change is significant enough.
+     * @return false if a valid pointer to cnc is missing
+     */
     bool collect() override;  // Collect required sensor data
+    /**
+     * @brief Generate command queue based on calculated path from OMPL planner.
+     * Note: the path only update if there is a change in goal position OR the octomap is updated and causing the
+     * previous planned path to be invalid. Data queue is also populated with: algorithm name, confidence,
+     * and path cost.
+     * @return true all the time
+     */
     bool plan() override;  // Return false when get around is impossible
 };
 

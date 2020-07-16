@@ -96,7 +96,6 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
             }
             case CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL_ENU:
             {
-                ROS_WARN("CMD_GOTO_GLOBAL_ENU: %s", cmdline.second.c_str());
                 std::vector<std::string> dataList = getDataListFromString(cmdline.second);
                 if (dataList.size() > 3 || dataList.size() < 2) throw 1;
                 float x = std::stof(dataList.at(0));
