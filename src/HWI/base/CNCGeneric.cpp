@@ -274,11 +274,13 @@ void CNCGeneric::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
 
 void CNCGeneric::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
     mCurrentHudData = *msg;
+    geometry_msgs::Vector3 RPY = CNC::CNCUtility::quaternionToRPY(getIMUData().orientation);
     // Post Infomation Package For GUI
     std_msgs::String guiMsg;
     std::stringstream ss;
     ss << getMode() << " " << getRelativeAltitude() << " " << getBatteryVoltage() << " " << getHUDData().climb << " "
-        << getHUDData().heading << " " << getHUDData().groundspeed << " " << getHUDData().throttle;
+        << getHUDData().heading << " " << getHUDData().groundspeed << " " << getHUDData().throttle << " " << RPY.x
+         << " " << RPY.y << " " << RPY.z;
     guiMsg.data = ss.str();
     mGuiInfoPub.publish(guiMsg);
     GUI::GUISubject::notifyGUIPopups();
