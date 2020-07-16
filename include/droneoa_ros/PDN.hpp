@@ -130,7 +130,7 @@ static const int32_t RUNNER_TIMEOUT_LIMIT = 100000;  /**< @brief unit: msec */
 // Max Error
 static const double GPS_COMPARE_DIFF_MAX = 0.5;  /**< @brief max distance consider to be the same GPS point unit: m */
 static const double ALT_COMPARE_DIFF_MAX = 0.1;  /**< @brief max distance consider to be the same Altitude unit: m */
-static const double POS3D_COMPARE_DIFF_MAX = 0.2;  /**< @brief max diff consider to be the same position 3d unit: m */
+static const double POS3D_COMPARE_DIFF_MAX = 0.25;  /**< @brief max diff consider to be the same position 3d unit: m */
 
 // SITL
 static const float UE4_SITL_SCALE = 1000.0f;

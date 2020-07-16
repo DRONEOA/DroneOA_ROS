@@ -24,6 +24,7 @@
 #include <sensor_msgs/NavSatStatus.h>
 #include <std_msgs/String.h>
 #include <tf/tf.h>
+#include <tf2/LinearMath/Quaternion.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -219,6 +220,13 @@ bool CNCGeneric::pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC)
     pose.pose.position.x = location.mX;
     pose.pose.position.y = location.mY;
     pose.pose.position.z = CNCUtility::validAltitudeCMD(location.mZ);
+    tf::Quaternion rotation;
+    // Calculate new heading (NED)
+    LocalPoint current = getLocalPosition();
+    float heading = std::atan2(current.mX - location.mX, current.mY - location.mY) + M_PI * (3/2);
+    heading = (2*M_PI) - heading;
+    // There is 90 degress rotation introduceed in the mavros
+    pose.pose.orientation = tf::createQuaternionMsgFromYaw(heading + M_PI/2);
     mSetpointLocalPub.publish(pose);
     mCurrentNEULocalTarget = location;
     ROS_WARN("Setpoint: %s", location.AsString().c_str());

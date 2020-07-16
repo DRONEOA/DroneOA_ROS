@@ -71,6 +71,7 @@ class CNCMock : public CNCInterface {
     MOCK_METHOD1(checkFModeExist, bool(std::string modeName));
     MOCK_METHOD0(getTargetWaypoint, GPSPoint());
     MOCK_METHOD0(getLocalPosition, LocalPoint());
+    MOCK_METHOD0(getCurrentLocalENUTarget, LocalPoint());
     /* IMU */
     MOCK_METHOD0(getIMUData, sensor_msgs::Imu());
     MOCK_METHOD0(getIMURawAttitude, geometry_msgs::Vector3());
