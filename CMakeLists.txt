@@ -24,6 +24,9 @@ find_package(OpenCV REQUIRED COMPONENTS
 )
 
 find_package( PCL REQUIRED )
+find_package( ompl REQUIRED )
+find_package( fcl REQUIRED )
+find_package( octomap REQUIRED )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -119,6 +122,7 @@ catkin_package(
 #  LIBRARIES droneoa_ros
   CATKIN_DEPENDS nodelet mavros roscpp rospy std_msgs sensor_msgs cv_bridge
 #  DEPENDS system_lib
+  DEPENDS OMPL
 )
 
 ###########
@@ -130,6 +134,9 @@ catkin_package(
 include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
+  ${FCL_INCLUDE_DIRS}
+  ${ompl_INCLUDE_DIRS}
+  ${OCTOMAP_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -142,10 +149,12 @@ add_library(droneoa_ros_liboac
   src/OAC/CAAlgLidar.cpp
   src/OAC/CAAlgDepthCam.cpp
   src/OAC/OAAlgFGM.cpp
+  src/OAC/OAAlgRRT.cpp
   src/OAC/CMDParser.cpp
   src/OAC/CMDRunner.cpp
   src/OAC/Command.cpp
   src/OAC/OAC.cpp
+  src/OAC/OMPLPlanner.cpp
 )
 
 add_library(droneoa_ros_libhwi
@@ -156,6 +165,8 @@ add_library(droneoa_ros_libhwi
   src/HWI/RSC.cpp
   src/HWI/Utils/CNCUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
+  src/HWI/Utils/LocalPoint.cpp
+  src/HWI/Utils/Position3D.cpp
   src/HWI/Utils/LidarUtils.cpp
   src/HWI/ConsoleInputManager.cpp
 )
@@ -200,6 +211,9 @@ target_link_libraries(droneoa_ros
   ${catkin_LIBRARIES}
   ${OpenCV_LIBRARIES}
   ${PCL_LIBRARIES}
+  ${FCL_LIBRARIES}
+  ${OMPL_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
   readline
 )
 
@@ -263,6 +277,8 @@ add_executable(droneoa_ros_utiltest
   src/Utils/GeneralUtils.cpp
   src/HWI/Utils/CNCUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
+  src/HWI/Utils/LocalPoint.cpp
+  src/HWI/Utils/Position3D.cpp
 )
 
 target_link_libraries(droneoa_ros_utiltest ${catkin_LIBRARIES} gtest)
@@ -275,6 +291,9 @@ add_executable(droneoa_ros_commandtest
   src/OAC/Command.cpp
   src/Utils/GeneralUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
+  src/HWI/Utils/LocalPoint.cpp
+  src/HWI/Utils/Position3D.cpp
+  src/HWI/Utils/CNCUtils.cpp
   src/GUI/GUISubscriber.cpp
   src/GUI/GUISubject.cpp
 )

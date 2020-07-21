@@ -24,6 +24,7 @@
 #include <sensor_msgs/NavSatStatus.h>
 #include <std_msgs/String.h>
 #include <tf/tf.h>
+#include <tf2/LinearMath/Quaternion.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -74,6 +75,7 @@ void CNCGeneric::initWatcherThread() {
     mpThreadWatchIMU = new boost::thread(boost::bind(&CNCGeneric::watchIMUThread, this));
     mpThreadWatchLocalPosition = new boost::thread(boost::bind(&CNCGeneric::watchLocalPositionThread, this));
     mGuiInfoPub = mNodeHandle.advertise<std_msgs::String>("droneoa/gui_data", 1000);
+    mSetpointLocalPub = mNodeHandle.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
     ROS_INFO("[CNC] init threads done");
 }
 
@@ -100,6 +102,11 @@ bool CNCGeneric::armVehicle() {
     mavros_msgs::CommandBool srv;
     srv.request.value = true;
 
+    if (isArmed()) {
+        ROS_WARN("Vehicle Already Armed");
+        return true;
+    }
+
     if (!isReady(getMode())) {
         ROS_ERROR("NOT READY TO ARM UNDER MODE: %s", getMode().c_str());
         return false;
@@ -107,6 +114,8 @@ bool CNCGeneric::armVehicle() {
 
     if (arming_cl.call(srv)) {
         ROS_INFO("ARM send ok %d", srv.response.success);
+        mHomeGPS = getCurrentGPSPoint();
+        mIsHomeGPSSet = true;
         return true;
     } else {
         ROS_ERROR("Failed arming or disarming");
@@ -198,33 +207,30 @@ bool CNCGeneric::setHome(float targetLatitude, float targetLongitude, float targ
     return generalLongCommand(srv);
 }
 
-bool CNCGeneric::isReady(std::string modeName) {
-    if (!isConnected()) {
-        ROS_ERROR("VEHICLE NOT CONNECTED !!!");
+bool CNCGeneric::pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC) {
+    if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1) {
+        if (OAC_USE_SETPOINT_ENU) {
+            pushLocalMissionQueue(location);
+            return true;
+        }
+        ROS_WARN("Command Ignored Due to: Miss matched coordination system");
         return false;
     }
-    if (modeName == FLT_MODE_GUIDED) {
-        if (!mIsHomeSet) {
-            ROS_ERROR("No 3D Fix !!!");
-            return false;
-        }
-        if (getMode() == FLT_MODE_GUIDED) {
-            ROS_INFO("Ready To Arm GUIDED :)");
-            return true;
-        }
-    } else if (modeName == FLT_MODE_STABILIZE) {
-        if (getMode() == FLT_MODE_STABILIZE) {
-            ROS_INFO("Ready To Arm STABILIZE :)");
-            return true;
-        }
-    } else if (modeName == FLT_MODE_ALT_HOLD) {
-        if (getMode() == FLT_MODE_ALT_HOLD) {
-            ROS_INFO("Ready To Arm STABILIZE :)");
-            return true;
-        }
-    }
-    ROS_ERROR("NOT READY TO ARM !!!");
-    return false;
+    geometry_msgs::PoseStamped pose;
+    pose.pose.position.x = location.mX;
+    pose.pose.position.y = location.mY;
+    pose.pose.position.z = CNCUtility::validAltitudeCMD(location.mZ);
+    tf::Quaternion rotation;
+    // Calculate new heading (NED)
+    LocalPoint current = getLocalPosition();
+    float heading = std::atan2(current.mX - location.mX, current.mY - location.mY) + M_PI * (3/2);
+    heading = (2*M_PI) - heading;
+    // There is 90 degress rotation introduceed in the mavros
+    pose.pose.orientation = tf::createQuaternionMsgFromYaw(heading + M_PI/2);
+    mSetpointLocalPub.publish(pose);
+    mCurrentNEULocalTarget = location;
+    ROS_WARN("Setpoint: %s", location.AsString().c_str());
+    return true;
 }
 
 /*****************************************************
@@ -392,6 +398,14 @@ GPSPoint CNCGeneric::getCurrentGPSPoint() {
     return GPSPoint(mCurrentGpsFix.latitude, mCurrentGpsFix.longitude, mCurrentGpsFix.altitude);
 }
 
+GPSPoint CNCGeneric::getHomeGPSPoint() {
+    return mHomeGPS;
+}
+
+bool CNCGeneric::isHomeGPSSet() {
+    return mIsHomeGPSSet;
+}
+
 /* Altitude */
 float CNCGeneric::getRelativeAltitude() {
     return mCurrentRelativeAltitude.data;
@@ -424,8 +438,14 @@ mavros_msgs::VFR_HUD CNCGeneric::getHUDData() {
     return mCurrentHudData;
 }
 
-geometry_msgs::PoseStamped CNCGeneric::getLocalPosition() {
-    return mLocalPosition;
+LocalPoint CNCGeneric::getLocalPosition() {
+    return LocalPoint(mLocalPosition.pose.position.x,
+            mLocalPosition.pose.position.y,
+            mLocalPosition.pose.position.z);
+}
+
+LocalPoint CNCGeneric::getCurrentLocalENUTarget() {
+    return mCurrentNEULocalTarget;
 }
 
 /*****************************************************
@@ -448,18 +468,18 @@ bool CNCGeneric::generalLongCommand(mavros_msgs::CommandLong commandMessage) {
  */
 
 void CNCGeneric::clearLocalMissionQueue() {
-    mLocalMissionQueue = std::queue<GPSPoint>();
+    mLocalMissionQueue = std::queue<Position3D>();
 }
 
-std::queue<GPSPoint> CNCGeneric::getLocalMissionQueue() {
+std::queue<Position3D> CNCGeneric::getLocalMissionQueue() {
     return mLocalMissionQueue;
 }
 
-void CNCGeneric::pushLocalMissionQueue(GPSPoint wp) {
+void CNCGeneric::pushLocalMissionQueue(Position3D wp) {
     mLocalMissionQueue.push(wp);
 }
 
-GPSPoint CNCGeneric::popLocalMissionQueue() {
+Position3D CNCGeneric::popLocalMissionQueue() {
     mLocalMissionQueue.pop();
 }
 

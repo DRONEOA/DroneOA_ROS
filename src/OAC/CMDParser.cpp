@@ -50,7 +50,6 @@ bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isFrom
         }
         //! @todo Merge continuous move wp command to single move wp list command
     }
-    std::cout << "parseCMDQueue isInstant: " << isInstant << std::endl;
     if (isInstant) {
         for (auto cmdline : cmdqueue) {
             if (!Command::parseCMD(mpCNC, cmdline, isFromOAC)) {

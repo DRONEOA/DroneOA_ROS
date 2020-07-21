@@ -5,7 +5,7 @@ stages:
   - Unittest
   - Release
 
-image: ros:melodic-perception
+image: shibohan/droneoa:latest
 
 cache:
   paths:

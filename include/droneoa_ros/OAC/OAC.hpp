@@ -32,6 +32,7 @@
 #include <droneoa_ros/OAC/CAAlgLidar.hpp>
 #include <droneoa_ros/OAC/CAAlgDepthCam.hpp>
 #include <droneoa_ros/OAC/OAAlgFGM.hpp>
+#include <droneoa_ros/OAC/OAAlgRRT.hpp>
 #include <droneoa_ros/OAC/CMDParser.hpp>
 #include <droneoa_ros/PDN.hpp>
 
@@ -65,14 +66,14 @@ static const char* SYS_STATE_NAME[] {
  * @brief Supported Algorithms
  */
 enum SYS_Algs : uint32_t {
-    ALG_BUG = 0,  // S2 If time allows
-    ALG_VFF,  // S2 If time allows
+    ALG_BUG,  // Future
+    ALG_VFF,  // Future
     ALG_FGM,  // S2
     ALG_VISION,  // S2
     ALG_COLLISION_LIDAR,  // S1
     ALG_COLLISION_DEPTH,  // S1
-    ALG_AI,  // S3
-    ALG_SLAM  // Wishlist :)
+    ALG_AI,  // Future
+    ALG_RRT  // Concept Proof
 };
 
 /**
@@ -86,7 +87,7 @@ static const char* SYS_Algs_STR[] {
     "ALG_COLLISION_LIDAR",
     "ALG_COLLISION_DEPTH",
     "ALG_AI",
-    "ALG_SLAM"
+    "ALG_RRT"
 };
 
 /**
@@ -165,6 +166,10 @@ class OAController {
     SYS_SelectedDetermineFun selectedDetermineFun_;
     std::map<SYS_Algs, Command::CommandQueue> mAlgCMDmap;
     std::map<SYS_Algs, Command::DataQueue> mAlgDATAmap;
+
+    // Helper
+    bool isMissionLeftAndCheckArrival();
+    bool isValidAlgorithmLeft(SYS_State newState);
 };
 
 }  // namespace OAC
