@@ -49,6 +49,13 @@ class CNCArdupilot : public CNCGeneric{
     virtual ~CNCArdupilot();
     void initWatcherThread() override;
 
+    /**
+     * @brief Check whether the vehicle is ready for to arm under certain mode
+     * @param modeName (Only Allow: GUIDED)
+     * @return true if ready to arm. Otherwise false
+     */
+    bool isReady(std::string modeName) override;
+
     /***************************************************************************
      * Mission
      */
@@ -61,7 +68,7 @@ class CNCArdupilot : public CNCGeneric{
      * @param command (default NAV_WAYPOINT)
      * @return client send response
      */
-    bool pushWaypoints(float x_lat, float y_long, float z_alt, uint8_t isCurrent = 2,
+    bool pushWaypoint(float x_lat, float y_long, float z_alt, uint8_t isCurrent = 2,
         uint16_t command = mavros_msgs::CommandCode::NAV_WAYPOINT);
     /**
      * @brief Push New Waypoint List
@@ -70,7 +77,7 @@ class CNCArdupilot : public CNCGeneric{
      * @param command (default NAV_WAYPOINT)
      * @return client send response
      */
-    bool pushWaypoints(std::vector<GPSPoint> wpList, uint8_t isCurrent = 2,
+    bool pushWaypoints(const std::vector<GPSPoint> &wpList, uint8_t isCurrent = 2,
         uint16_t command = mavros_msgs::CommandCode::NAV_WAYPOINT);
     mavros_msgs::WaypointPull pullWaypoints();
     bool clearFCUWaypoint() override;
@@ -93,13 +100,13 @@ class CNCArdupilot : public CNCGeneric{
     bool gotoGlobal(float x_lat, float y_long, float z_alt, bool isFromOAC = false) override;
     /**
      * @brief Goto Relative Waypoint (North+, East+)
-     * @param x_lat North+ in meter
-     * @param y_long East+ in meter
+     * @param x North+ in meter / forward (Local)
+     * @param y East+ in meter / right (Local)
      * @param z_alt default 10 in meter
      * @param isAltDelta not used
      * @return client send response
      */
-    bool gotoRelative(float x_lat, float y_long, float z_alt = 10, bool isAltDelta = false,
+    bool gotoRelative(float x, float y, float z_alt = 10, bool isAltDelta = false,
             bool isFromOAC = false) override;
     /**
      * @brief Goto Target Head
@@ -109,6 +116,15 @@ class CNCArdupilot : public CNCGeneric{
      * @return client send response
      */
     bool gotoHeading(float heading, float distance, float z_alt, bool isFromOAC = false) override;
+
+    /**
+     * @brief Using pushWaypoints if isGlobal = true, use setpoint otherwise (WIP)
+     * 
+     * @param wpList list of missions (GPS if global, relative to last init location if local)
+     * @param isGlobal whether the mission is using global (GPS) coordination system
+     * @return client send response 
+     */
+    bool pushGlobalMission(const std::vector<GPSPoint> &wpList, bool isGlobal = true) override;
 
     /**
      * @brief Move missions in FCU queue to local mission queue. (For OA Operation)

@@ -67,9 +67,16 @@ void OAController::init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Dept
     for (auto tmp : mAlgorithmInstances) {
         if (tmp.second) delete tmp.second;
     }
+    // Collision are alwayse enable as safety gurantee
     if (ENABLE_LIDAR) mAlgorithmInstances[SYS_Algs::ALG_COLLISION_LIDAR] = new CAAlgLidar(mpCNC, mpLidar);
     if (ENABLE_RSC) mAlgorithmInstances[SYS_Algs::ALG_COLLISION_DEPTH] = new CAAlgDepthCam(mpCNC, mpRSC);
-    if (ENABLE_LIDAR) mAlgorithmInstances[SYS_Algs::ALG_FGM] = new OAAlgFGM(mpCNC, mpLidar);
+    if (OAC_STAGE_SETTING == 2) {
+        // Add FGM for stage 2, Obstacle Avoidance (Local Path Planning)
+        if (ENABLE_LIDAR) mAlgorithmInstances[SYS_Algs::ALG_FGM] = new OAAlgFGM(mpCNC, mpLidar);
+    } else if (OAC_STAGE_SETTING == 3) {
+        // Add RRT for stage 3, Obstacle Avoidance (Global Path Planning)
+        if (ENABLE_OCTOMAP) mAlgorithmInstances[SYS_Algs::ALG_RRT] = new OAAlgRRT(mpCNC);
+    }
     //! @todo create new alg instance here
     ROS_INFO("[OAC] init");
 }
@@ -130,6 +137,7 @@ void OAController::tick() {
     }
 }
 
+// Thread Carrier
 void OAController::masterThread() {
     ROS_WARN("[OAC] MASTER THREAD START - PAUSED");
 
@@ -159,15 +167,7 @@ bool OAController::evaluate() {
             popAlgorithmFromSelected(tmp);
         }
     }
-    // No valid algorithms left is an Error
-    if (mSelectedAlgorithm.size() == 0) {
-        mCurrState = SYS_State::SYS_IDLE;
-        ROS_ERROR("NO VALID ALGORITHM ENABLED !!!");
-        return false;
-    }
-    // Set next state if success
-    mCurrState = SYS_State::SYS_EVALUATED;
-    return true;
+    return isValidAlgorithmLeft(SYS_State::SYS_EVALUATED);
 }
 
 bool OAController::plan() {
@@ -187,22 +187,16 @@ bool OAController::plan() {
         mAlgDATAmap[tmp] = (mAlgorithmInstances[tmp])->getDataQueue();
     #ifdef DEBUG_OAC
         for (auto cmdline : mAlgCMDmap[tmp]) {
-            ROS_INFO("            CMD: %d with %s", cmdline.first, cmdline.second.c_str());
+            ROS_INFO("            CMD: %s with %s",
+                    Command::CMD_QUEUE_TYPES_NAME[cmdline.first], cmdline.second.c_str());
         }
         for (auto dataline : mAlgDATAmap[tmp]) {
-            ROS_INFO("            DATA: %d with %s", dataline.first, dataline.second.c_str());
+            ROS_INFO("            DATA: %s with %s",
+                    Command::DATA_QUEUE_TYPES_NAME[dataline.first], dataline.second.c_str());
         }
     #endif
     }
-    // No valid algorithms left is an Error
-    if (mSelectedAlgorithm.size() == 0) {
-        mCurrState = SYS_State::SYS_IDLE;
-        ROS_ERROR("NO VALID ALGORITHM ENABLED !!!");
-        return false;
-    }
-    // Set next state if success
-    mCurrState = SYS_State::SYS_PLANNED;
-    return true;
+    return isValidAlgorithmLeft(SYS_State::SYS_PLANNED);
 }
 
 bool OAController::execute() {
@@ -268,7 +262,10 @@ void OAController::determineFunStage2() {
 }
 
 void OAController::determineFunStage3() {
-    //! @todo
+    //! @todo test only one alg
+    for (auto algCommand : mAlgCMDmap) {
+        mpParserExecuter->parseCMDQueue(algCommand.second, true);
+    }
 }
 
 bool OAController::abort() {
@@ -292,6 +289,40 @@ bool OAController::abort() {
     return false;
 }
 
+bool OAController::isMissionLeftAndCheckArrival() {
+    if (mpCNC->getLocalMissionQueue().size() == 0) {
+        return false;
+    }
+    Position3D goal = (mpCNC->getLocalMissionQueue()).front();
+    Position3D current;
+    if (OAC_USE_SETPOINT_ENU) {
+        current = mpCNC->getLocalPosition();
+    } else {
+        current = mpCNC->getCurrentGPSPoint();
+    }
+    if (goal == current) {
+        ROS_WARN("ARRIVED!!!");
+        mpCNC->popLocalMissionQueue();
+    }
+    if (mpCNC->getLocalMissionQueue().size() == 0) {
+        return false;
+    }
+    return true;
+}
+
+bool OAController::isValidAlgorithmLeft(SYS_State newState) {
+    // No valid algorithms left is an Error
+    if (mSelectedAlgorithm.size() == 0) {
+        mCurrState = SYS_State::SYS_IDLE;
+        if (mpCNC->getLocalMissionQueue().size() > 0) {
+            ROS_ERROR("NO VALID ALGORITHM ENABLED !!!");
+        }
+        return false;
+    }
+    mCurrState = newState;
+    return true;
+}
+
 bool OAController::popAlgorithmFromSelected(SYS_Algs algIndex) {
     auto it = std::find(mSelectedAlgorithm.begin(), mSelectedAlgorithm.end(), algIndex);
     if (it != mSelectedAlgorithm.end()) {
@@ -308,14 +339,14 @@ std::vector<SYS_Algs> OAController::selectAlgorithm() {
     if (OAC_STAGE_SETTING == 1) {
         if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_COLLISION_LIDAR);
         if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_COLLISION_DEPTH);
-    } else if (OAC_STAGE_SETTING == 2) {
-        if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_FGM);
-        // if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_VISION);
+    } else if (OAC_STAGE_SETTING == 2 && isMissionLeftAndCheckArrival()) {
+        if (ENABLE_LIDAR && isMissionLeftAndCheckArrival()) {
+            mSelectedAlgorithm.push_back(SYS_Algs::ALG_FGM);
+        }
     } else if (OAC_STAGE_SETTING == 3) {
-        if (ENABLE_LIDAR) mSelectedAlgorithm.push_back(SYS_Algs::ALG_FGM);
-        // if (ENABLE_RSC) mSelectedAlgorithm.push_back(SYS_Algs::ALG_VISION);
-        // mSelectedAlgorithm.push_back(SYS_Algs::ALG_AI);
-        // mSelectedAlgorithm.push_back(SYS_Algs::ALG_SLAM);
+        if (ENABLE_OCTOMAP && isMissionLeftAndCheckArrival()) {
+            mSelectedAlgorithm.push_back(SYS_Algs::ALG_RRT);
+        }
     } else {
         ROS_ERROR("Invalid OAC Stage Setting !!!");
     }

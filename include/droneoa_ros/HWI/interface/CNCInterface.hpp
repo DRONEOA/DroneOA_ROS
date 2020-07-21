@@ -26,8 +26,10 @@
 
 #include <string>
 #include <queue>
+#include <vector>
 
 #include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
+#include <droneoa_ros/HWI/Utils/LocalPoint.hpp>
 #include <droneoa_ros/GUI/GUISubject.hpp>
 
 namespace CNC {
@@ -48,16 +50,18 @@ class CNCInterface : public GUI::GUISubject {
     virtual bool setMaxSpeed(float speedType, float speed, float isRelative) = 0;
     virtual bool setHome(float targetLatitude, float targetLongitude, float targetAltitude) = 0;
     virtual bool gotoGlobal(float x_lat, float y_long, float z_alt, bool isFromOAC = false) = 0;
-    virtual bool gotoRelative(float x_lat, float y_long, float z_alt, bool isAltDelta = false,
+    virtual bool gotoRelative(float x, float y, float z_alt, bool isAltDelta = false,
             bool isFromOAC = false) = 0;
     virtual bool gotoHeading(float heading, float distance, float z_alt, bool isFromOAC = false) = 0;
+    virtual bool pushGlobalMission(const std::vector<GPSPoint> &wpList, bool isGlobal = true) = 0;
+    virtual bool pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC = false) = 0;
 
     // Local Mission
     virtual bool clearFCUWaypoint() = 0;
     virtual void clearLocalMissionQueue() = 0;
-    virtual std::queue<GPSPoint> getLocalMissionQueue() = 0;
-    virtual void pushLocalMissionQueue(GPSPoint wp) = 0;
-    virtual GPSPoint popLocalMissionQueue() = 0;
+    virtual std::queue<Position3D> getLocalMissionQueue() = 0;
+    virtual void pushLocalMissionQueue(Position3D wp) = 0;
+    virtual Position3D popLocalMissionQueue() = 0;
     virtual void moveMissionToLocalQueue() = 0;
 
     // Status & Checks
@@ -66,12 +70,15 @@ class CNCInterface : public GUI::GUISubject {
     virtual bool isArmed() = 0;
     virtual std::string getMode() = 0;
     virtual GPSPoint getCurrentGPSPoint() = 0;
+    virtual GPSPoint getHomeGPSPoint() = 0;
+    virtual bool isHomeGPSSet() = 0;
     virtual float getRelativeAltitude() = 0;
     virtual float getBatteryVoltage() = 0;
     virtual uint8_t getSysStatus() = 0;
     virtual bool checkFModeExist(std::string modeName) = 0;
     virtual GPSPoint getTargetWaypoint() = 0;
-    virtual geometry_msgs::PoseStamped getLocalPosition() = 0;
+    virtual LocalPoint getLocalPosition() = 0;
+    virtual LocalPoint getCurrentLocalENUTarget() = 0;
     /* IMU */
     virtual sensor_msgs::Imu getIMUData() = 0;
     virtual geometry_msgs::Vector3 getIMURawAttitude() = 0;

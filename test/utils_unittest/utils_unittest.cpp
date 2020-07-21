@@ -23,37 +23,37 @@
 
 TEST(UtilTestSuite, testLocMeter01) {
     GPSPoint newPos = CNC::CNCUtility::getLocationMeter(GPSPoint(43.484409, -80.53272, 10), 0, 0);
-    EXPECT_NEAR(43.484409, newPos.latitude_, 0.0001);
-    EXPECT_NEAR(-80.53272, newPos.longitude_, 0.0001);
-    EXPECT_NEAR(10, newPos.altitude_, 0.1);
+    EXPECT_NEAR(43.484409, newPos.mX, 0.0001);
+    EXPECT_NEAR(-80.53272, newPos.mY, 0.0001);
+    EXPECT_NEAR(10, newPos.mZ, 0.1);
 }
 
 TEST(UtilTestSuite, testLocMeter02) {
     GPSPoint newPos = CNC::CNCUtility::getLocationMeter(GPSPoint(43.484409, -80.53272, 10), 100, 0);
-    EXPECT_NEAR(43.485305, newPos.latitude_, 0.0001);
-    EXPECT_NEAR(-80.53272, newPos.longitude_, 0.0001);
-    EXPECT_NEAR(10, newPos.altitude_, 0.1);
+    EXPECT_NEAR(43.485305, newPos.mX, 0.0001);
+    EXPECT_NEAR(-80.53272, newPos.mY, 0.0001);
+    EXPECT_NEAR(10, newPos.mZ, 0.1);
 }
 
 TEST(UtilTestSuite, testLocMeter03) {
     GPSPoint newPos = CNC::CNCUtility::getLocationMeter(GPSPoint(43.484409, -80.53272, 15), 100, 100);
-    EXPECT_NEAR(43.485305, newPos.latitude_, 0.0001);
-    EXPECT_NEAR(-80.531486, newPos.longitude_, 0.0001);
-    EXPECT_NEAR(15, newPos.altitude_, 0.1);
+    EXPECT_NEAR(43.485305, newPos.mX, 0.0001);
+    EXPECT_NEAR(-80.531486, newPos.mY, 0.0001);
+    EXPECT_NEAR(15, newPos.mZ, 0.1);
 }
 
 TEST(UtilTestSuite, testLocMeter04) {
     GPSPoint newPos = CNC::CNCUtility::getLocationMeter(GPSPoint(43.484409, -80.53272, 10), 0, 100);
-    EXPECT_NEAR(43.484409, newPos.latitude_, 0.0001);
-    EXPECT_NEAR(-80.531486, newPos.longitude_, 0.0001);
-    EXPECT_NEAR(10, newPos.altitude_, 0.1);
+    EXPECT_NEAR(43.484409, newPos.mX, 0.0001);
+    EXPECT_NEAR(-80.531486, newPos.mY, 0.0001);
+    EXPECT_NEAR(10, newPos.mZ, 0.1);
 }
 
 TEST(UtilTestSuite, testLocMeter05) {
     GPSPoint newPos = CNC::CNCUtility::getLocationMeter(GPSPoint(43.484409, -80.53272, 10), 1000, 25000);
-    EXPECT_NEAR(43.493392, newPos.latitude_, 0.0001);
-    EXPECT_NEAR(-80.223197, newPos.longitude_, 0.0001);
-    EXPECT_NEAR(10, newPos.altitude_, 0.1);
+    EXPECT_NEAR(43.493392, newPos.mX, 0.0001);
+    EXPECT_NEAR(-80.223197, newPos.mY, 0.0001);
+    EXPECT_NEAR(10, newPos.mZ, 0.1);
 }
 
 TEST(UtilTestSuite, testDistMeter01) {

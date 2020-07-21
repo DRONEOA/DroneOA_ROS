@@ -107,13 +107,13 @@ std::pair<int, int> CNCPopup::drawGPSStatus(cv::Mat *cncPanel, std::pair<int, in
     std::string GPSDisplay = "Current Pos: ";
     startPos.second += padding;
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), GPSDisplay, 0.5, 1, cv::Scalar(238, 238, 238, 255));
-    GPSDisplay = "         Lat: " + std::to_string(mpCNC->getCurrentGPSPoint().latitude_);
+    GPSDisplay = "         Lat: " + std::to_string(mpCNC->getCurrentGPSPoint().mX);
     startPos.second += padding;
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), GPSDisplay, 0.5, 1, cv::Scalar(238, 238, 238, 255));
-    GPSDisplay = "       Long: " + std::to_string(mpCNC->getCurrentGPSPoint().longitude_);
+    GPSDisplay = "       Long: " + std::to_string(mpCNC->getCurrentGPSPoint().mY);
     startPos.second += padding;
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), GPSDisplay, 0.5, 1, cv::Scalar(238, 238, 238, 255));
-    GPSDisplay = "         Alt: " + std::to_string(mpCNC->getCurrentGPSPoint().altitude_);
+    GPSDisplay = "         Alt: " + std::to_string(mpCNC->getCurrentGPSPoint().mZ);
     startPos.second += padding;
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), GPSDisplay, 0.5, 1, cv::Scalar(238, 238, 238, 255));
     return startPos;
@@ -170,9 +170,9 @@ std::pair<int, int> CNCPopup::drawWPStatus(cv::Mat *cncPanel, std::pair<int, int
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), "=== Waypoint List ================", 0.5, 1,
             cv::Scalar(238, 238, 238, 255));
     startPos.second += padding;
-    std::string localPosDisplay = "Local Position: " + std::to_string(mpCNC->getLocalPosition().pose.position.x) + " "
-            + std::to_string(mpCNC->getLocalPosition().pose.position.y) + " "
-            + std::to_string(mpCNC->getLocalPosition().pose.position.z);
+    std::string localPosDisplay = "Local Position: " + std::to_string(mpCNC->getLocalPosition().mX) + " "
+            + std::to_string(mpCNC->getLocalPosition().mY) + " "
+            + std::to_string(mpCNC->getLocalPosition().mZ);
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), localPosDisplay, 0.5, 1,
             cv::Scalar(238, 238, 238, 255));
     startPos.second += padding;
@@ -200,21 +200,21 @@ std::pair<int, int> CNCPopup::drawLocalMissionQueueStatus(
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), "=== Local WP List ================", 0.5, 1,
             cv::Scalar(238, 238, 238, 255));
         startPos.second += padding;
-    std::string localPosDisplay = "Local Position: " + std::to_string(mpCNC->getLocalPosition().pose.position.x) + " "
-            + std::to_string(mpCNC->getLocalPosition().pose.position.y) + " "
-            + std::to_string(mpCNC->getLocalPosition().pose.position.z);
+    std::string localPosDisplay = "Local Position: " + std::to_string(mpCNC->getLocalPosition().mX) + " "
+            + std::to_string(mpCNC->getLocalPosition().mY) + " "
+            + std::to_string(mpCNC->getLocalPosition().mZ);
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), localPosDisplay, 0.5, 1,
             cv::Scalar(238, 238, 238, 255));
     startPos.second += padding;
     drawText(cncPanel, cv::Point(startPos.first, startPos.second), "Idx Current Lat            Long            Alt",
             0.5, 1, cv::Scalar(238, 238, 238, 255));
-    std::queue<GPSPoint> localWPList = ardupilotPtr->getLocalMissionQueue();
+    std::queue<Position3D> localWPList = ardupilotPtr->getLocalMissionQueue();
     int index = 0;
     while (!localWPList.empty()) {
         std::string lineStr = std::to_string(index) + "   X        ";
-        lineStr += std::to_string(localWPList.front().latitude_) + "    " +
-                std::to_string(localWPList.front().longitude_) + "    " +
-                std::to_string(localWPList.front().altitude_);
+        lineStr += std::to_string(localWPList.front().mX) + "    " +
+                std::to_string(localWPList.front().mY) + "    " +
+                std::to_string(localWPList.front().mZ);
         startPos.second += padding;
         drawText(cncPanel, cv::Point(startPos.first, startPos.second), lineStr, 0.5, 1, cv::Scalar(238, 238, 238, 255));
         localWPList.pop();

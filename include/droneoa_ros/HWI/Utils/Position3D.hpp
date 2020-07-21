@@ -14,31 +14,34 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, July 2020
  */
 
-#ifndef HWI_GPSPOINT_HPP_  // NOLINT
-#define HWI_GPSPOINT_HPP_  // NOLINT
+#ifndef HWI_POSITION3D_HPP_  // NOLINT
+#define HWI_POSITION3D_HPP_  // NOLINT
 
 #include <string>
-#include <droneoa_ros/HWI/Utils/Position3D.hpp>
 
 /**
- * @brief Reprsentation of local GPS point
+ * @brief Reprsentation of any 3D point
  */
 
-class GPSPoint : public Position3D {
- public:
-    GPSPoint();
-    GPSPoint(float latitude, float longitude, float altitude);
+struct Position3D {
+    Position3D();
+    Position3D(double x, double y, double z);
+    virtual ~Position3D();
+    virtual std::string AsString() const;
     /**
-     * @brief Compare whether 2 GPSPoint are equal.
+     * @brief Compare whether 2 positions are equal.
      * @param other The other point
-     * @return true if the distance between is less than or equal to GPS_COMPARE_DIFF_MAX
-     * @return false if the distance between is greater than GPS_COMPARE_DIFF_MAX
+     * @return true if the distance between is less than or equal to POS3D_COMPARE_DIFF_MAX
+     * @return false if the distance between is greater than POS3D_COMPARE_DIFF_MAX
      */
-    bool operator==(const Position3D& other) const;
-    std::string AsString() const override;
+    virtual bool operator==(const Position3D& other) const;
+    virtual float getDistanceTo(const Position3D &other) const;
+    double mX;
+    double mY;
+    double mZ;
 };
 
-#endif  // HWI_GPSPOINT_HPP_  // NOLINT
+#endif  // HWI_POSITION3D_HPP_  // NOLINT

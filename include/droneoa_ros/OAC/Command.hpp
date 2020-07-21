@@ -31,8 +31,13 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <droneoa_ros/HWI/interface/CNCInterface.hpp>
 #include <droneoa_ros/PDN.hpp>
+
+namespace CNC {
+
+class CNCInterface;
+
+}  // namespace CNC
 
 namespace Command {
 
@@ -50,11 +55,13 @@ enum CMD_QUEUE_TYPES : uint32_t {
     CMD_SET_YAW,  /*!< DATA: float heading */
     CMD_DELAY_MSEC,  /*!< DATA: uint32 time in ms */
     CMD_GOTO_RELATIVE,  /*!< DATA: float North axis dist, float East axis dist, float Altitude */
-    CMD_GOTO_GLOBAL,  /*!< DATA: float Latitude, float Longitude, float Altitude */
+    CMD_GOTO_GLOBAL_ENU,  /*!< DATA: float x, float y, float z */
+    CMD_GOTO_GLOBAL_GPS,  /*!< DATA: float Latitude, float Longitude, float Altitude */
     CMD_GOTO_HEADING,  /*!< DATA: float heading, float distance, float Altitude */
     CMD_CLIMB,  /*!< DATA: float Delta Altitude */
     CMD_DESCEND,  /*!< DATA: float Delta Altitude */
     CMD_UNTIL,  /*!< DATA: mode (arrwp: arrive at way point; clrwp: clear all waypoints; More to be added) */
+    CMD_PUSH_MISSION_QUEUE,  /*!< DATA: Waypoints queue "lat,long,alt lat,long,alt ..." */
 };
 
 /**
@@ -69,11 +76,13 @@ static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_SET_YAW",
     "CMD_DELAY_MSEC",
     "CMD_GOTO_RELATIVE",
-    "CMD_GOTO_GLOBAL",
+    "CMD_GOTO_GLOBAL_ENU",
+    "CMD_GOTO_GLOBAL_GPS",
     "CMD_GOTO_HEADING",
     "CMD_CLIMB",
     "CMD_DESCEND",
     "CMD_UNTIL",
+    "CMD_PUSH_MISSION_QUEUE",
 };
 
 /**
@@ -94,6 +103,7 @@ typedef std::vector<CommandLine> CommandQueue;
 enum DATA_QUEUE_TYPES : uint32_t {
     DATA_CONFIDENCE = 0,  /*!< DATA: confidence */
     DATA_ALG_NAME,  /*!< DATA: algorithm name */
+    DATA_SOLUTION_COST,  /*!< DATA: cost of the solution */
 };
 
 /**
@@ -101,7 +111,8 @@ enum DATA_QUEUE_TYPES : uint32_t {
  */
 static const char* DATA_QUEUE_TYPES_NAME[] {
     "DATA_CONFIDENCE",
-    "DATA_ALG_NAME"
+    "DATA_ALG_NAME",
+    "DATA_SOLUTION_COST"
 };
 
 /**

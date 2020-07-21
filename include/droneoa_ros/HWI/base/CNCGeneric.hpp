@@ -92,29 +92,32 @@ class CNCGeneric : public CNCInterface {
      * @return client send response
      */
     bool setHome(float targetLatitude, float targetLongitude, float targetAltitude) override;
+    /**
+     * @brief Push guided waypoint based on local ENU coordination system
+     * @param location LocalPoint target local postion
+     * @param isFromOAC Does the caller has OAC privilege
+     * @return client send response 
+     */
+    bool pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC = false) override;
 
     /***************************************************************************
      * Local Mission Queue
      */
 
     void clearLocalMissionQueue() override;
-    std::queue<GPSPoint> getLocalMissionQueue() override;
-    void pushLocalMissionQueue(GPSPoint wp) override;
-    GPSPoint popLocalMissionQueue() override;
+    std::queue<Position3D> getLocalMissionQueue() override;
+    void pushLocalMissionQueue(Position3D wp) override;
+    Position3D popLocalMissionQueue() override;
 
     /***************************************************************************
      * Status & Checks
      */
-    /**
-     * @brief Check whether the vehicle is ready for to arm under certain mode
-     * @param modeName (Only Allow: GUIDED, STABLIZED, ALT_HOLD)
-     * @return true if ready to arm. Otherwise false
-     */
-    bool isReady(std::string modeName) override;
     bool isConnected() override;
     bool isArmed() override;
     std::string getMode() override;
     GPSPoint getCurrentGPSPoint() override;
+    GPSPoint getHomeGPSPoint() override;
+    bool isHomeGPSSet() override;
     float getRelativeAltitude() override;
     float getBatteryVoltage() override;
     uint8_t getSysStatus() override;
@@ -123,7 +126,8 @@ class CNCGeneric : public CNCInterface {
     geometry_msgs::Vector3 getIMURawAttitude() override;
     mavros_msgs::VFR_HUD getHUDData() override;
     /* Local Position */
-    geometry_msgs::PoseStamped getLocalPosition() override;
+    LocalPoint getLocalPosition() override;
+    LocalPoint getCurrentLocalENUTarget() override;
 
     /***************************************************************************
      * Callback
@@ -147,6 +151,8 @@ class CNCGeneric : public CNCInterface {
      */
     float mTargetAltitude;
     GPSPoint mRecentWaypoint;
+    GPSPoint mHomeGPS;
+    bool mIsHomeGPSSet = false;
 
     bool mIsHomeSet = false;  // Note: this value will NOT be updated after becomeing true
     mavros_msgs::State mCurrentState;
@@ -158,7 +164,8 @@ class CNCGeneric : public CNCInterface {
     std_msgs::Float64 mCurrentRelativeAltitude;
     sensor_msgs::Imu mCurrentIMUData;
     geometry_msgs::PoseStamped mLocalPosition;
-    std::queue<GPSPoint> mLocalMissionQueue;
+    std::queue<Position3D> mLocalMissionQueue;
+    LocalPoint mCurrentNEULocalTarget;
 
     /***************************************************************************
      * Threads
@@ -175,8 +182,11 @@ class CNCGeneric : public CNCInterface {
     void watchIMUThread();
     void watchLocalPositionThread();
 
-    // GUI Data Publisher
+    /***************************************************************************
+     * Publisher
+     */
     ros::Publisher mGuiInfoPub;
+    ros::Publisher mSetpointLocalPub;
 
     // Private CNC
     bool generalLongCommand(mavros_msgs::CommandLong commandMessage);

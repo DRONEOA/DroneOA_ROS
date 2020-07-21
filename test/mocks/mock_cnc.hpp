@@ -25,6 +25,7 @@
 
 #include <string>
 #include <queue>
+#include <vector>
 
 #include "../../include/droneoa_ros/HWI/interface/CNCInterface.hpp"
 
@@ -45,14 +46,16 @@ class CNCMock : public CNCInterface {
     MOCK_METHOD3(setMaxSpeed, bool(float speedType, float speed, float isRelative));
     MOCK_METHOD3(setHome, bool(float targetLatitude, float targetLongitude, float targetAltitude));
     MOCK_METHOD4(gotoGlobal, bool(float x_lat, float y_long, float z_alt, bool isFromOAC));
-    MOCK_METHOD5(gotoRelative, bool(float x_lat, float y_long, float z_alt, bool isAltDelta, bool isFromOAC));
+    MOCK_METHOD5(gotoRelative, bool(float x, float y, float z_alt, bool isAltDelta, bool isFromOAC));
     MOCK_METHOD4(gotoHeading, bool(float heading, float distance, float z_alt, bool isFromOAC));
+    MOCK_METHOD2(pushGlobalMission, bool(const std::vector<GPSPoint> &wpList, bool isGlobal));
+    MOCK_METHOD2(pushLocalENUWaypoint, bool(const LocalPoint location, bool isFromOAC));
     // Local Mission
     MOCK_METHOD0(clearFCUWaypoint, bool());
     MOCK_METHOD0(clearLocalMissionQueue, void());
-    MOCK_METHOD0(getLocalMissionQueue, std::queue<GPSPoint>());
-    MOCK_METHOD1(pushLocalMissionQueue, void(GPSPoint wp));
-    MOCK_METHOD0(popLocalMissionQueue, GPSPoint());
+    MOCK_METHOD0(getLocalMissionQueue, std::queue<Position3D>());
+    MOCK_METHOD1(pushLocalMissionQueue, void(Position3D wp));
+    MOCK_METHOD0(popLocalMissionQueue, Position3D());
     MOCK_METHOD0(moveMissionToLocalQueue, void());
     // Status & Checks
     MOCK_METHOD1(isReady, bool(std::string modeName));
@@ -60,12 +63,15 @@ class CNCMock : public CNCInterface {
     MOCK_METHOD0(isArmed, bool());
     MOCK_METHOD0(getMode, std::string());
     MOCK_METHOD0(getCurrentGPSPoint, GPSPoint());
+    MOCK_METHOD0(getHomeGPSPoint, GPSPoint());
+    MOCK_METHOD0(isHomeGPSSet, bool());
     MOCK_METHOD0(getRelativeAltitude, float());
     MOCK_METHOD0(getBatteryVoltage, float());
     MOCK_METHOD0(getSysStatus, uint8_t());
     MOCK_METHOD1(checkFModeExist, bool(std::string modeName));
     MOCK_METHOD0(getTargetWaypoint, GPSPoint());
-    MOCK_METHOD0(getLocalPosition, geometry_msgs::PoseStamped());
+    MOCK_METHOD0(getLocalPosition, LocalPoint());
+    MOCK_METHOD0(getCurrentLocalENUTarget, LocalPoint());
     /* IMU */
     MOCK_METHOD0(getIMUData, sensor_msgs::Imu());
     MOCK_METHOD0(getIMURawAttitude, geometry_msgs::Vector3());

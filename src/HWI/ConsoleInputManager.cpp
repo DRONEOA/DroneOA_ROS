@@ -259,11 +259,11 @@ bool ConsoleInputManager::buildCNCCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DESCEND, std::to_string(deltaAlt)});
         } else if (cmdType == "info") {
             GPSPoint tmpGPSPoint = mpCNC->getCurrentGPSPoint();
-            geometry_msgs::Point localPose = mpCNC->getLocalPosition().pose.position;
+            LocalPoint localPose = mpCNC->getLocalPosition();
             geometry_msgs::Vector3 RPY = CNC::CNCUtility::quaternionToRPY(mpCNC->getIMUData().orientation);
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
-            ROS_INFO("[DISPLAY] gps: %f %f %f", tmpGPSPoint.latitude_, tmpGPSPoint.longitude_, tmpGPSPoint.altitude_);
-            ROS_INFO("[DISPLAY] local: %f %f %f", localPose.x, localPose.y, localPose.z);
+            ROS_INFO("[DISPLAY] gps: %f %f %f", tmpGPSPoint.mX, tmpGPSPoint.mY, tmpGPSPoint.mZ);
+            ROS_INFO("[DISPLAY] local: %f %f %f", localPose.mX, localPose.mY, localPose.mZ);
             ROS_INFO("[DISPLAY] altitude: %f", mpCNC->getRelativeAltitude());
             ROS_INFO("[DISPLAY] mode: %s", mpCNC->getMode().c_str());
             ROS_INFO("[DISPLAY] voltage: %f", mpCNC->getBatteryVoltage());
@@ -364,6 +364,10 @@ bool ConsoleInputManager::buildQuickCommands() {
             }
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "90"});
+        } else if (cmdType == "t") {
+            ROS_WARN("::CUSTOM TEST CMD::");
+            /* ! @node Add your custom command here, trigger with "! t" command */
+            mpCNC->pushLocalENUWaypoint(LocalPoint(0, 0, 3));
         } else {
             ROS_WARN("Unknown Quick command");
             printQuickHelper();

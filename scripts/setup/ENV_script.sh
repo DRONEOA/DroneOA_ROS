@@ -39,6 +39,7 @@ mkdir -p $absolutePath/ardupilot_ws/src
 cd $absolutePath/ardupilot_ws/src
 git clone http://gitlab.tuotuogzs.com/droneoa/droneoa_ros.git
 
+echo "----- Install Realsense Library"
 echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | sudo tee /etc/apt/sources.list.d/realsense-public.list
 sudo apt-key add ./droneoa_ros/scripts/ci/realsenseKey
 sudo apt-get update
@@ -46,6 +47,7 @@ sudo apt-get install librealsense2-dkms --allow-unauthenticated -y
 sudo apt-get install librealsense2-dev --allow-unauthenticated -y
 sudo apt-get install librealsense2-utils -y
 sudo apt-get install libreadline7 libreadline-dev -y
+echo "----- Install ROS Dependencies"
 sudo apt-get install ros-melodic-cv-bridge -y
 sudo apt-get install ros-melodic-image-transport
 sudo apt-get install ros-melodic-tf -y
@@ -56,19 +58,26 @@ sudo apt-get install ros-melodic-perception -y
 sudo apt-get install ros-melodic-pcl-ros -y
 sudo apt-get install ros-melodic-pcl-conversions -y
 sudo apt-get install ros-melodic-mavros -y
+sudo apt-get install liboctomap-dev -y
 sudo apt-get install ros-melodic-octomap -y
 sudo apt-get install ros-melodic-octomap-server -y
 sudo apt-get install ros-melodic-octomap-rviz-plugins -y
+echo "----- Clone Dependency Repos"
 git clone https://github.com/IntelRealSense/realsense-ros.git
 git clone https://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
 cd realsense-ros/
 git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
 
+echo "----- Install Geographiclib"
 wget https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh
 sudo chmod +x ./install_geographiclib_datasets.sh
 sudo ./install_geographiclib_datasets.sh
 
+echo "----- Build OMPL"
+cd $absolutePath
+bash ./RRT_script.sh
 
+echo "----- Build Ardupilot"
 cd $absolutePath
 git clone -b Copter-4.0.3 https://github.com/ArduPilot/ardupilot
 cd ardupilot
@@ -87,7 +96,3 @@ pip install MAVProxy==1.8.18
 . ~/.profile
 cd ArduCopter
 sim_vehicle.py -w
-
-
-
-

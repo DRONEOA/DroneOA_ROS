@@ -14,32 +14,27 @@
  * License along with DroneOA_ROS. 
  * If not, see <https://www.gnu.org/licenses/>.
  *
- * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, August 2019
+ * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, July 2020
  */
 
 #include <math.h>
 
-#include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
+#include <droneoa_ros/HWI/Utils/LocalPoint.hpp>
 #include <droneoa_ros/PDN.hpp>
 
-GPSPoint::GPSPoint() : Position3D() {}
+LocalPoint::LocalPoint() : Position3D() {}
 
-GPSPoint::GPSPoint(float latitude, float longitude, float altitude) : Position3D(latitude, longitude, altitude) {}
+LocalPoint::LocalPoint(double x, double y, double z) : Position3D(x, y, z) {}
 
-bool GPSPoint::operator==(const Position3D& other) const {
-    float dlat = this->mX - other.mX;
-    float dlong = this->mY - other.mY;
-    float dist = sqrt((dlat*dlat) + (dlong*dlong)) * 1.113195e5;
-    if (dist < GPS_COMPARE_DIFF_MAX) {
-        return true;
-    }
-    return false;
+float LocalPoint::getDistBetweenPos3D(const LocalPoint &pos1, const LocalPoint& pos2) {
+    float dx = pos1.mX - pos2.mX;
+    float dy = pos1.mY - pos2.mY;
+    float dz = pos1.mZ - pos2.mZ;
+    return sqrt((dx*dx) + (dy*dy) + (dz*dz));
 }
 
-std::string GPSPoint::AsString() const {
-    std::string result = "GPSPoint: ";
-    result += std::to_string(mX) + " ";
-    result += std::to_string(mY) + " ";
-    result += std::to_string(mZ);
+std::string LocalPoint::AsString() const {
+    std::string result = "LocalPoint: x: " + std::to_string(mX) + " y: " +
+                std::to_string(mY) + " z: " + std::to_string(mZ);
     return result;
 }

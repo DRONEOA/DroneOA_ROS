@@ -82,7 +82,7 @@ TEST_F(CommandTest, GotoRelativeCommand_success) {
 TEST_F(CommandTest, GotoGlobalCommand_success) {
     EXPECT_CALL(cnc, getRelativeAltitude()).WillOnce(Return(5));
     EXPECT_CALL(cnc, gotoGlobal(5, -2, 10, false));
-    Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL, "5 -2 10"));
+    Command::parseCMD(&cnc, Command::CommandLine(Command::CMD_QUEUE_TYPES::CMD_GOTO_GLOBAL_GPS, "5 -2 10"));
 }
 
 TEST_F(CommandTest, GotoHeadingCommand_success) {
