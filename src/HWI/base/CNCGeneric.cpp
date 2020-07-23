@@ -286,7 +286,7 @@ void CNCGeneric::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
     std::stringstream ss;
     ss << getMode() << " " << getRelativeAltitude() << " " << getBatteryVoltage() << " " << getHUDData().climb << " "
         << getHUDData().heading << " " << getHUDData().groundspeed << " " << getHUDData().throttle << " " << RPY.x
-         << " " << RPY.y << " " << RPY.z;
+         << " " << RPY.y << " " << getHUDData().airspeed;
     guiMsg.data = ss.str();
     mGuiInfoPub.publish(guiMsg);
     GUI::GUISubject::notifyGUIPopups();
