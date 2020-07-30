@@ -25,6 +25,15 @@ cpplint:
     - cd ..
     - cd ..
 
+pylint:
+  stage: Style
+  script:
+    - pip install pylint --quiet
+    - cd ./src/droneoa_ros
+    - find . -type f -name "*.py" | xargs pylint
+    - cd ..
+    - cd ..
+
 catkinlint:
   stage: StaticAnalysis
   script:
