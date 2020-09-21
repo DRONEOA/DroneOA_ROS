@@ -66,7 +66,7 @@ echo "----- Clone Dependency Repos"
 git clone https://github.com/IntelRealSense/realsense-ros.git
 git clone https://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
 cd realsense-ros/
-git checkout `git tag | sort -V | grep -P "^\d+\.\d+\.\d+" | tail -1`
+git checkout 2.2.17
 
 echo "----- Install Geographiclib"
 wget https://raw.githubusercontent.com/mavlink/mavros/master/mavros/scripts/install_geographiclib_datasets.sh
