@@ -6,7 +6,8 @@ Translate & Forward data from SITL to UE4 Simulator via UDP
 """
 
 import socket
-from pymavlink import fgFDM  # pylint: disable=E0401
+import six
+from pymavlink import fgFDM # pylint: disable=E0401
 
 udp = socket.socket(socket.AF_INET, # Internet
                     socket.SOCK_DGRAM) # UDP
@@ -42,7 +43,7 @@ def try_read():
         print_line_msg = "GPS: %s %s %s SPD: %s PRY: %s %s %s RPM: %s" % ( \
             latitude, longitude, altitude, vcas, pitch, roll, yaw, rpm)
         # print(print_line_msg)
-        sent = udpSender.sendto(print_line_msg, ue4_address)  # pylint: disable=W0612
+        sent = udpSender.sendto(six.b(print_line_msg), ue4_address)  # pylint: disable=W0612
         # print(send)
 
 def close_udp():
