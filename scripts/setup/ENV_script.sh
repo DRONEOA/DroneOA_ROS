@@ -74,7 +74,7 @@ sudo chmod +x ./install_geographiclib_datasets.sh
 sudo ./install_geographiclib_datasets.sh
 
 echo "----- Build OMPL"
-cd $absolutePath
+cd $absolutePath/ardupilot_ws/src/droneoa_ros/scripts/setup
 bash ./RRT_script.sh
 
 echo "----- Build Ardupilot"
@@ -94,5 +94,6 @@ sudo -H pip install -Iv MAVProxy==1.8.18
 pip install MAVProxy==1.8.18
 ./waf configure --board sitl
 . ~/.profile
+
 cd ArduCopter
 sim_vehicle.py -w
