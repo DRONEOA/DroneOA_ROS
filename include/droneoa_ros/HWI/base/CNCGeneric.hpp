@@ -185,7 +185,6 @@ class CNCGeneric : public CNCInterface {
     /***************************************************************************
      * Publisher
      */
-    ros::Publisher mGuiInfoPub;
     ros::Publisher mSetpointLocalPub;
 
     // Private CNC

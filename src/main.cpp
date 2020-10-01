@@ -33,6 +33,7 @@
 #include <droneoa_ros/GUI/Debug/LidarPopup.hpp>
 #include <droneoa_ros/GUI/Debug/RSCPopup.hpp>
 #include <droneoa_ros/GUI/Debug/CNCPopup.hpp>
+#include <droneoa_ros/GUI/Release/WebGUIServer.hpp>
 
 void sysSignalhandler(int signum) {
     ROS_WARN("Caught signal %d", signum);
@@ -69,6 +70,7 @@ int main(int argc, char **argv) {
     OAC::OAController oac(&cnc, &lidar, &rsc, &runner, ros::Rate(OAC_REFRESH_FREQ));
 
     // GUIs
+    GUI::WebGUIServer webGUI = GUI::WebGUIServer("Default Session", &cnc);
     #ifdef DEBUG_CNC_POPUP
     GUI::CNCPopup cp = GUI::CNCPopup("CNC Debug Popup", &cnc);
     #endif

@@ -22,7 +22,6 @@
 #include <mavros_msgs/CommandLong.h>
 #include <mavros_msgs/SetMode.h>
 #include <sensor_msgs/NavSatStatus.h>
-#include <std_msgs/String.h>
 #include <tf/tf.h>
 #include <tf2/LinearMath/Quaternion.h>
 
@@ -74,7 +73,6 @@ void CNCGeneric::initWatcherThread() {
     mpThreadWatchAltitude = new boost::thread(boost::bind(&CNCGeneric::watchAltitudeThread, this));
     mpThreadWatchIMU = new boost::thread(boost::bind(&CNCGeneric::watchIMUThread, this));
     mpThreadWatchLocalPosition = new boost::thread(boost::bind(&CNCGeneric::watchLocalPositionThread, this));
-    mGuiInfoPub = mNodeHandle.advertise<std_msgs::String>("droneoa/gui_data", 1000);
     mSetpointLocalPub = mNodeHandle.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
     ROS_INFO("[CNC] init threads done");
 }
@@ -280,15 +278,6 @@ void CNCGeneric::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
 
 void CNCGeneric::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
     mCurrentHudData = *msg;
-    geometry_msgs::Vector3 RPY = CNC::CNCUtility::quaternionToRPY(getIMUData().orientation);
-    // Post Infomation Package For GUI
-    std_msgs::String guiMsg;
-    std::stringstream ss;
-    ss << getMode() << " " << getRelativeAltitude() << " " << getBatteryVoltage() << " " << getHUDData().climb << " "
-        << getHUDData().heading << " " << getHUDData().groundspeed << " " << getHUDData().throttle << " " << RPY.x
-         << " " << RPY.y << " " << getHUDData().airspeed;
-    guiMsg.data = ss.str();
-    mGuiInfoPub.publish(guiMsg);
     GUI::GUISubject::notifyGUIPopups();
 }
 
