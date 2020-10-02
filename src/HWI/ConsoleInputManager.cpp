@@ -154,6 +154,9 @@ bool ConsoleInputManager::buildCommandQueue() {
         mIsBuildingQueue = false;
         ROS_ERROR("Until is only valid in command queue: until [mode]");
         return false;
+    } else if (currentCommand_.first == "then") {
+        ROS_WARN("Redundent THEN Detected - ignore");
+        return true;
     } else {
         ROS_WARN("Unknown Module Name: %s", currentCommand_.first.c_str());
         printModuleHelper();
@@ -168,25 +171,31 @@ bool ConsoleInputManager::buildQueueCommands() {
         printQueueHelper();
         return false;
     }
-    uint8_t stepCount = 0;  // 0: module name 1-:entries
+    uint8_t stepCount = 0;  // 0: module name; >=1:entries;
     currentCommand_.second.clear();
     mIsBuildingQueue = true;
     for (std::string entry : inputCmd) {
-        if (entry == "then" || entry == "end") {
+        // THEN, END, UNTIL indicate end of previous command
+        //   Parse the queue then clean the currentCommand_ (which is used by single command bulider)
+        if (entry == "then" || entry == "end" || entry == "until") {
             stepCount = 0;
             if (!buildCommandQueue()) {
                 printQueueHelper();
                 mIsBuildingQueue = false;
                 return false;
             }
+            currentCommand_.first = entry;
             currentCommand_.second.clear();
-            continue;
+            // Until is also first entry of a command, so do not skip
+            if (entry != "until") continue;
         }
+        // First entry of command indicate target module name
         if (stepCount == 0) {
             currentCommand_.first = entry;
             stepCount++;
             continue;
         }
+        // Store parameters of the command
         currentCommand_.second.push_back(entry);
     }
     mIsBuildingQueue = false;
@@ -535,11 +544,13 @@ void ConsoleInputManager::printQueueHelper() {
     ROS_WARN("Command Queue Helper:");
     ROS_WARN("Usage: START [CMD] THEN [CMD] TEHN [CMD] ... END");
     ROS_WARN("Supported Commands [CMD]:");
-    ROS_WARN("    CNC:   all expect: quit");
-    ROS_WARN("    OAC:   none WIP");
-    ROS_WARN("    RSC:   none WIP");
-    ROS_WARN("    Lidar: none WIP");
-    ROS_WARN("    !:     all");
+    ROS_WARN("    CNC:    all expect: quit");
+    ROS_WARN("    OAC:    none WIP");
+    ROS_WARN("    RSC:    none WIP");
+    ROS_WARN("    Lidar:  none WIP");
+    ROS_WARN("    !:      all");
+    ROS_WARN("    UNTIL:  alt(gt lt eq), clrwp, arrwp");
+    ROS_WARN("    DELAY:  time in msec");
 }
 
 }  // namespace IO
