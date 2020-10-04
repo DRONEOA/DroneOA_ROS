@@ -172,6 +172,7 @@ add_library(droneoa_ros_libhwi
 )
 
 add_library(droneoa_ros_libgui
+  src/GUI/Release/WebGUIServer.cpp
   src/GUI/Debug/LidarPopup.cpp
   src/GUI/Debug/RSCPopup.cpp
   src/GUI/Debug/CNCPopup.cpp
