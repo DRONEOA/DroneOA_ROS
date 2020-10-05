@@ -469,7 +469,9 @@ void CNCGeneric::pushLocalMissionQueue(Position3D wp) {
 }
 
 Position3D CNCGeneric::popLocalMissionQueue() {
+    Position3D nextP3D = mLocalMissionQueue.front();
     mLocalMissionQueue.pop();
+    return nextP3D;
 }
 
 }  // namespace CNC

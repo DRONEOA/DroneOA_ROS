@@ -124,7 +124,7 @@ void RSCPopup::drawText(cv::Mat targetImg, cv::Point origin, std::string text, d
     cv::Point pt2;
     pt2.x = originTop.x + text_size.width;
     pt2.y = origin.y;
-    cv::rectangle(targetImg, originTop, pt2, cv::Scalar(0), -1, CV_AA);
+    cv::rectangle(targetImg, originTop, pt2, cv::Scalar(0), -1, cv::LineTypes::LINE_AA);
     cv::putText(targetImg, text, origin, font_face, font_scale, cv::Scalar(0xffff), thickness, 8, 0);
 }
 

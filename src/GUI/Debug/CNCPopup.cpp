@@ -51,7 +51,7 @@ void CNCPopup::drawText(cv::Mat *targetImg, cv::Point origin, std::string text, 
     cv::Point pt2;
     pt2.x = originTop.x + text_size.width + 2;
     pt2.y = origin.y + 2;
-    cv::rectangle(*targetImg, originTop, pt2, cv::Scalar(0), -1, CV_AA);
+    cv::rectangle(*targetImg, originTop, pt2, cv::Scalar(0), -1, cv::LineTypes::LINE_AA);
     cv::putText(*targetImg, text, origin, font_face, font_scale, color, thickness, 8, 0);
 }
 
