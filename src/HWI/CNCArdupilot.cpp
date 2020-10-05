@@ -165,6 +165,7 @@ mavros_msgs::WaypointPull CNCArdupilot::pullWaypoints() {
         ROS_INFO("%d", pulledWp.response.wp_received);
         ROS_INFO("Waypoint pull success");
     }
+    return pulledWp;
 }
 
 bool CNCArdupilot::clearFCUWaypoint() {

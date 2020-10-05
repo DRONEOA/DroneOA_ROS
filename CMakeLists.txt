@@ -1,8 +1,18 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(droneoa_ros)
 
+# Set target C++ standard and required compiler features
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+if(COMPILER_SUPPORTS_CXX14)
+    set(CMAKE_CXX_STANDARD 14)
+else()
+    set(CMAKE_CXX_STANDARD 11)
+endif()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+# add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -17,12 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
 )
 
-find_package(OpenCV REQUIRED COMPONENTS
-  core
-  highgui
-  imgproc
-)
-
+find_package( OpenCV REQUIRED )
 find_package( PCL REQUIRED )
 find_package( ompl REQUIRED )
 find_package( fcl REQUIRED )
@@ -137,6 +142,7 @@ include_directories(include
   ${FCL_INCLUDE_DIRS}
   ${ompl_INCLUDE_DIRS}
   ${OCTOMAP_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library

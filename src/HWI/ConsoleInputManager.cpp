@@ -40,6 +40,7 @@ bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAC
     mpLidar = lidar;
     thread_watch_command_ = new boost::thread(boost::bind(&ConsoleInputManager::watchCommandThread, this));
     mpParser = new OAC::CMDParser(cnc, runner);
+    return thread_watch_command_ ? true : false;
 }
 
 void ConsoleInputManager::command_callback(const std_msgs::String::ConstPtr& msg) {
