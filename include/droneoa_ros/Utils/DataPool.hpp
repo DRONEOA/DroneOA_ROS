@@ -28,6 +28,9 @@
 
 namespace DP {
 
+/*******************************************************************************
+ * Record supported data types
+ */
 enum SUPPORT_TYPES {
     TYPE_BOOL,
     TYPE_STRING,
@@ -38,6 +41,9 @@ enum SUPPORT_TYPES {
     TYPE_GEO_MSGS_VEC3
 };
 
+/*******************************************************************************
+ * Data Entries Definition
+ */
 // Basic Flight Info
 constexpr char DP_IS_ARMED[] = "IsArmed";  /**< @brief Type: bool */
 
@@ -78,14 +84,35 @@ constexpr char DP_LOCAL_LOC[] = "LocalLocation";  /**< @brief Type: LocalPoint *
 
 constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @brief Type: LocalPoint */
 
-// Data Pool
+/*******************************************************************************
+ * Data Pool
+ *! @note Data may not be available during construction. Note construct order.
+ *! @note This should be used mainly for:
+ *          1. Configurations
+ *          2. Low update frequency data that require cross module access
+ *          3. Important flags for debug
+ *          4. Important flags that developer main need
+ */
 class DataPool {
     static std::mutex mContainerMutex;
     static std::map<std::string, boost::any> mDataPoolContainer;
 
  public:
+    /**
+     * @brief Get the Data object at desired entry
+     * @param name name of the data entry
+     * @return boost::any data (Note: you can only cast data to it's original type)
+     */
     boost::any getData(std::string name);
+    /**
+     * @brief Set the Data object at desired entry
+     * @param name name of the data entry
+     * @param data original data in the DP will be updated if exist
+     */
     void setData(std::string name, boost::any data);
+    /**
+     * @brief Print the list of existing entries (Debug only)
+     */
     void printAllEntry();  // Debug
     DataPool();
     ~DataPool();
