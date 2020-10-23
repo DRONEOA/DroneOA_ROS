@@ -26,7 +26,10 @@
 namespace Lidar {
 
 LidarGeneric::LidarGeneric(ros::NodeHandle node, ros::Rate rate) : mNodeHandle(node), mRate(rate) {
-    mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
+        mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
+    if (ENABLE_LIDAR) {
+        initWatcherThread();
+    }
 }
 
 LidarGeneric::~LidarGeneric() {

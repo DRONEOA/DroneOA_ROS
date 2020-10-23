@@ -56,15 +56,6 @@ int main(int argc, char **argv) {
     Lidar::LidarYDLidar lidar(node, rate);
     Depth::RSC rsc(node, rate);
 
-    // Init watchers
-    cnc.initWatcherThread();
-    if (ENABLE_RSC) {
-        rsc.initWatcherThread();
-    }
-    if (ENABLE_LIDAR) {
-        lidar.initWatcherThread();
-    }
-
     // OAC Components
     OAC::CMDRunner runner(&cnc);
     OAC::OAController oac(&cnc, &lidar, &rsc, &runner, ros::Rate(OAC_REFRESH_FREQ));

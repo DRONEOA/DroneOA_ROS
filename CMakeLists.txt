@@ -148,6 +148,7 @@ include_directories(include
 ## Declare a C++ library
 add_library(droneoa_ros_libutils
   src/Utils/GeneralUtils.cpp
+  src/Utils/DataPool.cpp
 )
 
 add_library(droneoa_ros_liboac
@@ -179,6 +180,7 @@ add_library(droneoa_ros_libhwi
 
 add_library(droneoa_ros_libgui
   src/GUI/Release/WebGUIServer.cpp
+  src/GUI/Release/UE4SIMServer.cpp
   src/GUI/Debug/LidarPopup.cpp
   src/GUI/Debug/RSCPopup.cpp
   src/GUI/Debug/CNCPopup.cpp

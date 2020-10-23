@@ -30,7 +30,11 @@
 
 namespace Depth {
 
-RSC::RSC(ros::NodeHandle node, ros::Rate rate) : mNodeHandle(node), mRate(rate) {}
+RSC::RSC(ros::NodeHandle node, ros::Rate rate) : mNodeHandle(node), mRate(rate) {
+    if (ENABLE_RSC) {
+        initWatcherThread();
+    }
+}
 
 RSC::~RSC() {
     if (mpThreadWatchDepthImg) {
