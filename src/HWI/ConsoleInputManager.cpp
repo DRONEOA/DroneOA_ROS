@@ -130,6 +130,8 @@ bool ConsoleInputManager::buildCommandQueue() {
             return false;
         }
         return buildLIDARCommands();
+    } else if (currentCommand_.first == "dp") {
+        return buildDPCommands();
     } else if (currentCommand_.first == "!") {
         return buildQuickCommands();
     } else if (currentCommand_.first == "start") {
@@ -482,6 +484,25 @@ bool ConsoleInputManager::buildLIDARCommands() {
     return true;
 }
 
+bool ConsoleInputManager::buildDPCommands() {
+    try {
+        std::string cmdType = currentCommand_.second.at(0);
+        if (cmdType == "list") {
+            msDP.printAllEntry();
+        } else if(cmdType == "print") {
+            std::string srcName = currentCommand_.second.at(1);
+            ROS_WARN("[DP] Data at: %s = %s", srcName.c_str(), msDP.getDataAsString(srcName).c_str());
+        } else {
+            ROS_WARN("Unknown DataPool command");
+            printDPHelper();
+        }
+    } catch (...) {
+        ROS_WARN("ERROR happened while processing DataPool command");
+        printDPHelper();
+    }
+    return true;
+}
+
 void ConsoleInputManager::printCNCHelper() {
     ROS_WARN("CNC Commands: [required] <optional>");
     ROS_WARN("    arm:                                  Arm the vehicle motor");
@@ -517,6 +538,12 @@ void ConsoleInputManager::printLIDARHelper() {
     ROS_WARN("    chsrc:                                Change data source");
 }
 
+void ConsoleInputManager::printDPHelper() {
+    ROS_WARN("DataPool Commands: [required] <optional>");
+    ROS_WARN("    list:                                 List existing datapool entries");
+    ROS_WARN("    print [entry name]:                   Print value of given entry");
+}
+
 void ConsoleInputManager::printQuickHelper() {
     ROS_WARN("Quick Commands: [required] <optional>");
     ROS_WARN("    w [Distance] <Altitude>:         Go to North");
@@ -536,6 +563,7 @@ void ConsoleInputManager::printModuleHelper() {
     ROS_WARN("    OAC:    Obstacle Avoidance Algorithm Controller");
     ROS_WARN("    RSC:    Realsense Camera HS Interface");
     ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
+    ROS_WARN("    DP:     DataPool Tools");
     ROS_WARN("    !:      Quick Commands");
     ROS_WARN("Give Queue Commands:");
     ROS_WARN("    START [CMD] THEN [CMD] TEHN [CMD] ... END");

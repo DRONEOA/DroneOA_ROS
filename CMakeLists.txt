@@ -149,6 +149,7 @@ include_directories(include
 add_library(droneoa_ros_libutils
   src/Utils/GeneralUtils.cpp
   src/Utils/DataPool.cpp
+  src/Utils/DataPoolSubscriber.cpp
 )
 
 add_library(droneoa_ros_liboac

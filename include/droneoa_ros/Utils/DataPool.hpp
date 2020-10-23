@@ -23,66 +23,26 @@
 #include <ros/ros.h>
 #include <string>
 #include <map>
+#include <vector>
 #include <mutex>  // NOLINT
 #include <boost/any.hpp>
+#include <droneoa_ros/Utils/DataPoolEntries.hpp>
 
 namespace DP {
 
 /*******************************************************************************
- * Record supported data types
+ * Subscriber Class
  */
-enum SUPPORT_TYPES {
-    TYPE_BOOL,
-    TYPE_STRING,
-    TYPE_UINT8,
-    TYPE_FLOAT,
-    TYPE_POSITION3D,  // GPS & Local
-    TYPE_GEO_MSGS_QUAT,
-    TYPE_GEO_MSGS_VEC3
-};
+class DataPoolSubscriber;
 
 /*******************************************************************************
- * Data Entries Definition
+ * Helpers
  */
-// Basic Flight Info
-constexpr char DP_IS_ARMED[] = "IsArmed";  /**< @brief Type: bool */
-
-constexpr char DP_IS_CONNECTED[] = "IsConnected";  /**< @brief Type: bool */
-
-constexpr char DP_IS_GUIDED[] = "IsGuided";  /**< @brief Type: bool */
-
-constexpr char DP_FLIGHT_MOD[] = "FlightMod";  /**< @brief Type: string */
-
-constexpr char DP_SYS_STATUS[] = "SystemStatus";  /**< @brief Type: uint8_t */
-
-constexpr char DP_RELATIVE_ALTITUDE[] = "RelativeAltitude";  /**< @brief Type: float */
-
-constexpr char DP_HUD_ALTITUDE[] = "HUDAltitude";  /**< @brief Type: float */
-
-constexpr char DP_BATTERY_VOLTAGE[] = "BatteryVoltage";  /**< @brief Type: float */
-
-constexpr char DP_HEADING[] = "Heading";  /**< @brief Type: float */
-
-constexpr char DP_AIR_SPEED[] = "AirSpeed";  /**< @brief Type: float */
-
-constexpr char DP_GROUND_SPEED[] = "GroundSpeed";  /**< @brief Type: float */
-
-constexpr char DP_CLIMB_Rate[] = "ClimbRate";  /**< @brief Type: float */
-
-constexpr char DP_THROTTLE[] = "Throttle";  /**< @brief Type: float */
-
-constexpr char DP_ORIENTATION_QUAT[] = "OrientationQuaternion";  /**< @brief Type: geometry_msgs::Quaternion */
-
-constexpr char DP_ORIENTATION_RPY[] = "OrientationRollPitchYaw";  /**< @brief Type: geometry_msgs::Vector3 */
-
-// Location
-constexpr char DP_GPS_LOC[] = "GPSLocal";  /**< @brief Type: GPSPoint */
-
-constexpr char DP_GPS_HOME[] = "GPSHome";  /**< @brief Type: GPSPoint */
-
-constexpr char DP_LOCAL_LOC[] = "LocalLocation";  /**< @brief Type: LocalPoint */
-
-constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @brief Type: LocalPoint */
+// Check if a any can be cast to certain type，RTTI
+template<typename T>
+bool can_cast_to(const boost::any& a){
+    return a.type() == typeid(T);
+}
 
 /*******************************************************************************
  * Data Pool
@@ -96,8 +56,15 @@ constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @b
 class DataPool {
     static std::mutex mContainerMutex;
     static std::map<std::string, boost::any> mDataPoolContainer;
+    static std::vector<DataPoolSubscriber*> mSubscriberList;
+    static bool isInitialized;
+    void notifyAll(ENTRY_TYPES type, std::string entryName);
 
  public:
+    /**
+     * @brief Set configs with Default configuration set
+     */
+    void setDefaultConfig();
     /**
      * @brief Get the Data object at desired entry
      * @param name name of the data entry
@@ -105,11 +72,28 @@ class DataPool {
      */
     boost::any getData(std::string name);
     /**
-     * @brief Set the Data object at desired entry
+     * @brief Get the Data As String object, auto conversion
+     * @param name name of the data entry
+     * @return std::string 
+     */
+    std::string getDataAsString(std::string name);
+    /**
+     * @brief Set the Data object at desired entry. Subscribers of DATA type will be notified.
      * @param name name of the data entry
      * @param data original data in the DP will be updated if exist
      */
     void setData(std::string name, boost::any data);
+    /**
+     * @brief Set the Config object at desired entry. Subscribers of CONFIG type will be notified.
+     * @param name name of the data entry
+     * @param data original data in the DP will be updated if exist
+     */
+    void setConfig(std::string name, boost::any data);
+    /**
+     * @brief Register a subscriber for DATA/CONFIG/ALL
+     * @param subscriber 
+     */
+    void registerEvents(DataPoolSubscriber* subscriber);
     /**
      * @brief Print the list of existing entries (Debug only)
      */

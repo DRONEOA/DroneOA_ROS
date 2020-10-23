@@ -336,7 +336,22 @@ void CNCGeneric::watchHomePosThread() {
             boost::bind(&CNCGeneric::homePos_callback, this, _1));
 
     ROS_WARN("Waiting For 3D Fix ...");
-    while (ros::ok() && (ENABLE_SAFETY_GPS && !mIsHomeSet)) {
+    while (ros::ok()) {
+        // Check is home set, set indicate we have a 2D+ GPS fix
+        if (mIsHomeSet) {
+            break;
+        }
+        // Prevent uninitialized data pool
+        bool safetySetting = true;
+        try {
+            safetySetting = boost::any_cast<bool>(msDP.getData(DP::CONF_SAFETY_GPS_FIX));
+        } catch(boost::bad_any_cast& e) {
+            ROS_WARN("GPS Fix Safety Setting Missing, Enabled by Default");
+        }
+        if (!safetySetting) {
+            ROS_WARN("GPS Fix Safety Disabled");
+            break;
+        }
         ros::spinOnce();
         mRate.sleep();
     }
