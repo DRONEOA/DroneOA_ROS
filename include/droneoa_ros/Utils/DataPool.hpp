@@ -89,9 +89,9 @@ constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @b
  *! @note Data may not be available during construction. Note construct order.
  *! @note This should be used mainly for:
  *          1. Configurations
- *          2. Low update frequency data that require cross module access
- *          3. Important flags for debug
- *          4. Important flags that developer main need
+ *          2. Low update frequency data that require cross-module access
+ *          3. Important flags for debugging
+ *          4. Important flags that developers may need
  */
 class DataPool {
     static std::mutex mContainerMutex;
