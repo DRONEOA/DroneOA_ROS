@@ -40,7 +40,7 @@ class DataPoolSubscriber;
  */
 // Check if a any can be cast to certain type，RTTI
 template<typename T>
-bool can_cast_to(const boost::any& a){
+bool can_cast_to(const boost::any& a) {
     return a.type() == typeid(T);
 }
 
@@ -95,9 +95,13 @@ class DataPool {
      */
     void registerEvents(DataPoolSubscriber* subscriber);
     /**
-     * @brief Print the list of existing entries (Debug only)
+     * @brief Print the list of existing entries
      */
-    void printAllEntry();  // Debug
+    void printAllEntry();
+    /**
+     * @brief Print the list of existing entries and current data (Debug only)
+     */
+    void printAllEntryWithData();  // Debug
     DataPool();
     ~DataPool();
 };

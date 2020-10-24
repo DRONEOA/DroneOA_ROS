@@ -18,12 +18,12 @@
  */
 
 #include <droneoa_ros/Utils/DataPool.hpp>
+#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/Vector3.h>
 #include <droneoa_ros/Utils/DataPoolSubscriber.hpp>
 #include <droneoa_ros/HWI/Utils/LocalPoint.hpp>
 #include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
-#include <geometry_msgs/Quaternion.h>
-#include <geometry_msgs/Vector3.h>
 
 namespace DP {
 
@@ -135,6 +135,13 @@ void DataPool::printAllEntry() {
     ROS_INFO("[DP] All DataPool Entries:");
     for (auto entry : mDataPoolContainer) {
         ROS_INFO("    %s", entry.first.c_str());
+    }
+}
+
+void DataPool::printAllEntryWithData() {
+    ROS_INFO("[DP] All DataPool Entries And Data:");
+    for (auto entry : mDataPoolContainer) {
+        ROS_INFO("    %-30s %-50s", entry.first.c_str(), getDataAsString(entry.first).c_str());
     }
 }
 

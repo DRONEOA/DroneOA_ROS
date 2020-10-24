@@ -489,8 +489,12 @@ bool ConsoleInputManager::buildDPCommands() {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "list") {
             msDP.printAllEntry();
-        } else if(cmdType == "print") {
+        } else if (cmdType == "print") {
             std::string srcName = currentCommand_.second.at(1);
+            if (srcName == "all") {
+                msDP.printAllEntryWithData();
+                return true;
+            }
             ROS_WARN("[DP] Data at: %s = %s", srcName.c_str(), msDP.getDataAsString(srcName).c_str());
         } else {
             ROS_WARN("Unknown DataPool command");
@@ -541,7 +545,7 @@ void ConsoleInputManager::printLIDARHelper() {
 void ConsoleInputManager::printDPHelper() {
     ROS_WARN("DataPool Commands: [required] <optional>");
     ROS_WARN("    list:                                 List existing datapool entries");
-    ROS_WARN("    print [entry name]:                   Print value of given entry");
+    ROS_WARN("    print [entry name / ALL]:             Print value of given entry or all");
 }
 
 void ConsoleInputManager::printQuickHelper() {
