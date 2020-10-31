@@ -12,7 +12,7 @@ PACKAGE_NAME=$1
 
 ## Delete Package locally
 echo "Uninstall Package: $PACKAGE_NAME"
-rm -r src/$PACKAGE_NAME
-
+rm -rf src/$PACKAGE_NAME
+retval=$?
 echo "Uninstall Exit with code: $retval"
 exit $retval

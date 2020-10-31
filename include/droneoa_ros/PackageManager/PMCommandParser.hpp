@@ -1,5 +1,24 @@
-#ifndef PM_CMD_PARSER_
-#define PM_CMD_PARSER_
+/* Copyright (C) 2020 DroneOA Group - All Rights Reserved
+ * This file is part of DroneOA_ROS.
+ *
+ * DroneOA_ROS is free software: you can redistribute it and/or 
+ * modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation.
+ *
+ * DroneOA_ROS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with DroneOA_ROS. 
+ * If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Written by Bohan Shi <b34shi@uwaterloo.ca>, Nov 2020
+ */
+
+#ifndef PM_CMD_PARSER_  // NOLINT
+#define PM_CMD_PARSER_  // NOLINT
 
 #include <string>
 #include <vector>
@@ -13,7 +32,7 @@ struct PackageRecord {
     std::string branch;
     bool startWithMainNode;
     PackageRecord();
-    PackageRecord(std::string name);
+    explicit PackageRecord(std::string name);
     std::string toString();
 };
 
@@ -40,4 +59,4 @@ class CommandParser {
 
 }  // namespace PM
 
-#endif
+#endif  // NOLINT

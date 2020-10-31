@@ -1,3 +1,22 @@
+/* Copyright (C) 2020 DroneOA Group - All Rights Reserved
+ * This file is part of DroneOA_ROS.
+ *
+ * DroneOA_ROS is free software: you can redistribute it and/or 
+ * modify it under the terms of the GNU Affero General Public License
+ * as published by the Free Software Foundation.
+ *
+ * DroneOA_ROS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License along with DroneOA_ROS. 
+ * If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Written by Bohan Shi <b34shi@uwaterloo.ca>, Nov 2020
+ */
+
 #include <ros/ros.h>
 #include <ros/package.h>
 
@@ -55,6 +74,7 @@ bool CommandParser::parseInput(std::vector<std::string> tokens) {
     // Check Command Type NOT Specified / Help
     if (tokens.size() == 0 || tokens[0] == "help") {
         printHelp();
+        return true;
     }
     // Check Command Type
     std::string cmdType = tokens[0];
@@ -70,7 +90,7 @@ bool CommandParser::parseInput(std::vector<std::string> tokens) {
     } else if (cmdType == "launch") {
         launch();
     } else if (cmdType == "shutdown") {
-        shutdown(false);
+        shutdown(true);
     } else {
         ROS_WARN("Unknown PM Command !!!");
         printHelp();
@@ -90,7 +110,7 @@ void CommandParser::install(std::vector<std::string> tokens) {
         return;
     }
     // Run install script (clone & pkg's install script)
-    std::string cmd = DRONEOA_PATH + "/scripts/PackageManager/install.sh ";
+    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/install.sh ";
     cmd = cmd + tokens[0] + " " + tokens[1];
     int ret = system(cmd.c_str());
     if (WEXITSTATUS(ret) != 0) {
@@ -104,6 +124,7 @@ void CommandParser::install(std::vector<std::string> tokens) {
     mPackageList[tokens[0]] = PackageRecord(tokens[0]);
     mPackageList[tokens[0]].url = tokens[1];
     writeListToFile();
+    ROS_INFO("[PM][INSTALL] Package: %s is Successfully Installed.", tokens[0].c_str());
 }
 
 void CommandParser::update(std::vector<std::string> tokens) {
@@ -115,7 +136,7 @@ void CommandParser::update(std::vector<std::string> tokens) {
         return;
     }
     // Update latest by pull
-    std::string cmd = DRONEOA_PATH + "/scripts/PackageManager/update.sh ";
+    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/update.sh ";
     cmd = cmd + tokens[0];
     int ret = system(cmd.c_str());
     if (WEXITSTATUS(ret) != 0) {
@@ -125,6 +146,7 @@ void CommandParser::update(std::vector<std::string> tokens) {
     if (!rebuild()) {
         ROS_ERROR("[PM][UPDATE] Rebuild failed !!!");
     }
+    ROS_INFO("[PM][UPDATE] Package: %s is Successfully Updated.", tokens[0].c_str());
 }
 
 void CommandParser::uninstall(std::vector<std::string> tokens) {
@@ -140,7 +162,7 @@ void CommandParser::uninstall(std::vector<std::string> tokens) {
         return;
     }
     // Update latest by pull
-    std::string cmd = DRONEOA_PATH + "/scripts/PackageManager/uninstall.sh ";
+    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/uninstall.sh ";
     cmd = cmd + tokens[0];
     int ret = system(cmd.c_str());
     if (WEXITSTATUS(ret) != 0) {
@@ -150,22 +172,39 @@ void CommandParser::uninstall(std::vector<std::string> tokens) {
     if (!rebuild()) {
         ROS_ERROR("[PM][UNINSTALL] Rebuild failed !!!");
     }
+    // Remove From Installed List
+    mPackageList.erase(mPackageList.find(tokens[0]));
+    ROS_INFO("[PM][UNINSTALL] Package: %s is Successfully Uninstalled.", tokens[0].c_str());
 }
 
 void CommandParser::list(std::vector<std::string> tokens) {
-    for (auto pkg : mPackageList) {
-        ROS_INFO("> %s", pkg.second.toString().c_str());
+    // Check arguments complete
+    if (tokens.size() < 1) {
+        ROS_ERROR("[PM][LIST] Missing Package Name Or URL !!!");
+        return;
+    }
+    if (tokens[0] == "running") {
+        ROS_INFO("[PM][LIST] Listing Running Nodes");
+        system("rosnode list");
+    } else if (tokens[0] == "installed") {
+        ROS_INFO("[PM][LIST] Listing Installed Nodes");
+        for (auto pkg : mPackageList) {
+            ROS_INFO("    > %s", pkg.second.toString().c_str());
+        }
+    } else {
+        ROS_ERROR("[PM][LIST] Unknown Listing Type (running, installed)");
     }
 }
 
 bool CommandParser::rebuild() {
-    std::string cmd = DRONEOA_PATH + "/scripts/PackageManager/rebuild.sh";
+    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/rebuild.sh";
     int ret = system(cmd.c_str());
     std::cout << "Return: " << WEXITSTATUS(ret) << std::endl;
     if (ret != 0) {
         ROS_ERROR("[PM][REBUILD] Rebuild failed !!!");
         return false;
     }
+    ROS_INFO("[PM][REBUILD] Rebuild Operation is Successful.");
     return true;
 }
 
