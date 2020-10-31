@@ -186,6 +186,11 @@ add_library(droneoa_ros_libgui
   src/GUI/GUISubject.cpp
 )
 
+add_library(droneoa_ros_libpm
+  src/PackageManager/PMCommandParser.cpp
+  src/Utils/GeneralUtils.cpp
+)
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -205,6 +210,10 @@ add_executable(droneoa_ros
   src/main.cpp
 )
 
+add_executable(droneoa_ros_pm
+  src/PackageManager/PackageManagerNode.cpp
+)
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -221,6 +230,12 @@ target_link_libraries(droneoa_ros
   ${FCL_LIBRARIES}
   ${OMPL_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
+  readline
+)
+
+target_link_libraries(droneoa_ros_pm
+  droneoa_ros_libpm
+  ${catkin_LIBRARIES}
   readline
 )
 

@@ -98,7 +98,7 @@ bool ConsoleInputManager::splitModuleCommand(std::string cmd) {
     std::string token;
     std::istringstream tokenStream(cmd);
 
-    while (std::getline(tokenStream, token, ConsoleDelimiter)) {
+    while (std::getline(tokenStream, token, CONSOLE_DELIMITER)) {
         GeneralUtility::toLowerCaseStr(&token);
         if (currentCommand_.first == "INVALID") {
             currentCommand_.first = token;

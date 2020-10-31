@@ -36,6 +36,11 @@
 static const double GLOBAL_ROS_RATE = 20;
 
 /**
+ * @brief Console delimiter
+ */ 
+static const char CONSOLE_DELIMITER = ' ';
+
+/**
  * @brief List of FCU Type
  */
 static const char* FCU_PX4 = "PX4";
