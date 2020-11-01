@@ -44,7 +44,7 @@ void sysSignalhandler(int signum) {
 
 int main(int argc, char **argv) {
     // Setup Refresh Rate
-    ros::init(argc, argv, "droneoa");
+    ros::init(argc, argv, "droneoa", ros::init_options::NoSigintHandler);
     ros::NodeHandle node;
     ros::Rate rate(GLOBAL_ROS_RATE);
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     bool masterSW = true;
     IO::ConsoleInputManager consoleInputManager(&masterSW);
     consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &runner);  // @todo Or seperate runner ?
-    while ((commandIn = readline("")) != nullptr) {
+    while (node.ok() && (commandIn = readline("")) != nullptr) {
         if (*commandIn) {
             add_history(commandIn);
             std::string sCommandIn(commandIn);

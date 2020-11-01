@@ -37,13 +37,14 @@
 
 int main(int argc, char **argv) {
     // Set up ROS.
-    ros::init(argc, argv, "talker");
+    ros::init(argc, argv, "packagemanager");
     ros::NodeHandle n;
     ros::Rate r(10);
 
     std::string line;
     PM::CommandParser mPM;
     // Main loop.
+    //! @todo remember input history with readline
     while (n.ok() && std::getline(std::cin, line)) {
         mPM.parseInput(line);
         ros::spinOnce();

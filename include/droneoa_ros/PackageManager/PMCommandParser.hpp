@@ -20,9 +20,13 @@
 #ifndef PM_CMD_PARSER_  // NOLINT
 #define PM_CMD_PARSER_  // NOLINT
 
+#include <std_msgs/String.h>
+
 #include <string>
 #include <vector>
 #include <map>
+
+#include <boost/thread.hpp>
 
 namespace PM {
 
@@ -44,17 +48,24 @@ class CommandParser {
     void uninstall(std::vector<std::string> tokens);
     void list(std::vector<std::string> tokens);
     bool rebuild();
-    void launch();
-    void shutdown(bool killAllNodes);
+    void launch(std::vector<std::string> tokens);
+    void shutdown(std::vector<std::string> tokens);
+    void safeShutdownMainNode();
     void printHelp();
     // File Operation
     bool writeListToFile();
     bool readListFromFile();
+    // Handled Uhandled Inputs
+    boost::thread* thread_watch_command_ = nullptr;
+    void watchCommandThread();
+
  public:
     CommandParser();
     ~CommandParser();
     bool parseInput(std::string input);
     bool parseInput(std::vector<std::string> tokens);
+    // Handled Uhandled Inputs
+    void command_callback(const std_msgs::String::ConstPtr& msg);
 };
 
 }  // namespace PM

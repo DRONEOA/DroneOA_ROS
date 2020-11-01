@@ -106,4 +106,3 @@ Release_Package:
   only:
     - latest-stable
     - latest-dev
-

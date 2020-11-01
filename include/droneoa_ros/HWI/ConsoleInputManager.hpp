@@ -54,6 +54,7 @@ class ConsoleInputManager {
  private:
     CMDPair currentCommand_;
     bool* masterSwitch_;
+    ros::NodeHandle mNodeHandle;
 
     // Parser
     OAC::CMDParser* mpParser;
@@ -68,6 +69,11 @@ class ConsoleInputManager {
     // Listen to command from topic
     boost::thread* thread_watch_command_ = nullptr;
     void watchCommandThread();
+
+    // Publisher
+    ros::Publisher mUnKnownCmdPub;
+    std::string mCurrentProcessingCMD;
+    void publishUnhandledCMD();
 
     // Statue
     bool mIsBuildingQueue;

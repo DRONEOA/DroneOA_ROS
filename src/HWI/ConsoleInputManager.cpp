@@ -39,6 +39,7 @@ bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAC
     oac_ = oac;
     mpLidar = lidar;
     thread_watch_command_ = new boost::thread(boost::bind(&ConsoleInputManager::watchCommandThread, this));
+    mUnKnownCmdPub = mNodeHandle.advertise<std_msgs::String>("droneoa/unhandled_inputs", 1000);
     mpParser = new OAC::CMDParser(cnc, runner);
     return thread_watch_command_ ? true : false;
 }
@@ -46,14 +47,14 @@ bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAC
 void ConsoleInputManager::command_callback(const std_msgs::String::ConstPtr& msg) {
     std_msgs::String inputCMD = *msg;
     if (!parseAndExecuteConsole(inputCMD.data)) {
-        ROS_ERROR("ERROR in incoming command via input_command topic");
+        ROS_ERROR("[MainNode] ERROR in processing command from input_command topic");
     }
 }
 
 void ConsoleInputManager::watchCommandThread() {
     auto rate = ros::Rate(OAC_REFRESH_FREQ);
     auto node = boost::make_shared<ros::NodeHandle>();
-    auto gpsFix_sub =
+    auto cmd_sub =
         node->subscribe<std_msgs::String>("droneoa/input_command", 1,
             boost::bind(&ConsoleInputManager::command_callback, this, _1));
 
@@ -76,14 +77,22 @@ void removeSpaces(std::string *cmd) {
     *cmd = out;
 }
 
+void ConsoleInputManager::publishUnhandledCMD() {
+    std_msgs::String unhandledMag;
+    unhandledMag.data = mCurrentProcessingCMD;
+    mUnKnownCmdPub.publish(unhandledMag);
+}
+
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
     //! @todo(shibohan) Detect composed commands, use runner in this case
     removeSpaces(&cmd);
 
+    mCurrentProcessingCMD = cmd;
     if (!splitModuleCommand(cmd)) {
-        ROS_WARN("Command Missing Module Name");
-        printFormatHelper();
-        return false;
+        ROS_WARN("[MainNode] Missing Module Name, Ignored --> Forwarded");
+        printModuleHelper();
+        publishUnhandledCMD();
+        return true;  // Forwarded, may still be accepted by other nodes
     }
     mGeneratedCMDQueue.clear();
     if (buildCommandQueue()) {
@@ -158,10 +167,12 @@ bool ConsoleInputManager::buildCommandQueue() {
     } else if (currentCommand_.first == "then") {
         ROS_WARN("Redundent THEN Detected - ignore");
         return true;
-    } else {
-        ROS_WARN("Unknown Module Name: %s", currentCommand_.first.c_str());
+    } else if (currentCommand_.first == "help") {
         printModuleHelper();
-        return false;
+    } else {
+        ROS_WARN("[MainNode] Unknown Module Name: %s. Ignored --> Forwarded", currentCommand_.first.c_str());
+        publishUnhandledCMD();
+        return true;  // Forwarded, may still be accepted by other nodes
     }
 }
 
@@ -537,6 +548,7 @@ void ConsoleInputManager::printModuleHelper() {
     ROS_WARN("    RSC:    Realsense Camera HS Interface");
     ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
     ROS_WARN("    !:      Quick Commands");
+    ROS_WARN("    PM:     Package Manager");
     ROS_WARN("Give Queue Commands:");
     ROS_WARN("    START [CMD] THEN [CMD] TEHN [CMD] ... END");
 }
