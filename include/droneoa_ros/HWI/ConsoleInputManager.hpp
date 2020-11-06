@@ -30,6 +30,7 @@
 #include <droneoa_ros/HWI/base/LidarGeneric.hpp>
 #include <droneoa_ros/HWI/RSC.hpp>
 #include <droneoa_ros/OAC/OAC.hpp>
+#include <droneoa_ros/Utils/DataPool.hpp>
 
 namespace IO {
 
@@ -54,6 +55,7 @@ class ConsoleInputManager {
  private:
     CMDPair currentCommand_;
     bool* masterSwitch_;
+    DP::DataPool msDP;
     ros::NodeHandle mNodeHandle;
 
     // Parser
@@ -87,6 +89,7 @@ class ConsoleInputManager {
     bool buildOACCommands();
     bool buildRSCCommands();
     bool buildLIDARCommands();
+    bool buildDPCommands();
     bool buildQuickCommands();
     bool buildQueueCommands();
 
@@ -97,6 +100,7 @@ class ConsoleInputManager {
     void printRSCHelper();
     void printOACHelper();
     void printLIDARHelper();
+    void printDPHelper();
     void printQuickHelper();
     void printQueueHelper();
 };

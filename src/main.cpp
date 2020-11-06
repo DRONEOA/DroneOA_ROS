@@ -35,15 +35,15 @@
 #include <droneoa_ros/GUI/Debug/CNCPopup.hpp>
 #include <droneoa_ros/GUI/Release/WebGUIServer.hpp>
 
+// Terminate program on signal
 void sysSignalhandler(int signum) {
     ROS_WARN("Caught signal %d", signum);
-    // Terminate program
     ros::shutdown();
     exit(signum);
 }
 
 int main(int argc, char **argv) {
-    // Setup Refresh Rate
+    // Setup ROS
     ros::init(argc, argv, "droneoa", ros::init_options::NoSigintHandler);
     ros::NodeHandle node;
     ros::Rate rate(GLOBAL_ROS_RATE);
@@ -51,25 +51,22 @@ int main(int argc, char **argv) {
     // Register exit signal
     signal(SIGINT, sysSignalhandler);
 
-    // HWI Components
+    /***************************************************************************
+     * Sub Modules (Composited)
+     */
     CNC::CNCArdupilot cnc(node, rate);
     Lidar::LidarYDLidar lidar(node, rate);
     Depth::RSC rsc(node, rate);
-
-    // Init watchers
-    cnc.initWatcherThread();
-    if (ENABLE_RSC) {
-        rsc.initWatcherThread();
-    }
-    if (ENABLE_LIDAR) {
-        lidar.initWatcherThread();
-    }
-
-    // OAC Components
     OAC::CMDRunner runner(&cnc);
+
+    /***************************************************************************
+     * Modules (Composite)
+     */
     OAC::OAController oac(&cnc, &lidar, &rsc, &runner, ros::Rate(OAC_REFRESH_FREQ));
 
-    // GUIs
+    /***************************************************************************
+     * GUIs
+     */
     GUI::WebGUIServer webGUI = GUI::WebGUIServer("Default Session", &cnc);
     #ifdef DEBUG_CNC_POPUP
     GUI::CNCPopup cp = GUI::CNCPopup("CNC Debug Popup", &cnc);
@@ -85,7 +82,9 @@ int main(int argc, char **argv) {
         #endif
     #endif
 
-    // Console IO
+    /***************************************************************************
+     * Console IO (With memory)
+     */
     char *commandIn;
     bool masterSW = true;
     IO::ConsoleInputManager consoleInputManager(&masterSW);

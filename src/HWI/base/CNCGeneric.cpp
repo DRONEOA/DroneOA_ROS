@@ -37,7 +37,9 @@
 namespace CNC {
 
 CNCGeneric::CNCGeneric(ros::NodeHandle node, ros::Rate rate) : mTargetAltitude(0),
-    mNodeHandle(node), mRate(rate) {}
+        mNodeHandle(node), mRate(rate) {
+    initWatcherThread();
+}
 
 CNCGeneric::~CNCGeneric() {
     if (mpThreadWatchAltitude) {
@@ -227,26 +229,34 @@ bool CNCGeneric::pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC)
     pose.pose.orientation = tf::createQuaternionMsgFromYaw(heading + M_PI/2);
     mSetpointLocalPub.publish(pose);
     mCurrentNEULocalTarget = location;
+    msDP.setData(DP::DP_CURR_SETPOINT_ENU_TARGET, mCurrentNEULocalTarget);
     ROS_WARN("Setpoint: %s", location.AsString().c_str());
     return true;
 }
 
 /*****************************************************
- * Callback
+ * Callback (Update local data and DP data)
  */
 /* State */
 void CNCGeneric::state_callback(const mavros_msgs::State::ConstPtr& msg) {
     mCurrentState = *msg;
+    msDP.setData(DP::DP_IS_ARMED, isArmed());
+    msDP.setData(DP::DP_FLIGHT_MOD, getMode());
+    msDP.setData(DP::DP_IS_CONNECTED, isConnected());
+    msDP.setData(DP::DP_SYS_STATUS, getSysStatus());
+    msDP.setData(DP::DP_IS_GUIDED, static_cast<bool>(mCurrentState.guided));
     GUI::GUISubject::notifyGUIPopups();
 }
 /* GPS Fix */
 void CNCGeneric::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
     mCurrentGpsFix = *msg;
+    msDP.setData(DP::DP_GPS_LOC, getCurrentGPSPoint());
     GUI::GUISubject::notifyGUIPopups();
 }
 
 void CNCGeneric::LocalPosition_callback(const geometry_msgs::PoseStampedConstPtr& msg) {
     mLocalPosition = *msg;
+    msDP.setData(DP::DP_LOCAL_LOC, getLocalPosition());
     GUI::GUISubject::notifyGUIPopups();
 }
 
@@ -254,21 +264,26 @@ void CNCGeneric::LocalPosition_callback(const geometry_msgs::PoseStampedConstPtr
 void CNCGeneric::homePos_callback(const mavros_msgs::HomePositionConstPtr& msg) {
     mIsHomeSet = true;
     mCurrentHomePos = *msg;
+    msDP.setData(DP::DP_GPS_HOME, getHomeGPSPoint());
     GUI::GUISubject::notifyGUIPopups();
 }
 /* Altitude */
 void CNCGeneric::altitude_callback(const std_msgs::Float64ConstPtr& msg) {
     mCurrentRelativeAltitude = *msg;
+    msDP.setData(DP::DP_RELATIVE_ALTITUDE, getRelativeAltitude());
     GUI::GUISubject::notifyGUIPopups();
 }
 /* Battery */
 void CNCGeneric::battery_callback(const sensor_msgs::BatteryStateConstPtr& msg) {
     mCurrentBattery = *msg;
+    msDP.setData(DP::DP_BATTERY_VOLTAGE, getBatteryVoltage());
     GUI::GUISubject::notifyGUIPopups();
 }
 /* IMU */
 void CNCGeneric::IMU_callback(const sensor_msgs::ImuConstPtr& msg) {
     mCurrentIMUData = *msg;
+    msDP.setData(DP::DP_ORIENTATION_QUAT, mCurrentIMUData.orientation);
+    msDP.setData(DP::DP_ORIENTATION_RPY, CNC::CNCUtility::quaternionToRPY(mCurrentIMUData.orientation));
     GUI::GUISubject::notifyGUIPopups();
 }
 void CNCGeneric::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
@@ -278,6 +293,12 @@ void CNCGeneric::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
 
 void CNCGeneric::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
     mCurrentHudData = *msg;
+    msDP.setData(DP::DP_HEADING, mCurrentHudData.heading);
+    msDP.setData(DP::DP_AIR_SPEED, mCurrentHudData.airspeed);
+    msDP.setData(DP::DP_GROUND_SPEED, mCurrentHudData.groundspeed);
+    msDP.setData(DP::DP_HUD_ALTITUDE, mCurrentHudData.altitude);
+    msDP.setData(DP::DP_CLIMB_Rate, mCurrentHudData.climb);
+    msDP.setData(DP::DP_THROTTLE, mCurrentHudData.throttle);
     GUI::GUISubject::notifyGUIPopups();
 }
 
@@ -315,7 +336,22 @@ void CNCGeneric::watchHomePosThread() {
             boost::bind(&CNCGeneric::homePos_callback, this, _1));
 
     ROS_WARN("Waiting For 3D Fix ...");
-    while (ros::ok() && (ENABLE_SAFETY_GPS && !mIsHomeSet)) {
+    while (ros::ok()) {
+        // Check is home set, set indicate we have a 2D+ GPS fix
+        if (mIsHomeSet) {
+            break;
+        }
+        // Prevent uninitialized data pool
+        bool safetySetting = true;
+        try {
+            safetySetting = boost::any_cast<bool>(msDP.getData(DP::CONF_SAFETY_GPS_FIX));
+        } catch(boost::bad_any_cast& e) {
+            ROS_WARN("GPS Fix Safety Setting Missing, Enabled by Default");
+        }
+        if (!safetySetting) {
+            ROS_WARN("GPS Fix Safety Disabled");
+            break;
+        }
         ros::spinOnce();
         mRate.sleep();
     }

@@ -72,11 +72,6 @@ static const char* FLT_MODE_AVOID_ADSB = "AVOID_ADSB";
 static const char* FLT_MODE_GUIDED_NOGPS = "GUIDED_NOGPS";
 
 /**
- * @brief Whether to check GPS fix before initialize
- */
-static const bool ENABLE_SAFETY_GPS = true;
-
-/**
  * @brief True if want to use GPS global position for move relative and heading command
  * @note For Ardupilot, setpoint home position is not reset after intermediate landing. So if use local setpoint on
  * Ardupilot, the movement control will be INVALID after intermediate landing
