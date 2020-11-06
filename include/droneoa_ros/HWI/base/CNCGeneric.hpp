@@ -40,6 +40,7 @@
 #include <droneoa_ros/PDN.hpp>
 #include <droneoa_ros/HWI/interface/CNCInterface.hpp>
 #include <droneoa_ros/GUI/GUISubject.hpp>
+#include <droneoa_ros/Utils/DataPool.hpp>
 
 namespace CNC {
 
@@ -145,6 +146,11 @@ class CNCGeneric : public CNCInterface {
  protected:
     ros::NodeHandle mNodeHandle;
     ros::Rate mRate = ros::Rate(GLOBAL_ROS_RATE);
+
+    /***************************************************************************
+     * Data Pool Instance
+     */
+    DP::DataPool msDP;
 
     /***************************************************************************
      * Local Data
