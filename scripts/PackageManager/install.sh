@@ -24,6 +24,14 @@ git clone $PACKAGE_URL $PACKAGE_NAME
 ## Run Package's install script
 cd $PACKAGE_NAME
 # cd "$(basename $PACKAGE_URL .git)"  # Find Folder Name
+## If specified branch
+if [ -z "$3" ]
+then
+    echo "Branch: $(git branch --show-current)"
+else
+    echo "Checkout Branch: $3"
+    git checkout $3
+fi
 FILE=./install.sh
 if [ -f "$FILE" ]; then
     echo "RUN Package Installation Script..."

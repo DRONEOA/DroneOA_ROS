@@ -48,10 +48,11 @@ class CommandParser {
     void uninstall(std::vector<std::string> tokens);
     void list(std::vector<std::string> tokens);
     bool rebuild();
-    void launch(std::vector<std::string> tokens);
+    bool launch(std::vector<std::string> tokens);
     void shutdown(std::vector<std::string> tokens);
     void safeShutdownMainNode();
     void printHelp();
+    int runPMScripts(std::string scriptName, std::vector<std::string> tokens);
     // File Operation
     bool writeListToFile();
     bool readListFromFile();

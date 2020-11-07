@@ -38,7 +38,6 @@ std::string PackageRecord::toString() {
     return result;
 }
 
-
 CommandParser::CommandParser() {
     DRONEOA_PATH = ros::package::getPath("droneoa_ros");
     readListFromFile();
@@ -121,7 +120,6 @@ bool CommandParser::parseInput(std::vector<std::string> tokens) {
 }
 
 void CommandParser::install(std::vector<std::string> tokens) {
-    //! @todo specific branch
     // Check arguments complete
     if (tokens.size() < 2) {
         ROS_ERROR("[PM][INSTALL] Missing Package Name Or URL !!!");
@@ -133,10 +131,13 @@ void CommandParser::install(std::vector<std::string> tokens) {
         return;
     }
     // Run install script (clone & pkg's install script)
-    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/install.sh ";
-    cmd = cmd + tokens[0] + " " + tokens[1];
-    int ret = system(cmd.c_str());
-    if (WEXITSTATUS(ret) != 0) {
+    std::string scriptName = "install.sh";
+    std::vector<std::string> paras{tokens[0], tokens[1]};
+    // Install specific branch if specified
+    if (tokens.size() >= 3) {
+        paras.push_back(tokens[2]);
+    }
+    if (runPMScripts(scriptName, paras) != 0) {
         ROS_ERROR("[PM][INSTALL] CLONE and/or INITIAL PACKAGE SETUP failed !!!");
         return;
     }
@@ -149,23 +150,36 @@ void CommandParser::install(std::vector<std::string> tokens) {
     // Add package to installed package list
     mPackageList[tokens[0]] = PackageRecord(tokens[0]);
     mPackageList[tokens[0]].url = tokens[1];
+    if (tokens.size() >= 3) {
+        mPackageList[tokens[0]].branch = tokens[2];
+    }
+    if (tokens.size() >= 4) {
+        if (tokens[3] == "true" || tokens[3] == "true") {
+            mPackageList[tokens[0]].startWithMainNode = true;
+        }
+    }
+    // Write to file
     writeListToFile();
     ROS_INFO("[PM][INSTALL] Package: %s is Successfully Installed.", tokens[0].c_str());
 }
 
 void CommandParser::update(std::vector<std::string> tokens) {
-    //! @todo update branch? e.g. update xxx v0.2
     //! @todo update all command
+    //! @todo update main node
+    //! @todo update whether to start with ain node
     // Check arguments complete
     if (tokens.size() < 1) {
         ROS_ERROR("[PM][UPDATE] Missing Package Name !!!");
         return;
     }
     // Update latest by pull
-    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/update.sh ";
-    cmd = cmd + tokens[0];
-    int ret = system(cmd.c_str());
-    if (WEXITSTATUS(ret) != 0) {
+    std::string scriptName = "update.sh";
+    std::vector<std::string> paras{tokens[0]};
+    // Update to branch if specified
+    if (tokens.size() >= 2) {
+        paras.push_back(tokens[1]);
+    }
+    if (runPMScripts(scriptName, paras) != 0) {
         ROS_ERROR("[PM][UPDATE] Update pull latest failed !!!");
         return;
     }
@@ -174,11 +188,13 @@ void CommandParser::update(std::vector<std::string> tokens) {
         ROS_ERROR("[PM][UPDATE] Rebuild failed !!!");
         return;
     }
+    if (tokens.size() >= 2) {
+        mPackageList[tokens[0]].branch = tokens[1];
+    }
     ROS_INFO("[PM][UPDATE] Package: %s is Successfully Updated.", tokens[0].c_str());
 }
 
 void CommandParser::uninstall(std::vector<std::string> tokens) {
-    //! @todo update branch? e.g. update xxx v0.2
     // Check arguments complete
     if (tokens.size() < 1) {
         ROS_ERROR("[PM][UNINSTALL] Missing Package Name !!!");
@@ -190,10 +206,7 @@ void CommandParser::uninstall(std::vector<std::string> tokens) {
         return;
     }
     // Update latest by pull
-    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/uninstall.sh ";
-    cmd = cmd + tokens[0];
-    int ret = system(cmd.c_str());
-    if (WEXITSTATUS(ret) != 0) {
+    if (runPMScripts("uninstall.sh", {tokens[0]}) != 0) {
         ROS_ERROR("[PM][UNINSTALL] Uninstall deletion failed !!!");
         return;
     }
@@ -227,10 +240,7 @@ void CommandParser::list(std::vector<std::string> tokens) {
 }
 
 bool CommandParser::rebuild() {
-    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/rebuild.sh";
-    int ret = system(cmd.c_str());
-    std::cout << "Return: " << WEXITSTATUS(ret) << std::endl;
-    if (ret != 0) {
+    if (runPMScripts("rebuild.sh", {}) != 0) {
         ROS_ERROR("[PM][REBUILD] Rebuild failed !!!");
         return false;
     }
@@ -238,25 +248,34 @@ bool CommandParser::rebuild() {
     return true;
 }
 
-void CommandParser::launch(std::vector<std::string> tokens) {
+bool CommandParser::launch(std::vector<std::string> tokens) {
     std::string cmd;
     if (tokens.size() > 0 && tokens[0] != "main") {
         // Check if package name exist
         if (mPackageList.find(tokens[0]) == mPackageList.end()) {
             ROS_ERROR("[PM][LAUNCH] Package Name [%s] Not Exist !!!", tokens[0].c_str());
-            return;
+            return false;
         }
         cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/launch.sh " + tokens[0];
     } else {
-        //! @todo launch all startWithMainNode = true nodes (background)
+        for (auto pkg : mPackageList) {
+            if (pkg.second.startWithMainNode) {
+                if (!launch({pkg.first})) {
+                    ROS_ERROR("[PM][LAUNCH] Launch nodes required to be Launch with main node failed !!!");
+                    return false;
+                }
+            }
+        }
         // Main Node Always Launch Last, As it accept console inputs
         cmd = "roslaunch " + DRONEOA_PATH + "/launch/step2.launch";
     }
     int ret = system(cmd.c_str());
     if (WEXITSTATUS(ret) != 0) {
         ROS_ERROR("[PM][LAUNCH] Launch failed !!!");
-        return;
+        return false;
     }
+    ROS_INFO("[PM][LAUNCH] Launch Operation is successful.");
+    return true;
 }
 
 void CommandParser::shutdown(std::vector<std::string> tokens) {
@@ -284,20 +303,29 @@ void CommandParser::shutdown(std::vector<std::string> tokens) {
 }
 
 void CommandParser::safeShutdownMainNode() {
-    //! @todo Send "cnc quit" via topic
+    //! @todo Try send "cnc quit" via topic
     //! @todo Should Main Node quit on its own before went to PM (need pickup but forward commands)?
     //          or PM close main?
 }
 
 void CommandParser::printHelp() {
     ROS_WARN("Package Manager Commands: [required] <optional>");
-    ROS_WARN("    install   [name of package] [repo url]");
-    ROS_WARN("    update    [name of package]");
+    ROS_WARN("    install   [name of package] [repo url] <branch> <start with main node true/1>");
+    ROS_WARN("    update    [name of package] <branch>");
     ROS_WARN("    uninstall [name of package]");
     ROS_WARN("    list      [installed / running]");
-    ROS_WARN("    launch    WIP: default launch main node");
+    ROS_WARN("    launch    <package name> (default launch main node)");
     ROS_WARN("    shutdown  [node name / all]");
     //! @todo help message
+}
+
+int CommandParser::runPMScripts(std::string scriptName, std::vector<std::string> tokens) {
+    std::string cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/" + scriptName;
+    for (auto para : tokens) {
+        cmd = cmd + " " + para;
+    }
+    int ret = system(cmd.c_str());
+    return WEXITSTATUS(ret);
 }
 
 bool CommandParser::writeListToFile() {
