@@ -252,7 +252,7 @@ bool CNCArdupilot::pushGlobalMission(const std::vector<GPSPoint> &wpList, bool i
 // Move Mission
 void CNCArdupilot::moveMissionToLocalQueue() {
     clearLocalMissionQueue();
-    ROS_WARN("FCU Queue WPs Will Not Be Moved For Safty Consideration !!! [WIP]");
+    ROS_WARN("FCU Queue WPs Will Be Cleared For Safty Consideration !!!");
     // for (auto waypoint : mWaypointList.waypoints) {
     //     pushLocalMissionQueue(GPSPoint(waypoint.x_lat, waypoint.y_long, waypoint.z_alt));
     // }

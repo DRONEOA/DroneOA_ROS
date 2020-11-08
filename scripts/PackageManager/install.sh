@@ -27,7 +27,7 @@ cd $PACKAGE_NAME
 ## If specified branch
 if [ -z "$3" ]
 then
-    echo "Branch: $(git branch --show-current)"
+    echo "Branch: $(git rev-parse --abbrev-ref HEAD)"
 else
     echo "Checkout Branch: $3"
     git checkout $3

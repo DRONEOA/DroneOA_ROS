@@ -94,7 +94,7 @@ bool CommandParser::parseInput(std::vector<std::string> tokens) {
         return true;
     }
     if (tokens[0] != "pm") {
-        printModuleNameHelp();
+        ROS_WARN("[PM] Unknown Module Name, Ignored.");
         return false;
     }
     tokens.erase(tokens.begin());

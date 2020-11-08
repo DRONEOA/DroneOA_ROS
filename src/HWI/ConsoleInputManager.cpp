@@ -84,10 +84,12 @@ void ConsoleInputManager::publishUnhandledCMD() {
 }
 
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
-    //! @todo(shibohan) Detect composed commands, use runner in this case
     removeSpaces(&cmd);
-
     mCurrentProcessingCMD = cmd;
+    if (cmd.empty()) {
+        printModuleHelper();
+        return true;
+    }
     if (!splitModuleCommand(cmd)) {
         ROS_WARN("[MainNode] Missing Module Name, Ignored --> Forwarded");
         printModuleHelper();

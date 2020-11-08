@@ -90,22 +90,18 @@ int main(int argc, char **argv) {
     IO::ConsoleInputManager consoleInputManager(&masterSW);
     consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &runner);  // @todo Or seperate runner ?
     while (node.ok() && (commandIn = readline("")) != nullptr) {
-        if (*commandIn) {
+        if (strlen(commandIn) > 0) {
             add_history(commandIn);
-            std::string sCommandIn(commandIn);
-            consoleInputManager.parseAndExecuteConsole(sCommandIn);
         }
+        std::string sCommandIn(commandIn);
+        consoleInputManager.parseAndExecuteConsole(sCommandIn);
         free(commandIn);
         if (!masterSW) {  // Quit Signal
             ros::shutdown();
             break;
         }
-    }
-
-    //! @todo Do we need this
-    while (node.ok()) {
-      ros::spinOnce();
-      rate.sleep();
+        ros::spinOnce();
+        rate.sleep();
     }
 
     return 0;

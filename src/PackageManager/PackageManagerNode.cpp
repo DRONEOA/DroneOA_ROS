@@ -19,20 +19,18 @@
 
 #include <ros/ros.h>
 #include <ros/package.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 #include <iostream>
 #include <string>
 
 #include <droneoa_ros/PackageManager/PMCommandParser.hpp>
 
-/********************************************************
- * Method
- *      Both main node and PM accept PM inputs
- *          main node forward to PM
- *      Note: PM need a list of node
- *      Note: need a config for each addon, like, whether to start with main
- *      PS: we may want main node to broadcast all unacceped console inputs
- *      PS: make main node module help command only, like when type help. Maybe only notify, not main node command
- *      PS: other node free to pick up if matched, no need to inform main node
+/*******************************************************************************
+ * Package Manager Node
+ *     Package Manager (PM) is used to manage installed packages and perform
+ *     package related operations, including: install, update, uninstall,
+ *     launch and more.
  */
 
 int main(int argc, char **argv) {
@@ -41,12 +39,16 @@ int main(int argc, char **argv) {
     ros::NodeHandle n;
     ros::Rate r(10);
 
-    std::string line;
     PM::CommandParser mPM;
+
     // Main loop.
-    //! @todo remember input history with readline
-    while (n.ok() && std::getline(std::cin, line)) {
-        mPM.parseInput(line);
+    char* buf;
+    while (((buf = readline("")) != nullptr) && n.ok()) {
+        if (strlen(buf) > 0) {
+            add_history(buf);
+        }
+        mPM.parseInput(std::string(buf));
+        free(buf);
         ros::spinOnce();
         r.sleep();
     }
