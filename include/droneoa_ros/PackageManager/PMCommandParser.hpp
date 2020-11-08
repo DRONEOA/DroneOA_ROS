@@ -52,6 +52,7 @@ class CommandParser {
     void shutdown(std::vector<std::string> tokens);
     void safeShutdownMainNode();
     void printHelp();
+    void printModuleNameHelp();
     int runPMScripts(std::string scriptName, std::vector<std::string> tokens);
     // File Operation
     bool writeListToFile();

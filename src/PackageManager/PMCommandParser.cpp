@@ -86,9 +86,15 @@ bool CommandParser::parseInput(std::string input) {
 bool CommandParser::parseInput(std::vector<std::string> tokens) {
     // Check if command if for Package Manger Module
     if (tokens.size() == 0) {
+        printModuleNameHelp();
         return false;
     }
+    if (tokens[0] == "help") {
+        printModuleNameHelp();
+        return true;
+    }
     if (tokens[0] != "pm") {
+        printModuleNameHelp();
         return false;
     }
     tokens.erase(tokens.begin());
@@ -166,7 +172,8 @@ void CommandParser::install(std::vector<std::string> tokens) {
 void CommandParser::update(std::vector<std::string> tokens) {
     //! @todo update all command
     //! @todo update main node
-    //! @todo update whether to start with ain node
+    //! @todo update whether to start with main node
+    //! @todo what if the node is running
     // Check arguments complete
     if (tokens.size() < 1) {
         ROS_ERROR("[PM][UPDATE] Missing Package Name !!!");
@@ -195,6 +202,7 @@ void CommandParser::update(std::vector<std::string> tokens) {
 }
 
 void CommandParser::uninstall(std::vector<std::string> tokens) {
+    //! @todo what if the node is running
     // Check arguments complete
     if (tokens.size() < 1) {
         ROS_ERROR("[PM][UNINSTALL] Missing Package Name !!!");
@@ -317,6 +325,11 @@ void CommandParser::printHelp() {
     ROS_WARN("    launch    <package name> (default launch main node)");
     ROS_WARN("    shutdown  [node name / all]");
     //! @todo help message
+}
+
+void CommandParser::printModuleNameHelp() {
+    ROS_WARN("Module Names:");
+    ROS_WARN("    PM:     Package Manager");
 }
 
 int CommandParser::runPMScripts(std::string scriptName, std::vector<std::string> tokens) {

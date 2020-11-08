@@ -574,13 +574,14 @@ void ConsoleInputManager::printFormatHelper() {
 
 void ConsoleInputManager::printModuleHelper() {
     ROS_WARN("Module Names:");
-    ROS_WARN("    CNC:    Command And Control Module");
-    ROS_WARN("    OAC:    Obstacle Avoidance Algorithm Controller");
-    ROS_WARN("    RSC:    Realsense Camera HS Interface");
-    ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
-    ROS_WARN("    DP:     DataPool Tools");
-    ROS_WARN("    !:      Quick Commands");
-    ROS_WARN("    PM:     Package Manager");
+    ROS_WARN("    PM:             Package Manager");
+    ROS_WARN("    CNC:            Command And Control Module");
+    ROS_WARN("    OAC:            Obstacle Avoidance Algorithm Controller");
+    ROS_WARN("    RSC:            Realsense Camera HS Interface");
+    ROS_WARN("    LIDAR:          Lidar Sensor HS Interface");
+    ROS_WARN("    DP:             DataPool Tools");
+    ROS_WARN("    !:              Quick Commands");
+    ROS_WARN("    [Package Name]: Installed Extra Packages");
     ROS_WARN("Give Queue Commands:");
     ROS_WARN("    START [CMD] THEN [CMD] TEHN [CMD] ... END");
 }
