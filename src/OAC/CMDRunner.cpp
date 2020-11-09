@@ -33,6 +33,7 @@ void CMDRunner::clearCMDQueue() {
     ROS_DEBUG("[CMDRunner] %s", __func__);
     boost::unique_lock<boost::shared_mutex> uniqueLock(queue_mutex);
     theCMDQueue.clear();
+    resetTimer();
 }
 
 bool CMDRunner::populateCMDQueue(Command::CommandQueue commands) {
@@ -59,17 +60,22 @@ bool CMDRunner::isShutDownRequested() {
 }
 
 bool CMDRunner::setupRunner(Command::CommandQueue commands) {
-    mInternalTimmer = 0;
+    resetTimer();
     populateCMDQueue(commands);
 }
 
-bool CMDRunner::startRunner() {
-    //! @todo do we need this ?
+void CMDRunner::cancelCurrentQueueExec() {
+    clearCMDQueue();
 }
 
 RUNNER_STATE CMDRunner::getRunnerState() {
     boost::shared_lock<boost::shared_mutex> lock(state_mutex);
     return runnerState;
+}
+
+void CMDRunner::resetTimer() {
+    mWaitUntilMode = UNTIL_MODE::NONE;
+    mInternalTimmer = 0;
 }
 
 /*
@@ -85,9 +91,10 @@ void CMDRunner::runnerRoutine() {
             break;
         }
         if (theCMDQueue.empty()) {
-            // In case last command is a wait, we ignore it
+            //! @note In case last command is a wait, we ignore it.
+            //     Any Time Wait (at the end) Start --> Queue Empty --> next tick --> Timer reset
             toggleState(RUNNER_STATE::IDLE);
-            mInternalTimmer = 0;
+            resetTimer();
             continue;
         } else {
             toggleState(RUNNER_STATE::RUNNING);
@@ -99,8 +106,7 @@ void CMDRunner::runnerRoutine() {
                 mInternalTimmer -= RUNNER_TICK_TIME;
                 continue;
             } else {
-                mWaitUntilMode = UNTIL_MODE::NONE;  // Timeout reset
-                mInternalTimmer = 0;
+                resetTimer();
             }
         }
         // Handle runner specific commands
@@ -120,7 +126,14 @@ void CMDRunner::runnerRoutine() {
         } else {
             // Common Instant Commands
             // Using OAC privilege by default
-            Command::parseCMD(mpCNC, theCMDQueue.front(), true);
+            if (!Command::parseCMD(mpCNC, theCMDQueue.front(), true)) {
+                // Command Execution Failed. Brake and cancel queue execution.
+                ROS_ERROR("[CMDRunner] Error During Command Exec. Queue Exec Canceled. Set vehicle to BRAKE.");
+                clearCMDQueue();
+                Command::parseCMD(mpCNC, Command::CommandLine(
+                        Command::CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE), true);
+                continue;
+            }
             theCMDQueue.erase(theCMDQueue.begin());
         }
     }
@@ -206,15 +219,13 @@ bool CMDRunner::recheckUntilCommand() {
         }
         if (OAC_USE_SETPOINT_ENU) {
             if (mpCNC->getLocalPosition() == mpCNC->getCurrentLocalENUTarget()) {
-                mWaitUntilMode = UNTIL_MODE::NONE;
-                mInternalTimmer = 0;
+                resetTimer();
             }
         } else {
             int currentWPListSize = advCNC->getWaypointList().waypoints.size();
             if ((mWaypointListSize != currentWPListSize) || (currentWPListSize == 1 && checkReachLastWP())) {
                 //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
-                mWaitUntilMode = UNTIL_MODE::NONE;
-                mInternalTimmer = 0;
+                resetTimer();
             }
         }
     } else if (mWaitUntilMode == UNTIL_MODE::CLRWP) {
@@ -228,37 +239,32 @@ bool CMDRunner::recheckUntilCommand() {
             //! @note Since we only hold one setpoint goal at the moment, so arrive means clear all.
             //! @todo consider supporting local NEU waypoint queue ?
             if (mpCNC->getLocalPosition() == mpCNC->getCurrentLocalENUTarget()) {
-                mWaitUntilMode = UNTIL_MODE::NONE;
-                mInternalTimmer = 0;
+                resetTimer();
             }
         } else {
             int currentWPListSize = advCNC->getWaypointList().waypoints.size();
             if ((currentWPListSize == 0) || (currentWPListSize == 1 && checkReachLastWP())) {
                 //! @note Seems there is a bug in mavros. The last WP will remain in list with SITL
-                mWaitUntilMode = UNTIL_MODE::NONE;
-                mInternalTimmer = 0;
+                resetTimer();
             }
         }
     } else if (mWaitUntilMode == UNTIL_MODE::ALTEQ) {
         // Recheck whether altitude equal to
         float currentAlt = mpCNC->getRelativeAltitude();
         if (abs(currentAlt - mUntilAlt) <= ALT_COMPARE_DIFF_MAX) {
-            mWaitUntilMode = UNTIL_MODE::NONE;
-            mInternalTimmer = 0;
+            resetTimer();
         }
     } else if (mWaitUntilMode == UNTIL_MODE::ALTLT) {
         // Recheck whether altitude less than
         float currentAlt = mpCNC->getRelativeAltitude();
         if (currentAlt < mUntilAlt) {
-            mWaitUntilMode = UNTIL_MODE::NONE;
-            mInternalTimmer = 0;
+            resetTimer();
         }
     } else if (mWaitUntilMode == UNTIL_MODE::ALTGT) {
         // Recheck whether altitude greater than
         float currentAlt = mpCNC->getRelativeAltitude();
         if (currentAlt > mUntilAlt) {
-            mWaitUntilMode = UNTIL_MODE::NONE;
-            mInternalTimmer = 0;
+            resetTimer();
         }
     }
     return true;
