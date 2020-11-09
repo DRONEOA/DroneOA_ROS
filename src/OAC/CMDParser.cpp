@@ -48,7 +48,9 @@ bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isFrom
             isInstant = false;
             break;
         }
-        //! @todo Merge continuous move wp command to single move wp list command
+        if (tmpLine.first == Command::CMD_QUEUE_TYPES::CMD_CANCEL_QUEUE) {
+            cmdRunner_->cancelCurrentQueueExec();
+        }
     }
     if (isInstant) {
         for (auto cmdline : cmdqueue) {

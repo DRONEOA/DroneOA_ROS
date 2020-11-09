@@ -84,6 +84,7 @@ class CMDRunner {
 
     // Helpers
     void clearCMDQueue();
+    void resetTimer();
     bool populateCMDQueue(Command::CommandQueue commands);
     bool toggleState(RUNNER_STATE newState);
     bool isShutDownRequested();
@@ -99,8 +100,7 @@ class CMDRunner {
      * @return false condition unsatisfied or command queue contains error
      */
     bool setupRunner(Command::CommandQueue commands);
-    bool startRunner();
-    //! @todo(shibohan) interrupt and management
+    void cancelCurrentQueueExec();
 
     /**
      * @brief Get the current Runner State

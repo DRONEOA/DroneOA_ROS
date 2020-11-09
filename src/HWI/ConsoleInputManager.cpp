@@ -136,6 +136,9 @@ bool ConsoleInputManager::buildCommandQueue() {
         return buildQuickCommands();
     } else if (currentCommand_.first == "start") {
         return buildQueueCommands();
+    } else if (currentCommand_.first == "cancel") {
+        mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_CANCEL_QUEUE, ""});
+        return true;
     } else if (currentCommand_.first == "delay") {
         if (mIsBuildingQueue && currentCommand_.second.size() > 0) {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DELAY_MSEC, currentCommand_.second.at(0)});

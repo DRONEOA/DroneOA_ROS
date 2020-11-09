@@ -178,6 +178,9 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
                 cnc->clearFCUWaypoint();
                 return cnc->pushGlobalMission(wps, true);
             }
+            case CMD_QUEUE_TYPES::CMD_CANCEL_QUEUE:
+                ROS_WARN("[CMD PARSER] Currect CMD Queue Execution Canceled");
+                return true;
             default:
                 throw 1;
         }
