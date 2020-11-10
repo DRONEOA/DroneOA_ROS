@@ -41,7 +41,7 @@ void ConsoleService::input_callback(const std_msgs::String::ConstPtr& msg) {
 }
 
 bool ConsoleService::matchingModuleName(std::string inputModuleName, std::string desireModuleNames) {
-    ROS_DEBUG("+%s: inputModuleName: %s desireModuleNames: %s", __func__,
+    ROS_DEBUG("+%s: inputModuleName: [%s] desireModuleNames: [%s]", __func__,
             inputModuleName.c_str(), desireModuleNames.c_str());
     // Match any module name
     if (desireModuleNames == "*") {

@@ -285,7 +285,7 @@ bool CommandParser::launch(std::vector<std::string> tokens) {
             }
         }
         // Main Node Always Launch Last, As it accept console inputs
-        cmd = "roslaunch " + DRONEOA_PATH + "/launch/step2.launch";
+        cmd = "rosrun droneoa_ros droneoa_ros &";
     }
     int ret = system(cmd.c_str());
     if (WEXITSTATUS(ret) != 0) {
