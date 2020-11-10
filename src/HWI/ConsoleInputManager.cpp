@@ -17,6 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, Feb. 2020
  */
 
+#include <droneoa_ros/CheckGetNewInput.h>
 #include <sstream>
 #include <string>
 #include <droneoa_ros/HWI/ConsoleInputManager.hpp>
@@ -39,15 +40,23 @@ bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAC
     oac_ = oac;
     mpLidar = lidar;
     thread_watch_command_ = new boost::thread(boost::bind(&ConsoleInputManager::watchCommandThread, this));
-    mUnKnownCmdPub = mNodeHandle.advertise<std_msgs::String>("droneoa/unhandled_inputs", 1000);
     mpParser = new OAC::CMDParser(cnc, runner);
     return thread_watch_command_ ? true : false;
 }
 
 void ConsoleInputManager::command_callback(const std_msgs::String::ConstPtr& msg) {
     std_msgs::String inputCMD = *msg;
-    if (!parseAndExecuteConsole(inputCMD.data)) {
-        ROS_ERROR("[MainNode] ERROR in processing command from input_command topic");
+    ros::ServiceClient client = mNodeHandle.serviceClient<droneoa_ros::CheckGetNewInput>(
+            INPUT_MSG_REQUEST_SERVICE_NAME);
+    droneoa_ros::CheckGetNewInput srv;
+    srv.request.module_name = MAIN_NODE_ACCEPTED_MODULE_NAMES;
+    if (client.call(srv)) {
+        ROS_DEBUG("[MainNode] Input MATCH: %s", srv.response.msg.c_str());
+        if (!parseAndExecuteConsole(srv.response.msg)) {
+            ROS_WARN("[MainNode] Command from console service: %s. Ignored", srv.response.msg.c_str());
+        }
+    } else {
+        ROS_DEBUG("[MainNode] New input: No match or Expired");
     }
 }
 
@@ -55,7 +64,7 @@ void ConsoleInputManager::watchCommandThread() {
     auto rate = ros::Rate(OAC_REFRESH_FREQ);
     auto node = boost::make_shared<ros::NodeHandle>();
     auto cmd_sub =
-        node->subscribe<std_msgs::String>("droneoa/input_command", 1,
+        node->subscribe<std_msgs::String>(NEW_INPUT_FLAG_TOPIC_NAME, 1,
             boost::bind(&ConsoleInputManager::command_callback, this, _1));
 
     while (ros::ok()) {
@@ -64,15 +73,8 @@ void ConsoleInputManager::watchCommandThread() {
     }
 }
 
-void ConsoleInputManager::publishUnhandledCMD() {
-    std_msgs::String unhandledMag;
-    unhandledMag.data = mCurrentProcessingCMD;
-    mUnKnownCmdPub.publish(unhandledMag);
-}
-
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
     GeneralUtility::removeSpaces(&cmd);
-    mCurrentProcessingCMD = cmd;
     if (cmd.empty()) {
         printModuleHelper();
         return true;
@@ -80,7 +82,6 @@ bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
     if (!splitModuleCommand(cmd)) {
         ROS_WARN("[MainNode] Missing Module Name, Ignored --> Forwarded");
         printModuleHelper();
-        publishUnhandledCMD();
         return true;  // Forwarded, may still be accepted by other nodes
     }
     mGeneratedCMDQueue.clear();
@@ -162,7 +163,6 @@ bool ConsoleInputManager::buildCommandQueue() {
         printModuleHelper();
     } else {
         ROS_WARN("[MainNode] Unknown Module Name: %s. Ignored --> Forwarded", currentCommand_.first.c_str());
-        publishUnhandledCMD();
         return true;  // Forwarded, may still be accepted by other nodes
     }
 }

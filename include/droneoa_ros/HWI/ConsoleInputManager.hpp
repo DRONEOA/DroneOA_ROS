@@ -72,11 +72,6 @@ class ConsoleInputManager {
     boost::thread* thread_watch_command_ = nullptr;
     void watchCommandThread();
 
-    // Publisher
-    ros::Publisher mUnKnownCmdPub;
-    std::string mCurrentProcessingCMD;
-    void publishUnhandledCMD();
-
     // Statue
     bool mIsBuildingQueue;
 

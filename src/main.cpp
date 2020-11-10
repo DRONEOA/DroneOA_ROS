@@ -83,23 +83,13 @@ int main(int argc, char **argv) {
     #endif
 
     /***************************************************************************
-     * Console IO (With memory)
+     * Console IO
      */
-    char *commandIn;
     bool masterSW = true;
     IO::ConsoleInputManager consoleInputManager(&masterSW);
-    consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &runner);  // @todo Or seperate runner ?
-    while (node.ok() && (commandIn = readline("")) != nullptr) {
-        if (strlen(commandIn) > 0) {
-            add_history(commandIn);
-        }
-        std::string sCommandIn(commandIn);
-        consoleInputManager.parseAndExecuteConsole(sCommandIn);
-        free(commandIn);
-        if (!masterSW) {  // Quit Signal
-            ros::shutdown();
-            break;
-        }
+    consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &runner);
+
+    while (node.ok() && masterSW) {
         ros::spinOnce();
         rate.sleep();
     }
