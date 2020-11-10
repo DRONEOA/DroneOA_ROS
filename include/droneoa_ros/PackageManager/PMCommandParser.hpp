@@ -20,6 +20,7 @@
 #ifndef PM_CMD_PARSER_  // NOLINT
 #define PM_CMD_PARSER_  // NOLINT
 
+#include <ros/ros.h>
 #include <std_msgs/String.h>
 
 #include <string>
@@ -41,6 +42,7 @@ struct PackageRecord {
 };
 
 class CommandParser {
+    ros::NodeHandle mNodeHandle;
     std::string DRONEOA_PATH;
     std::map<std::string, PackageRecord> mPackageList;
     void install(std::vector<std::string> tokens);

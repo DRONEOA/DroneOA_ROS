@@ -19,6 +19,7 @@
 
 #include <ros/ros.h>
 #include <ros/package.h>
+#include <droneoa_ros/CheckGetNewInput.h>
 
 #include <sstream>
 #include <iostream>
@@ -51,8 +52,17 @@ CommandParser::~CommandParser() {
 
 void CommandParser::command_callback(const std_msgs::String::ConstPtr& msg) {
     std_msgs::String inputCMD = *msg;
-    if (!parseInput(inputCMD.data)) {
-        ROS_WARN("[PM] Command from unhandled_inputs: %s. Ignored", inputCMD.data.c_str());
+    ros::ServiceClient client = mNodeHandle.serviceClient<droneoa_ros::CheckGetNewInput>(
+            INPUT_MSG_REQUEST_SERVICE_NAME);
+    droneoa_ros::CheckGetNewInput srv;
+    srv.request.module_name = PACKAGE_MANAGER_ACCEPTED_MODULE_NAMES;
+    if (client.call(srv)) {
+        ROS_DEBUG("[PM] Input MATCH: %s", srv.response.msg.c_str());
+        if (!parseInput(srv.response.msg)) {
+            ROS_WARN("[PM] Command from console service: %s. Ignored", srv.response.msg.c_str());
+        }
+    } else {
+        ROS_DEBUG("[PM] New input: No match or Expired");
     }
 }
 
@@ -60,7 +70,7 @@ void CommandParser::watchCommandThread() {
     auto rate = ros::Rate(10);
     auto node = boost::make_shared<ros::NodeHandle>();
     auto cmd_sub =
-        node->subscribe<std_msgs::String>("droneoa/unhandled_inputs", 1,
+        node->subscribe<std_msgs::String>(NEW_INPUT_FLAG_TOPIC_NAME, 1,
             boost::bind(&CommandParser::command_callback, this, _1));
 
     while (ros::ok()) {

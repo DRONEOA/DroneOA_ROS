@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   cv_bridge
+  message_generation
 )
 
 find_package( OpenCV REQUIRED )
@@ -74,11 +75,10 @@ find_package( octomap REQUIRED )
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  CheckGetNewInput.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -88,10 +88,10 @@ find_package( octomap REQUIRED )
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -125,7 +125,7 @@ find_package( octomap REQUIRED )
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES droneoa_ros
-  CATKIN_DEPENDS nodelet mavros roscpp rospy std_msgs sensor_msgs cv_bridge
+  CATKIN_DEPENDS nodelet mavros roscpp rospy std_msgs sensor_msgs cv_bridge message_runtime
 #  DEPENDS system_lib
   DEPENDS OMPL
 )
@@ -194,6 +194,11 @@ add_library(droneoa_ros_libpm
   src/Utils/GeneralUtils.cpp
 )
 
+add_library(droneoa_ros_libconsole
+  src/ConsoleService/ConsoleService.cpp
+  src/Utils/GeneralUtils.cpp
+)
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
@@ -213,8 +218,12 @@ add_executable(droneoa_ros
   src/main.cpp
 )
 
-add_executable(droneoa_ros_pm
+add_executable(droneoa_ros_package_manager
   src/PackageManager/PackageManagerNode.cpp
+)
+
+add_executable(droneoa_ros_console_server
+  src/ConsoleService/ConsoleServiceNode.cpp
 )
 
 ## Add cmake target dependencies of the executable
@@ -236,8 +245,14 @@ target_link_libraries(droneoa_ros
   readline
 )
 
-target_link_libraries(droneoa_ros_pm
+target_link_libraries(droneoa_ros_package_manager
   droneoa_ros_libpm
+  ${catkin_LIBRARIES}
+  readline
+)
+
+target_link_libraries(droneoa_ros_console_server
+  droneoa_ros_libconsole
   ${catkin_LIBRARIES}
   readline
 )

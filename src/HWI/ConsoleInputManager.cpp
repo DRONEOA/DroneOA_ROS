@@ -64,19 +64,6 @@ void ConsoleInputManager::watchCommandThread() {
     }
 }
 
-void removeSpaces(std::string *cmd) {
-    std::istringstream iss(*cmd);
-    std::string word;
-    std::string out;
-    while (iss >> word) {
-        if (!out.empty()) {
-            out += ' ';
-        }
-        out += word;
-    }
-    *cmd = out;
-}
-
 void ConsoleInputManager::publishUnhandledCMD() {
     std_msgs::String unhandledMag;
     unhandledMag.data = mCurrentProcessingCMD;
@@ -84,7 +71,7 @@ void ConsoleInputManager::publishUnhandledCMD() {
 }
 
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
-    removeSpaces(&cmd);
+    GeneralUtility::removeSpaces(&cmd);
     mCurrentProcessingCMD = cmd;
     if (cmd.empty()) {
         printModuleHelper();

@@ -18,29 +18,25 @@
  */
 
 #include <ros/ros.h>
-#include <ros/package.h>
-#include <iostream>
-#include <string>
+#include <readline/readline.h>
+#include <readline/history.h>
 
-#include <droneoa_ros/PackageManager/PMCommandParser.hpp>
-#include <droneoa_ros/PDN.hpp>
-
-/*******************************************************************************
- * Package Manager Node
- *     Package Manager (PM) is used to manage installed packages and perform
- *     package related operations, including: install, update, uninstall,
- *     launch and more.
- */
+#include <droneoa_ros/ConsoleService/ConsoleService.hpp>
 
 int main(int argc, char **argv) {
-    // Set up ROS.
-    ros::init(argc, argv, "droneoa_ros_package_manager");
+    ros::init(argc, argv, "droneoa_ros_console_server");
     ros::NodeHandle n;
     ros::Rate r(GLOBAL_ROS_RATE);
+    ConsoleService::ConsoleService consoleServiceHandler;
+    ROS_INFO("[Console Service] Ready to process console inputs");
 
-    PM::CommandParser mPM;
-
-    while (n.ok()) {
+    char* buf = nullptr;
+    while (n.ok() && ((buf = readline("")) != nullptr)) {
+        if (strlen(buf) > 0) {
+            add_history(buf);
+        }
+        consoleServiceHandler.handleConsoleInput(std::string(buf));
+        free(buf);
         ros::spinOnce();
         r.sleep();
     }
