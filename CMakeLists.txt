@@ -179,6 +179,8 @@ add_library(droneoa_ros_libhwi
   src/HWI/ConsoleInputManager.cpp
 )
 
+add_dependencies(droneoa_ros_libhwi droneoa_ros_generate_messages_cpp)
+
 add_library(droneoa_ros_libgui
   src/GUI/Release/WebGUIServer.cpp
   src/GUI/Release/UE4SIMServer.cpp
@@ -194,10 +196,14 @@ add_library(droneoa_ros_libpm
   src/Utils/GeneralUtils.cpp
 )
 
+add_dependencies(droneoa_ros_libpm droneoa_ros_generate_messages_cpp)
+
 add_library(droneoa_ros_libconsole
   src/ConsoleService/ConsoleService.cpp
   src/Utils/GeneralUtils.cpp
 )
+
+add_dependencies(droneoa_ros_libconsole droneoa_ros_generate_messages_cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -229,9 +235,6 @@ add_executable(droneoa_ros_console_server
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-add_dependencies(droneoa_ros droneoa_ros_generate_messages_cpp)
-add_dependencies(droneoa_ros_package_manager droneoa_ros_generate_messages_cpp)
-add_dependencies(droneoa_ros_console_server droneoa_ros_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(droneoa_ros
