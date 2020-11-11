@@ -31,6 +31,9 @@
 
 namespace PM {
 
+/**
+ * @brief Abstract data structure to represent a package
+ */
 struct PackageRecord {
     std::string name;
     std::string url;
@@ -59,16 +62,26 @@ class CommandParser {
     // File Operation
     bool writeListToFile();
     bool readListFromFile();
-    // Handled Uhandled Inputs
+    // Handle new input from Console Service
     boost::thread* thread_watch_command_ = nullptr;
     void watchCommandThread();
 
  public:
     CommandParser();
     ~CommandParser();
+    /**
+     * @brief Process input command, separate tokens into a vector.
+     * The next step is parseInput(std::vector<std::string> tokens).
+     * @param input console input string
+     * @return true if command is valid and successfully executed
+     * @return false if command is invalid or error during execution
+     */
     bool parseInput(std::string input);
     bool parseInput(std::vector<std::string> tokens);
-    // Handled Uhandled Inputs
+    /**
+     * @brief Handle new input flag, request the message with module name PM
+     * @param msg msg from topic NEW_INPUT_FLAG_TOPIC_NAME
+     */
     void command_callback(const std_msgs::String::ConstPtr& msg);
 };
 

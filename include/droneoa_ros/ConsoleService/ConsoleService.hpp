@@ -54,6 +54,13 @@ class ConsoleService {
  public:
     ConsoleService();
     ~ConsoleService();
+    /**
+     * @brief Handle new console inputs.
+     * Handle change log verbose request.
+     * Publish flag to indicate new input is available.
+     * Expecting nodes that interested in console input to send a request to service INPUT_MSG_REQUEST_SERVICE_NAME.
+     * @param input the new console input string
+     */
     void handleConsoleInput(std::string input);
 };
 

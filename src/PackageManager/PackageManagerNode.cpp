@@ -26,7 +26,7 @@
 #include <droneoa_ros/PDN.hpp>
 
 /*******************************************************************************
- * Package Manager Node
+ * @brief  Package Manager Node.
  *     Package Manager (PM) is used to manage installed packages and perform
  *     package related operations, including: install, update, uninstall,
  *     launch and more.

@@ -41,7 +41,7 @@ class CNCInterface;
 
 namespace Command {
 
-constexpr char CommandDataDelimiter = ' ';
+constexpr char CommandDataDelimiter = CONSOLE_DELIMITER;
 
 /**
  * @brief ENUM of supported COMMAND types

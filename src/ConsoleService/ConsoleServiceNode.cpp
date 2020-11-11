@@ -23,6 +23,14 @@
 
 #include <droneoa_ros/ConsoleService/ConsoleService.hpp>
 
+/**
+ * @brief  Console Service Node.
+ *     Read console input using readline (with history). Notify other nodes by publish a new input available flag.
+ *     Expecting interested node to call service (INPUT_MSG_REQUEST_SERVICE_NAME). If the input modules name matches
+ *     the one provided by the get new input service request. Send back the input and make the new input expired.
+ *     (Except for *(any) module name matcher)
+ */
+
 int main(int argc, char **argv) {
     ros::init(argc, argv, "droneoa_ros_console_server");
     ros::NodeHandle n;
