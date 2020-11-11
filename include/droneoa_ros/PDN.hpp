@@ -52,6 +52,7 @@ static const char* INPUT_MSG_REQUEST_SERVICE_NAME = "get_input_from_console_serv
  */
 static const char* PACKAGE_MANAGER_ACCEPTED_MODULE_NAMES = "pm";
 static const char* MAIN_NODE_ACCEPTED_MODULE_NAMES = "cnc oac rsc lidar dp ! start cancel";
+static const char* ANY_ACCEPTED_MODULE_NAMES = "*";
 
 /**
  * @brief List of FCU Type

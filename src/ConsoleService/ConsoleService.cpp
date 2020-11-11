@@ -44,7 +44,7 @@ bool ConsoleService::matchingModuleName(std::string inputModuleName, std::string
     ROS_DEBUG("+%s: inputModuleName: [%s] desireModuleNames: [%s]", __func__,
             inputModuleName.c_str(), desireModuleNames.c_str());
     // Match any module name
-    if (desireModuleNames == "*") {
+    if (desireModuleNames == ANY_ACCEPTED_MODULE_NAMES) {
         return true;
     }
     // Match specific module name(s)
@@ -73,7 +73,7 @@ bool ConsoleService::handleGetInputRequest(droneoa_ros::CheckGetNewInput::Reques
     if (!mMsgExpired && matchingModuleName(mModuleName, req.module_name)) {
         res.msg = mNewInput;
         ROS_DEBUG("Found match, response: [%s]", res.msg.c_str());
-        mMsgExpired = true;
+        if (req.module_name != ANY_ACCEPTED_MODULE_NAMES) mMsgExpired = true;
         return true;
     }
     return false;
