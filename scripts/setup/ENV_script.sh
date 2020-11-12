@@ -144,6 +144,12 @@ bash ./RRT_script.sh
 
 # Try to build ROS workspace
 echo "----- Build ROS Worksapce"
+if test -f "$BASH_FILE"; then
+	source ~/.bashrc
+fi
+if test -f "$ZSH_FILE"; then
+	source ~/.zshrc
+fi
 cd $ROOT_WS_PATH/$ROS_WS_NAME
 catkin_make
 
