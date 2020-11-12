@@ -36,9 +36,11 @@ else
     echo "Unsupported OS Dist !!!"
 	exit 1
 fi
+
 ## Init rosdep
 sudo rosdep init
 rosdep update
+
 ## Source ROS
 BASH_FILE=~/.bashrc
 ZSH_FILE=~/.zshrc
@@ -67,12 +69,25 @@ sudo apt install git gitk -y
 
 # Construct Main Workspace
 cd ~
-echo -e "\033[0;33m Please pick you workspace root directory(absolute path): press ENTER to continue \033[0m"
-echo ""
-read absolutePath
-mkdir -p $absolutePath/ardupilot_ws/src
-cd $absolutePath/ardupilot_ws/src
+echo -e "\033[0;33m ===== Customize Workspace ===== \033[0m"
+echo " == File Structure Example == "
+echo " - <Workspace root directory>"
+echo "   - <Ardupilot firmware>"
+echo "   - <ROS workspace>"
+echo "     - src"
+echo "       - droneoa_ros"
+echo "       - realsense-ros"
+echo "       - ydlidar_ros/ydlidar-x2l-local"
+echo " == File Structure Example =="
+read -p "Pick workspace root directory[absolute path](default: ~/Workspace):" ROOT_WS_PATH
+read -p "Pick ROS workspace name(default: ardupilot_ws):" ROS_WS_NAME
+ROOT_WS_PATH=${ROOT_WS_PATH:-"~/Workspace"}
+ROS_WS_NAME=${ROS_WS_NAME:-"ardupilot_ws"}
+echo -e "\033[0;33m =====  Start Building WS  ===== \033[0m"
+mkdir -p $ROOT_WS_PATH/$ROS_WS_NAME/src
+cd $ROOT_WS_PATH/$ROS_WS_NAME/src
 git clone -b $DRONEOA_BRANCH http://gitlab.tuotuogzs.com/droneoa/droneoa_ros.git
+
 ## Install Realsense Lib
 echo "----- Install Realsense Library"
 echo 'deb http://realsense-hw-public.s3.amazonaws.com/Debian/apt-repo xenial main' | sudo tee /etc/apt/sources.list.d/realsense-public.list
@@ -86,6 +101,7 @@ if [[ $ROSDIST == "melodic" ]]; then
 elif [[ $ROSDIST == "noetic" ]]; then
 	sudo apt-get install libreadline8 libreadline-dev -y
 fi
+
 ## Install other ROS Dependencies
 echo "----- Install ROS Dependencies"
 sudo apt-get install ros-${ROSDIST}-cv-bridge -y
@@ -104,6 +120,7 @@ sudo apt-get install ros-${ROSDIST}-octomap-server -y
 if [[ $ROSDIST == "melodic" ]]; then
 	sudo apt-get install ros-${ROSDIST}-octomap-rviz-plugins -y
 fi
+
 ## Clone Dependency Repos
 echo "----- Clone Dependency Repos"
 git clone https://github.com/IntelRealSense/realsense-ros.git
@@ -122,18 +139,35 @@ sudo ./install_geographiclib_datasets.sh
 
 # Setup OMPL
 echo "----- Build OMPL"
-cd $absolutePath/ardupilot_ws/src/droneoa_ros/scripts/setup
+cd $ROOT_WS_PATH/$ROS_WS_NAME/src/droneoa_ros/scripts/setup
 bash ./RRT_script.sh
+
+# Try to build ROS workspace
+echo "----- Build ROS Worksapce"
+cd $ROOT_WS_PATH/$ROS_WS_NAME
+catkin_make
+
+## Source the workspace
+if test -f "$BASH_FILE"; then
+	echo "$BASH_FILE exist"
+	`echo "source $ROOT_WS_PATH/$ROS_WS_NAME/devel/setup.bash" >> ~/.bashrc`
+	source ~/.bashrc
+fi
+if test -f "$ZSH_FILE"; then
+	echo "$ZSH_FILE exists"
+	echo `echo "source $ROOT_WS_PATH/$ROS_WS_NAME/devel/setup.zsh" >> ~/.zshrc`
+	source ~/.zshrc
+fi
 
 # Setup Ardupilot Workspace
 ## [TODO] ensure correct python version; Simplfy;
 echo "----- Build Ardupilot"
-cd $absolutePath
+cd $ROOT_WS_PATH
 git clone -b Copter-4.0.3 https://github.com/ArduPilot/ardupilot
 cd ardupilot
 git submodule update --init --recursive
-sudo chown -R $USER $absolutePath/ardupilot
-sudo chown -R $USER $absolutePath/ardupilot_ws
+sudo chown -R $USER $ROOT_WS_PATH/ardupilot
+sudo chown -R $USER $ROOT_WS_PATH/$ROS_WS_NAME
 find . -name install-prereqs-ubuntu.sh -exec /bin/bash -x {} -y \;
 . ~/.profile
 sudo apt-get install libxml2-dev libxslt-dev python-dev -y
@@ -149,5 +183,6 @@ pip install MAVProxy==1.8.18
 ./waf configure --board sitl
 . ~/.profile
 
+## Attempt to launch a SITL instance, which will trigger a build
 cd ArduCopter
 sim_vehicle.py -w

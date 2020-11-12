@@ -152,6 +152,7 @@ rs-enumerate-devices | grep Serial
 First, create a catkin workspace OR use existing catkin workspace (If you have realsense-ros setup).
 
 **ONLY** do this if you don't have a catkin workspace, otherwise use the existing one
+**NOTE** replace `ardupilot_ws` with the ROS workspace name you want
 ```shell
 mkdir -p ardupilot_ws/src
 cd ardupilot_ws
