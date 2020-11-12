@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "---------- $0 start ----------"
 set -e
-set -x
+# set -x  # Expands variables and prints a little + sign before the line
 if [ $EUID == 0 ]; then
     echo "Please do not run this script as root; don't sudo it!"
     exit 1
@@ -79,9 +79,9 @@ echo "       - droneoa_ros"
 echo "       - realsense-ros"
 echo "       - ydlidar_ros/ydlidar-x2l-local"
 echo " == File Structure Example =="
-read -p "Pick workspace root directory[absolute path](default: ~/Workspace):" ROOT_WS_PATH
+read -p "Pick workspace root directory[absolute path](default: $HOME/Workspace):" ROOT_WS_PATH
 read -p "Pick ROS workspace name(default: ardupilot_ws):" ROS_WS_NAME
-ROOT_WS_PATH=${ROOT_WS_PATH:-"~/Workspace"}
+ROOT_WS_PATH=${ROOT_WS_PATH:-"$HOME/Workspace"}
 ROS_WS_NAME=${ROS_WS_NAME:-"ardupilot_ws"}
 echo -e "\033[0;33m =====  Start Building WS  ===== \033[0m"
 mkdir -p $ROOT_WS_PATH/$ROS_WS_NAME/src
