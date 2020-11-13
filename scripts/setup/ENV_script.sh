@@ -155,7 +155,7 @@ function ws_confirmation()
 {
 	echo " == File Structure Conf == "
 	echo " - $ROOT_WS_PATH"
-	echo "   - <Ardupilot firmware>"
+	echo "   - ardupilot"
 	echo "   - $ROS_WS_NAME"
 	echo "     - src"
 	echo "       - droneoa_ros"
@@ -170,12 +170,28 @@ function clone_repos()
 	set -e
 	echo "----- Clone Required Repos -----"
 	cd $ROOT_WS_PATH/$ROS_WS_NAME/src
-	git clone -b $DRONEOA_BRANCH http://gitlab.tuotuogzs.com/droneoa/droneoa_ros.git
-	git clone https://github.com/IntelRealSense/realsense-ros.git
+	if [ ! -d "droneoa_ros" ]; then
+		git clone -b $DRONEOA_BRANCH http://gitlab.tuotuogzs.com/droneoa/droneoa_ros.git
+	else
+		echo "Droneoa_ros folder already exist"
+	fi
+	if [ ! -d "realsense-ros" ]; then
+		git clone https://github.com/IntelRealSense/realsense-ros.git
+	else
+		echo "Realsense-ros folder already exist"
+	fi
 	if [[ $ROSDIST == "melodic" ]]; then
-		git clone https://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
+		if [ ! -d "ydlidar-x2l-local" ]; then
+			git clone https://gitlab.tuotuogzs.com/droneoa/ydlidar-x2l-local.git
+		else
+			echo "Ydlidar-x2l-local folder already exist"
+		fi
 	elif [[ $ROSDIST == "noetic" ]]; then
-		git clone https://github.com/YDLIDAR/ydlidar_ros.git
+		if [ ! -d "ydlidar_ros" ]; then
+			git clone https://github.com/YDLIDAR/ydlidar_ros.git
+		else
+			echo "Ydlidar_ros folder already exist"
+		fi
 	fi
 	cd realsense-ros/
 	git checkout $REALSENSE_BRANCH
@@ -262,7 +278,11 @@ function build_ardupilot()
 	set -e
 	echo "----- Build Ardupilot -----"
 	cd $ROOT_WS_PATH
-	git clone -b $ARDUPILOT_BRANCH https://github.com/ArduPilot/ardupilot
+	if [ ! -d "ardupilot" ]; then
+		git clone -b $ARDUPILOT_BRANCH https://github.com/ArduPilot/ardupilot
+	else
+		echo "Ardupilot folder already exist"
+	fi
 	cd ardupilot
 	git submodule update --init --recursive
 	sudo chown -R $USER $ROOT_WS_PATH/ardupilot
@@ -280,6 +300,7 @@ function build_ardupilot()
 	pip install MAVProxy==$MAVPROXY_VERSION
 	## Setup SITL
 	./waf configure --board sitl
+	. ~/.profile || true
 	## Attemp build and launch a Copter SITL instance
 	cd ArduCopter
 	sim_vehicle.py -w
