@@ -10,7 +10,8 @@ source ./ENV_script.sh
 Go to the generated ROS workspace: `<User Worspace Path>/<User ROS Workspace Name>`
 1. Try to **rebuild** the workspace: `catkin_make clean; catkin_make`
     - If `catkin_make` is not found, reopen terminal OR `source ~/.bashrc` / `source ~/.zshrc`
-2. Check the installation is complete:
+2. Run `. ~/.profile` to allow use command `sim_vehicle.py` anywhere
+3. Check the installation is complete:
     - Open a terminal with 3 tabs, then try the following in order.
     - Tab1: `sim_vehicle.py -v ArduCopter`
       - If command not found, run `. ~/.profile` to allow use command `sim_vehicle.py` anywhere.
