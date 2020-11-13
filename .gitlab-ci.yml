@@ -104,6 +104,7 @@ Release_Package:
       - ./release/
     expire_in: 4 weeks
   only:
+    - tags
     - latest-stable
     - latest-dev
 
