@@ -4,16 +4,16 @@
 ```shell
 cd droneoa_ros/scripts/setup
 chmod +x *
-./ENV_script.sh
+source ./ENV_script.sh
 ```
 ### After The Installation [Important]
 Go to the generated ROS workspace: `<User Worspace Path>/<User ROS Workspace Name>`
 1. Try to **rebuild** the workspace: `catkin_make clean; catkin_make`
     - If `catkin_make` is not found, reopen terminal OR `source ~/.bashrc` / `source ~/.zshrc`
-2. Run `. ~/.profile` to allow use command `sim_vehicle.py` anywhere.
-3. Check the installation is complete:
+2. Check the installation is complete:
     - Open a terminal with 3 tabs, then try the following in order.
     - Tab1: `sim_vehicle.py -v ArduCopter`
+      - If command not found, run `. ~/.profile` to allow use command `sim_vehicle.py` anywhere.
     - Tab2:
       - Navigate to droneoa_ros package path: `roscd dronsoa_ros`
         - If command not found, manually navigate to `<User Worspace Path>/<User ROS Workspace Name>/src/dronsoa_ros`
@@ -44,3 +44,8 @@ Solutions:
 - Run `. ~/.profile`
 - If still not found, Rebooting / Sign out your computer.
 - If still not found, you can find this script here: `<Ardupilot_Path>/Tools/autotest/sim_vehicle.py`
+
+### System program problem detected
+Solution:
+- This is normal
+- You can disable this warning by modifying `enabled=0` in this file `sudo nano /etc/default/apport`
