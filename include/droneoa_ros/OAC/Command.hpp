@@ -62,6 +62,7 @@ enum CMD_QUEUE_TYPES : uint32_t {
     CMD_DESCEND,  /*!< DATA: float Delta Altitude */
     CMD_UNTIL,  /*!< DATA: mode (arrwp: arrive at way point; clrwp: clear all waypoints; More to be added) */
     CMD_PUSH_MISSION_QUEUE,  /*!< DATA: Waypoints queue "lat,long,alt lat,long,alt ..." */
+    CMD_CANCEL_QUEUE,  /*!< DATA: none" */
 };
 
 /**
@@ -83,6 +84,7 @@ static const char* CMD_QUEUE_TYPES_NAME[] {
     "CMD_DESCEND",
     "CMD_UNTIL",
     "CMD_PUSH_MISSION_QUEUE",
+    "CMD_CANCEL_QUEUE",
 };
 
 /**
