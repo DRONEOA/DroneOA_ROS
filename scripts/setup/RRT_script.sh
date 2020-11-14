@@ -37,4 +37,3 @@ cd build
 cmake ..
 sudo make install
 echo "----------  All Done  -----------"
-
