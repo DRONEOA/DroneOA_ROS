@@ -13,7 +13,7 @@ fi
 # Determine which ROS dist to install based on OC version
 ROSDIST=""
 REALSENSE_BRANCH=2.2.17
-DRONEOA_BRANCH=master
+DRONEOA_BRANCH=latest-dev
 ARDUPILOT_BRANCH=Copter-4.0.3
 MAVPROXY_VERSION=1.8.18
 START_ABS_PATH=$(pwd)
