@@ -338,7 +338,7 @@ void CommandParser::printHelp() {
 }
 
 void CommandParser::printModuleNameHelp() {
-    ROS_WARN("Module Names:");
+    ROS_WARN("PM Module Names:");
     ROS_WARN("    PM:     Package Manager");
 }
 

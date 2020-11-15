@@ -164,6 +164,7 @@ bool ConsoleInputManager::buildCommandQueue() {
         return true;
     } else if (currentCommand_.first == "help") {
         printModuleHelper();
+        return true;
     } else {
         ROS_WARN("[MainNode] Unknown Module Name: %s. Ignored --> Forwarded", currentCommand_.first.c_str());
         return true;  // Forwarded, may still be accepted by other nodes
@@ -565,8 +566,7 @@ void ConsoleInputManager::printFormatHelper() {
 }
 
 void ConsoleInputManager::printModuleHelper() {
-    ROS_WARN("Module Names:");
-    ROS_WARN("    PM:             Package Manager");
+    ROS_WARN("Main Node Module Names:");
     ROS_WARN("    CNC:            Command And Control Module");
     ROS_WARN("    OAC:            Obstacle Avoidance Algorithm Controller");
     ROS_WARN("    RSC:            Realsense Camera HS Interface");
@@ -574,7 +574,7 @@ void ConsoleInputManager::printModuleHelper() {
     ROS_WARN("    DP:             DataPool Tools");
     ROS_WARN("    !:              Quick Commands");
     ROS_WARN("    [Package Name]: Installed Extra Packages");
-    ROS_WARN("Give Queue Commands:");
+    ROS_WARN("Queue Commands:");
     ROS_WARN("    START [CMD] THEN [CMD] TEHN [CMD] ... END");
 }
 

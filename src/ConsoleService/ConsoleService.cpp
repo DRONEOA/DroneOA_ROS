@@ -73,7 +73,11 @@ bool ConsoleService::handleGetInputRequest(droneoa_ros::CheckGetNewInput::Reques
     if (!mMsgExpired && matchingModuleName(mModuleName, req.module_name)) {
         res.msg = mNewInput;
         ROS_DEBUG("Found match, response: [%s]", res.msg.c_str());
-        if (req.module_name != ANY_ACCEPTED_MODULE_NAMES) mMsgExpired = true;
+        // Any matcher and help matcher won't make the input message expire
+        if (req.module_name != ANY_ACCEPTED_MODULE_NAMES && res.msg != HELP_ACCEPTED_MODULE_NAMES) {
+            ROS_DEBUG("Mark As Expired");
+            mMsgExpired = true;
+        }
         return true;
     }
     return false;
