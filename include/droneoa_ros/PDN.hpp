@@ -52,6 +52,7 @@ static const char* INPUT_MSG_REQUEST_SERVICE_NAME = "get_input_from_console_serv
  */
 static const char* ANY_ACCEPTED_MODULE_NAMES = "*";
 static const char* HELP_ACCEPTED_MODULE_NAMES = "help";
+static const char* QUIT_ACCEPTED_MODULE_NAMES = "quit";
 static const char* PACKAGE_MANAGER_ACCEPTED_MODULE_NAMES = "pm help";
 static const char* MAIN_NODE_ACCEPTED_MODULE_NAMES = "cnc oac rsc lidar dp ! start cancel help";
 

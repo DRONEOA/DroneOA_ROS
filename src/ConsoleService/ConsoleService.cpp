@@ -73,8 +73,10 @@ bool ConsoleService::handleGetInputRequest(droneoa_ros::CheckGetNewInput::Reques
     if (!mMsgExpired && matchingModuleName(mModuleName, req.module_name)) {
         res.msg = mNewInput;
         ROS_DEBUG("Found match, response: [%s]", res.msg.c_str());
-        // Any matcher and help matcher won't make the input message expire
-        if (req.module_name != ANY_ACCEPTED_MODULE_NAMES && res.msg != HELP_ACCEPTED_MODULE_NAMES) {
+        // Any matcher, help matcher and quit matcher won't make the input message expire
+        if (req.module_name != ANY_ACCEPTED_MODULE_NAMES &&
+                res.msg != HELP_ACCEPTED_MODULE_NAMES &&
+                res.msg != QUIT_ACCEPTED_MODULE_NAMES) {
             ROS_DEBUG("Mark As Expired");
             mMsgExpired = true;
         }
@@ -85,14 +87,15 @@ bool ConsoleService::handleGetInputRequest(droneoa_ros::CheckGetNewInput::Reques
 
 void ConsoleService::changeLoggerLevel(std::string input) {
     if (input == "verbose debug") {
-        if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug)) {
-            ros::console::notifyLoggerLevelsChanged();
+        if (!ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug)) {
+            ROS_ERROR("Something went wrong when set verbosity to DEBUG");
         }
     } else {
-        if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info)) {
-            ros::console::notifyLoggerLevelsChanged();
+        if (!ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info)) {
+            ROS_ERROR("Something went wrong when set verbosity to INFO");
         }
     }
+    ros::console::notifyLoggerLevelsChanged();
 }
 
 void ConsoleService::handleConsoleInput(std::string input) {

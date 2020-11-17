@@ -162,8 +162,13 @@ bool ConsoleInputManager::buildCommandQueue() {
     } else if (currentCommand_.first == "then") {
         ROS_WARN("Redundent THEN Detected - ignore");
         return true;
-    } else if (currentCommand_.first == "help") {
+    } else if (currentCommand_.first == HELP_ACCEPTED_MODULE_NAMES) {
         printModuleHelper();
+        return true;
+    } else if (currentCommand_.first == QUIT_ACCEPTED_MODULE_NAMES) {
+        ROS_WARN("::QUIT::");
+        oac_->masterSwitch(false);
+        *masterSwitch_ = false;
         return true;
     } else {
         ROS_WARN("[MainNode] Unknown Module Name: %s. Ignored --> Forwarded", currentCommand_.first.c_str());
