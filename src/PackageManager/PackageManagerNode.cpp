@@ -40,6 +40,24 @@ int main(int argc, char **argv) {
 
     PM::CommandParser mPM;
 
+    // Print Welcome message, [larry3d]
+    std::cout <<
+    " ____                                     _____   ______     \n" <<
+    "/\\  _`\\                                  /\\  __`\\/\\  _  \\    \n" <<
+    "\\ \\ \\/\\ \\  _ __   ___     ___      __    \\ \\ \\/\\ \\ \\ \\L\\ \\   \n" <<
+    " \\ \\ \\ \\ \\/\\`'__\\/ __`\\ /' _ `\\  /'__`\\   \\ \\ \\ \\ \\ \\  __ \\  \n" <<
+    "  \\ \\ \\_\\ \\ \\ \\//\\ \\L\\ \\/\\ \\/\\ \\/\\  __/    \\ \\ \\_\\ \\ \\ \\/\\ \\ \n" <<
+    "   \\ \\____/\\ \\_\\\\ \\____/\\ \\_\\ \\_\\ \\____\\    \\ \\_____\\ \\_\\ \\_\\\n" <<
+    "    \\/___/  \\/_/ \\/___/  \\/_/\\/_/\\/____/     \\/_____/\\/_/\\/_/" <<
+    std::endl;
+    ROS_INFO("[PM] Welcome, type:");
+    ROS_INFO("[PM]   - \"help\" for available <module name>s");
+    ROS_INFO("[PM]   - \"<module name> help\" for list of available commands of specified module");
+    ROS_INFO("[PM] For more information, please checkout:");
+    ROS_INFO("[PM]   - Official Wiki: http://droneoa.tuotuogzs.net/droneoa_gitbook/");
+    ROS_INFO("[PM]   - Repo page: https://gitlab.tuotuogzs.com/droneoa/droneoa_ros");
+    ROS_INFO("[PM]   - Feel free to post questions (as issue)");
+
     while (n.ok()) {
         ros::spinOnce();
         r.sleep();

@@ -18,7 +18,7 @@ git pull
 ## If specified branch
 if [ -z "$2" ]
 then
-    echo "Checkout Branch: $(git branch --show-current)"
+    echo "Checkout Branch: $(git rev-parse --abbrev-ref HEAD)"
 else
     echo "Checkout Branch: $2"
     cd ./$PACKAGE_NAME

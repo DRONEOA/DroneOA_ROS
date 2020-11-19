@@ -102,6 +102,7 @@ void ConsoleService::handleConsoleInput(std::string input) {
     mNewInput = input;
     // Pre-process input
     GeneralUtility::removeSpaces(&mNewInput);
+    GeneralUtility::toLowerCaseStr(&mNewInput);
     mModuleName = getModuleName(mNewInput);
     ROS_DEBUG("[Console Service] new input: %s; module name: %s", mNewInput.c_str(), mModuleName.c_str());
     // Change verbose command

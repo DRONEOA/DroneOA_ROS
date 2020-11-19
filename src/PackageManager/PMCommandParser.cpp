@@ -297,6 +297,7 @@ bool CommandParser::launch(std::vector<std::string> tokens) {
 }
 
 void CommandParser::shutdown(std::vector<std::string> tokens) {
+    //! @todo should we also kill nodes that were started with main node?
     // Check arguments complete
     if (tokens.size() < 1) {
         ROS_ERROR("[PM][SHUTDOWN] Missing Package !!!");
@@ -328,13 +329,12 @@ void CommandParser::safeShutdownMainNode() {
 
 void CommandParser::printHelp() {
     ROS_WARN("Package Manager Commands: [required] <optional>");
-    ROS_WARN("    install   [name of package] [repo url] <branch> <start with main node true/1>");
+    ROS_WARN("    install   [name of package] [repo url] <branch> <start with main node (0/1)>");
     ROS_WARN("    update    [name of package] <branch>");
     ROS_WARN("    uninstall [name of package]");
     ROS_WARN("    list      [installed / running]");
     ROS_WARN("    launch    <package name> (default launch main node)");
     ROS_WARN("    shutdown  [node name / all]");
-    //! @todo help message
 }
 
 void CommandParser::printModuleNameHelp() {
@@ -353,6 +353,7 @@ int CommandParser::runPMScripts(std::string scriptName, std::vector<std::string>
 
 bool CommandParser::writeListToFile() {
     //! @todo json utility
+    //! @todo option to start main node automatically on init
 }
 
 bool CommandParser::readListFromFile() {
