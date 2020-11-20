@@ -89,7 +89,7 @@ constexpr char DP_LOCAL_LOC[] = "LocalLocation";  /**< @brief Type: LocalPoint *
 constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @brief Type: LocalPoint */
 
 // OAC
-constexpr char DP_ACTIVE_OAC_LEVEL[] = "ActiveOACLevel";  /**< @brief Type: uint32_t */
+constexpr char DP_ACTIVE_OAC_LEVEL[] = "ActiveOACLevel";  /**< @brief Type: int32_t */
 
 /*******************************************************************************
  * Config Entries Definition
@@ -97,7 +97,7 @@ constexpr char DP_ACTIVE_OAC_LEVEL[] = "ActiveOACLevel";  /**< @brief Type: uint
 /**
  * @brief Whether to check GPS fix before initialize
  */
-constexpr char CONF_SAFETY_GPS_FIX[] = "GPSFixSafetyCheck";  /**< @brief Type: Bbool */
+constexpr char CONF_SAFETY_GPS_FIX[] = "GPSFixSafetyCheck";  /**< @brief Type: bool */
 
 }  // namespace DP
 

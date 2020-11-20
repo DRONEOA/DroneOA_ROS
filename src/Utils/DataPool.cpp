@@ -129,8 +129,12 @@ int DataPool::getDataAsInt(std::string name) {
             return boost::any_cast<uint8_t>(targetData);
         } else if (can_cast_to<int16_t>(targetData)) {
             return boost::any_cast<int16_t>(targetData);
+        } else if (can_cast_to<uint16_t>(targetData)) {
+            return boost::any_cast<uint16_t>(targetData);
         } else if (can_cast_to<int32_t>(targetData)) {
             return boost::any_cast<int32_t>(targetData);
+        } else if (can_cast_to<uint32_t>(targetData)) {
+            return boost::any_cast<uint32_t>(targetData);
         } else {
             ROS_ERROR("Data type cannot convert to int");
         }
