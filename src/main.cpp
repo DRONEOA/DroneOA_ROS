@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
      * Sub Modules (Composited)
      */
     CNC::CNCArdupilot cnc(node, rate);
+    cnc.initWatcherThread();
     Lidar::LidarYDLidar lidar(node, rate);
     Depth::RSC rsc(node, rate);
     OAC::CMDRunner runner(&cnc);

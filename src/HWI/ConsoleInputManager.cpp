@@ -520,6 +520,7 @@ void ConsoleInputManager::printCNCHelper() {
     ROS_WARN("CNC Commands: [required] <optional>");
     ROS_WARN("    arm:                                  Arm the vehicle motor");
     ROS_WARN("    takeoff [altitude]:                   Takeoff");
+    ROS_WARN("    land:                                 Land at current location");
     ROS_WARN("    chmod [mode name]:                    Change flight mode");
     ROS_WARN("    rtl:                                  Return to land");
     ROS_WARN("    velocity [Speed]:                     Set max velocity");

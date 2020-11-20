@@ -34,6 +34,7 @@
 #include <droneoa_ros/OAC/OAAlgFGM.hpp>
 #include <droneoa_ros/OAC/OAAlgRRT.hpp>
 #include <droneoa_ros/OAC/CMDParser.hpp>
+#include <droneoa_ros/Utils/DataPool.hpp>
 #include <droneoa_ros/PDN.hpp>
 
 namespace OAC {
@@ -101,11 +102,10 @@ enum SYS_SelectedDetermineFun {
     DET_INVALID
 };
 
-extern int ACTIVE_OAC_LEVEL;
-
 class OAController {
     CMDParser *mpParserExecuter = nullptr;
     CMDRunner *mpTheRunner = nullptr;
+    DP::DataPool msDP;
 
  public:
     OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc, CMDRunner *runner, ros::Rate r);

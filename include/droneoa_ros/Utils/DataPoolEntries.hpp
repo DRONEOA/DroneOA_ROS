@@ -88,6 +88,9 @@ constexpr char DP_LOCAL_LOC[] = "LocalLocation";  /**< @brief Type: LocalPoint *
 
 constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @brief Type: LocalPoint */
 
+// OAC
+constexpr char DP_ACTIVE_OAC_LEVEL[] = "ActiveOACLevel";  /**< @brief Type: uint32_t */
+
 /*******************************************************************************
  * Config Entries Definition
  */

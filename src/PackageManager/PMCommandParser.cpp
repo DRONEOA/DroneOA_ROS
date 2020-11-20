@@ -164,7 +164,7 @@ void CommandParser::install(std::vector<std::string> tokens) {
         mPackageList[tokens[0]].branch = tokens[2];
     }
     if (tokens.size() >= 4) {
-        if (tokens[3] == "true" || tokens[3] == "true") {
+        if (tokens[3] == "true" || tokens[3] == "1") {
             mPackageList[tokens[0]].startWithMainNode = true;
         }
     }
