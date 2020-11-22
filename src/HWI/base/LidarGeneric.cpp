@@ -26,7 +26,7 @@
 namespace Lidar {
 
 LidarGeneric::LidarGeneric(ros::NodeHandle node, ros::Rate rate) : mNodeHandle(node), mRate(rate) {
-        mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
+        mCurrentLidarSource = LIDAR_SOURCE_UE4;
     if (ENABLE_LIDAR) {
         initWatcherThread();
     }
@@ -41,7 +41,7 @@ LidarGeneric::~LidarGeneric() {
 }
 
 void LidarGeneric::initWatcherThread() {
-    mCurrentLidarSource = LIDAR_SOURCE_YDLIDAR;
+    mCurrentLidarSource = LIDAR_SOURCE_UE4;
     mpThreadWatchLidar = new boost::thread(boost::bind(&LidarGeneric::watchLidarThread, this));
     GUI::GUISubject::notifyGUIPopups();
     ROS_INFO("[LIDAR Generic] init");

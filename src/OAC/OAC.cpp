@@ -22,8 +22,6 @@
 
 namespace OAC {
 
-int ACTIVE_OAC_LEVEL = 0;
-
 OAController::OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc,
         CMDRunner *runner, ros::Rate r) {
     mpTheRunner = runner;
@@ -92,13 +90,13 @@ std::string OAController::getStatus() {
 void OAController::masterSwitch(bool isOn) {
     mIsOn = isOn;
     if (mIsOn) {
-        ACTIVE_OAC_LEVEL = OAC_STAGE_SETTING;
+        msDP.setData(DP::DP_ACTIVE_OAC_LEVEL, OAC_STAGE_SETTING);
         mpCNC->moveMissionToLocalQueue();
         mpCNC->clearFCUWaypoint();
         ROS_WARN("[OAC] MASTER RESUMED");
         return;
     }
-    ACTIVE_OAC_LEVEL = 0;
+    msDP.setData(DP::DP_ACTIVE_OAC_LEVEL, int32_t(0));
     mpCNC->clearLocalMissionQueue();
     mpCNC->clearFCUWaypoint();
     ROS_WARN("[OAC] MASTER PAUSED");

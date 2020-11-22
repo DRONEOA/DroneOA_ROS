@@ -157,12 +157,6 @@ void CommandParser::install(std::vector<std::string> tokens) {
         ROS_ERROR("[PM][INSTALL] CLONE and/or INITIAL PACKAGE SETUP failed !!!");
         return;
     }
-    // Build packages
-    if (!rebuild()) {
-        ROS_ERROR("[PM][INSTALL] Rebuild failed !!!");
-        uninstall(tokens);  // Restore file structure
-        return;
-    }
     // Add package to installed package list
     mPackageList[tokens[0]] = PackageRecord(tokens[0]);
     mPackageList[tokens[0]].url = tokens[1];
@@ -170,9 +164,16 @@ void CommandParser::install(std::vector<std::string> tokens) {
         mPackageList[tokens[0]].branch = tokens[2];
     }
     if (tokens.size() >= 4) {
-        if (tokens[3] == "true" || tokens[3] == "true") {
+        if (tokens[3] == "true" || tokens[3] == "1") {
             mPackageList[tokens[0]].startWithMainNode = true;
         }
+    }
+    // Build packages
+    if (!rebuild()) {
+        ROS_ERROR("[PM][INSTALL] Rebuild failed !!!");
+        ROS_ERROR("[PM][INSTALL] Restore file structure by UNINSTALL");
+        uninstall(tokens);  // Restore file structure
+        return;
     }
     // Write to file
     writeListToFile();
@@ -223,19 +224,21 @@ void CommandParser::uninstall(std::vector<std::string> tokens) {
         ROS_ERROR("[PM][UNINSTALL] Package Name [%s] Not Exist !!!", tokens[0].c_str());
         return;
     }
-    // Update latest by pull
+    // Uninstall by deleting
     if (runPMScripts("uninstall.sh", {tokens[0]}) != 0) {
         ROS_ERROR("[PM][UNINSTALL] Uninstall deletion failed !!!");
         return;
     }
+    // Remove From Installed List
+    mPackageList.erase(mPackageList.find(tokens[0]));
     // Build packages
     if (!rebuild()) {
         ROS_ERROR("[PM][UNINSTALL] Rebuild failed !!!");
     } else {
         ROS_INFO("[PM][UNINSTALL] Package: %s is Successfully Uninstalled.", tokens[0].c_str());
     }
-    // Remove From Installed List
-    mPackageList.erase(mPackageList.find(tokens[0]));
+    // Write to file
+    writeListToFile();
 }
 
 void CommandParser::list(std::vector<std::string> tokens) {

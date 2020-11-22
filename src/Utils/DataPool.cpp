@@ -45,6 +45,7 @@ DataPool::~DataPool() {
 
 void DataPool::setDefaultConfig() {
     setData(CONF_SAFETY_GPS_FIX, true);
+    setData(DP_ACTIVE_OAC_LEVEL, int32_t(0));
 }
 
 void DataPool::notifyAll(ENTRY_TYPES type, std::string entryName) {
@@ -85,6 +86,12 @@ std::string DataPool::getDataAsString(std::string name) {
             return std::to_string(boost::any_cast<uint8_t>(targetData));
         } else if (can_cast_to<int16_t>(targetData)) {
             return std::to_string(boost::any_cast<int16_t>(targetData));
+        } else if (can_cast_to<uint16_t>(targetData)) {
+            return std::to_string(boost::any_cast<uint16_t>(targetData));
+        } else if (can_cast_to<int32_t>(targetData)) {
+            return std::to_string(boost::any_cast<int32_t>(targetData));
+        } else if (can_cast_to<uint32_t>(targetData)) {
+            return std::to_string(boost::any_cast<uint32_t>(targetData));
         } else if (can_cast_to<float>(targetData)) {
             return std::to_string(boost::any_cast<float>(targetData));
         } else if (can_cast_to<LocalPoint>(targetData)) {
@@ -111,6 +118,36 @@ std::string DataPool::getDataAsString(std::string name) {
         ROS_ERROR("Convert any data to string failed");
     }
     return "ERROR";
+}
+
+int DataPool::getDataAsInt(std::string name) {
+    boost::any targetData = getData(name);
+    if (targetData.empty()) {
+        //! @note Data does not exist yet
+        return 0;
+    }
+    try {
+        if (can_cast_to<bool>(targetData)) {
+            return boost::any_cast<bool>(targetData);
+        } else if (can_cast_to<std::string>(targetData)) {
+            return std::stoi(boost::any_cast<std::string>(targetData));
+        } else if (can_cast_to<uint8_t>(targetData)) {
+            return boost::any_cast<uint8_t>(targetData);
+        } else if (can_cast_to<int16_t>(targetData)) {
+            return boost::any_cast<int16_t>(targetData);
+        } else if (can_cast_to<uint16_t>(targetData)) {
+            return boost::any_cast<uint16_t>(targetData);
+        } else if (can_cast_to<int32_t>(targetData)) {
+            return boost::any_cast<int32_t>(targetData);
+        } else if (can_cast_to<uint32_t>(targetData)) {
+            return boost::any_cast<uint32_t>(targetData);
+        } else {
+            ROS_ERROR("Data type cannot convert to int");
+        }
+    } catch(boost::bad_any_cast& e) {
+        ROS_ERROR("Fail to convert to int");
+    }
+    return 0;
 }
 
 void DataPool::setData(std::string name, boost::any data) {

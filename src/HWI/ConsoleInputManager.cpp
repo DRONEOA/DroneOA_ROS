@@ -431,6 +431,7 @@ bool ConsoleInputManager::buildRSCCommands() {
         } else if (cmdType == "range") {
             std::string cancel = currentCommand_.second.at(1);
             if (currentCommand_.second.size() == 3) {
+                ROS_WARN("::RSC Range Set::");
                 float max = std::stof(currentCommand_.second.at(1));
                 float min = std::stof(currentCommand_.second.at(2));
                 if (max < min || min < 0) {
@@ -439,6 +440,7 @@ bool ConsoleInputManager::buildRSCCommands() {
                 mpRSC->setRange(min, max);
                 mpRSC->setRangeSwitch(true);
             } else if (currentCommand_.second.size() == 2 && cancel == "cancel") {
+                ROS_WARN("::RSC Range Cancel::");
                 mpRSC->setRangeSwitch(false);
             } else {
                 ROS_WARN("Unknown Range Operation");
@@ -520,6 +522,7 @@ void ConsoleInputManager::printCNCHelper() {
     ROS_WARN("CNC Commands: [required] <optional>");
     ROS_WARN("    arm:                                  Arm the vehicle motor");
     ROS_WARN("    takeoff [altitude]:                   Takeoff");
+    ROS_WARN("    land:                                 Land at current location");
     ROS_WARN("    chmod [mode name]:                    Change flight mode");
     ROS_WARN("    rtl:                                  Return to land");
     ROS_WARN("    velocity [Speed]:                     Set max velocity");
