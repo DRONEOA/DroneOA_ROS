@@ -78,6 +78,12 @@ class DataPool {
      */
     std::string getDataAsString(std::string name);
     /**
+     * @brief Get the Data As INT
+     * @param name name of the data entry
+     * @return int
+     */
+    int getDataAsInt(std::string name);
+    /**
      * @brief Set the Data object at desired entry. Subscribers of DATA type will be notified.
      * @param name name of the data entry
      * @param data original data in the DP will be updated if exist

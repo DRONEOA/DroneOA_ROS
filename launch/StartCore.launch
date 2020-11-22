@@ -1,0 +1,6 @@
+<launch>
+  <node name="droneoa_ros_package_manager"  pkg="droneoa_ros"  type="droneoa_ros_package_manager"
+    output="screen" respawn="true" />
+  <node name="droneoa_ros_console_server"  pkg="droneoa_ros"  type="droneoa_ros_console_server"
+    output="screen" respawn="true" />
+</launch>

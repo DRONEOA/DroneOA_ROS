@@ -196,7 +196,7 @@ mavros_msgs::WaypointList CNCArdupilot::getWaypointList() {
 // Goto Global Waypoint
 bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt, bool isFromOAC) {
     // @TODO: check Guided mode
-    if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1) {
+    if (!isFromOAC && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
         if (!OAC_USE_SETPOINT_ENU) {
             if (!OAC_CUMULATIVE_WAYPOINT) clearLocalMissionQueue();
             pushLocalMissionQueue(GPSPoint(x_lat, y_long, z_alt));
@@ -221,7 +221,7 @@ bool CNCArdupilot::gotoRelative(float x, float y, float z_alt, bool isAltDelta, 
     LocalPoint localPos = getLocalPosition();
     // NEU input to ENU
     LocalPoint localPosFromHome(localPos.mX + y, localPos.mY + x, z_alt);
-    if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1 && OAC_USE_SETPOINT_ENU) {
+    if (!isFromOAC && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1 && OAC_USE_SETPOINT_ENU) {
         if (!OAC_CUMULATIVE_WAYPOINT) clearLocalMissionQueue();
         pushLocalMissionQueue(localPosFromHome);
         return true;
@@ -252,7 +252,7 @@ bool CNCArdupilot::pushGlobalMission(const std::vector<GPSPoint> &wpList, bool i
 // Move Mission
 void CNCArdupilot::moveMissionToLocalQueue() {
     clearLocalMissionQueue();
-    ROS_WARN("FCU Queue WPs Will Not Be Moved For Safty Consideration !!! [WIP]");
+    ROS_WARN("FCU Queue WPs Will Be Cleared For Safty Consideration !!!");
     // for (auto waypoint : mWaypointList.waypoints) {
     //     pushLocalMissionQueue(GPSPoint(waypoint.x_lat, waypoint.y_long, waypoint.z_alt));
     // }

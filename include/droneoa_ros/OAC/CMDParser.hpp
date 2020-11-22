@@ -26,12 +26,14 @@
 #include <droneoa_ros/HWI/interface/CNCInterface.hpp>
 #include <droneoa_ros/OAC/Command.hpp>
 #include <droneoa_ros/OAC/CMDRunner.hpp>
+#include <droneoa_ros/Utils/DataPool.hpp>
 
 namespace OAC {
 
 class CMDParser {
     CNC::CNCInterface *mpCNC;
     CMDRunner *cmdRunner_;
+    DP::DataPool msDP;
 
  public:
     CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner);

@@ -1,3 +1,0 @@
-<launch>
-  <node name="droneoa_ros"  pkg="droneoa_ros"  type="droneoa_ros" output="screen" respawn="false" />
-</launch>
