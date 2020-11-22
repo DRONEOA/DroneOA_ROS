@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
     "    \\/___/  \\/_/ \\/___/  \\/_/\\/_/\\/____/     \\/_____/\\/_/\\/_/" <<
     std::endl;
     ROS_INFO("[PM] Welcome, type:");
+    ROS_INFO("[PM]   - \"pm launch main\" to launch main control node");
     ROS_INFO("[PM]   - \"help\" for available <module name>s");
     ROS_INFO("[PM]   - \"<module name> help\" for list of available commands of specified module");
     ROS_INFO("[PM] For more information, please checkout:");
