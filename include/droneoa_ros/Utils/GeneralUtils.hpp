@@ -78,6 +78,12 @@ class GeneralUtility {
      * @param input string, used for output
      */
     static void toUpperCaseStr(std::string* input);
+
+    /**
+     * @brief Remove extra spaces in the string
+     * @param cmd string, used for output
+     */ 
+    static void removeSpaces(std::string *cmd);
 };
 
 #endif  // UTILS_GENERALUTILS_HPP_  // NOLINT

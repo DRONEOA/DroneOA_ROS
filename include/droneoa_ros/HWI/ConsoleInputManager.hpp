@@ -34,7 +34,6 @@
 
 namespace IO {
 
-static const char ConsoleDelimiter = ' ';
 typedef std::pair<std::string, std::vector<std::string>> CMDPair;
 class ConsoleInputManager {
  public:
@@ -57,6 +56,7 @@ class ConsoleInputManager {
     CMDPair currentCommand_;
     bool* masterSwitch_;
     DP::DataPool msDP;
+    ros::NodeHandle mNodeHandle;
 
     // Parser
     OAC::CMDParser* mpParser;

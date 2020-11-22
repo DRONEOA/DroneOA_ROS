@@ -49,8 +49,8 @@ RSC::~RSC() {
 }
 
 void RSC::initWatcherThread() {
-    mCurrentDepthSource = DEPTH_SOURCE_RSC;
-    mCurrentPCSource = PC_SOURCE_RSC;
+    mCurrentDepthSource = DEPTH_SOURCE_UE4;
+    mCurrentPCSource = PC_SOURCE_UE4;
     mpThreadWatchDepthImg = new boost::thread(boost::bind(&RSC::watchDepthImgThread, this));
 #ifdef ENABLE_POINTCLOUD
     mpThreadWatchPointcloud = new boost::thread(boost::bind(&RSC::watchPointCloudThread, this));

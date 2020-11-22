@@ -37,9 +37,7 @@
 namespace CNC {
 
 CNCGeneric::CNCGeneric(ros::NodeHandle node, ros::Rate rate) : mTargetAltitude(0),
-        mNodeHandle(node), mRate(rate) {
-    initWatcherThread();
-}
+        mNodeHandle(node), mRate(rate) {}
 
 CNCGeneric::~CNCGeneric() {
     if (mpThreadWatchAltitude) {
@@ -160,7 +158,7 @@ bool CNCGeneric::land(int32_t minAboutAltitude) {
 }
 
 bool CNCGeneric::setYaw(float targetYaw, bool isRelative, bool isFromOAC) {
-    if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1) {
+    if (!isFromOAC && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
         ROS_WARN("SetYaw is ignored from non-OAC requester to ensure snesor facing forward !");
         return true;
     }
@@ -208,7 +206,7 @@ bool CNCGeneric::setHome(float targetLatitude, float targetLongitude, float targ
 }
 
 bool CNCGeneric::pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC) {
-    if (!isFromOAC && OAC::ACTIVE_OAC_LEVEL > 1) {
+    if (!isFromOAC && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
         if (OAC_USE_SETPOINT_ENU) {
             pushLocalMissionQueue(location);
             return true;

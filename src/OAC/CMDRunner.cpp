@@ -217,7 +217,7 @@ bool CMDRunner::recheckUntilCommand() {
             ROS_ERROR("This FCU does not support arrwp command !!!");
             return false;
         }
-        if (OAC_USE_SETPOINT_ENU) {
+        if (OAC_USE_SETPOINT_ENU && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
             if (mpCNC->getLocalPosition() == mpCNC->getCurrentLocalENUTarget()) {
                 resetTimer();
             }
@@ -235,7 +235,7 @@ bool CMDRunner::recheckUntilCommand() {
             ROS_ERROR("This FCU does not support arrwp command !!!");
             return false;
         }
-        if (OAC_USE_SETPOINT_ENU) {
+        if (OAC_USE_SETPOINT_ENU && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
             //! @note Since we only hold one setpoint goal at the moment, so arrive means clear all.
             //! @todo consider supporting local NEU waypoint queue ?
             if (mpCNC->getLocalPosition() == mpCNC->getCurrentLocalENUTarget()) {

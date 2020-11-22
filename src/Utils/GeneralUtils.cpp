@@ -59,3 +59,16 @@ void GeneralUtility::toLowerCaseStr(std::string* input) {
 void GeneralUtility::toUpperCaseStr(std::string* input) {
     std::transform(input->begin(), input->end(), input->begin(), ::toupper);
 }
+
+void GeneralUtility::removeSpaces(std::string *cmd) {
+    std::istringstream iss(*cmd);
+    std::string word;
+    std::string out;
+    while (iss >> word) {
+        if (!out.empty()) {
+            out += ' ';
+        }
+        out += word;
+    }
+    *cmd = out;
+}

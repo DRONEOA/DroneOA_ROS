@@ -17,6 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, Feb. 2020
  */
 
+#include <droneoa_ros/CheckGetNewInput.h>
 #include <sstream>
 #include <string>
 #include <droneoa_ros/HWI/ConsoleInputManager.hpp>
@@ -45,16 +46,25 @@ bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAC
 
 void ConsoleInputManager::command_callback(const std_msgs::String::ConstPtr& msg) {
     std_msgs::String inputCMD = *msg;
-    if (!parseAndExecuteConsole(inputCMD.data)) {
-        ROS_ERROR("ERROR in incoming command via input_command topic");
+    ros::ServiceClient client = mNodeHandle.serviceClient<droneoa_ros::CheckGetNewInput>(
+            INPUT_MSG_REQUEST_SERVICE_NAME);
+    droneoa_ros::CheckGetNewInput srv;
+    srv.request.module_name = MAIN_NODE_ACCEPTED_MODULE_NAMES;
+    if (client.call(srv)) {
+        ROS_DEBUG("[MainNode] Input MATCH: %s", srv.response.msg.c_str());
+        if (!parseAndExecuteConsole(srv.response.msg)) {
+            ROS_WARN("[MainNode] Command from console service: %s. Ignored", srv.response.msg.c_str());
+        }
+    } else {
+        ROS_DEBUG("[MainNode] New input: No match or Expired");
     }
 }
 
 void ConsoleInputManager::watchCommandThread() {
     auto rate = ros::Rate(OAC_REFRESH_FREQ);
     auto node = boost::make_shared<ros::NodeHandle>();
-    auto gpsFix_sub =
-        node->subscribe<std_msgs::String>("droneoa/input_command", 1,
+    auto cmd_sub =
+        node->subscribe<std_msgs::String>(NEW_INPUT_FLAG_TOPIC_NAME, 1,
             boost::bind(&ConsoleInputManager::command_callback, this, _1));
 
     while (ros::ok()) {
@@ -63,27 +73,16 @@ void ConsoleInputManager::watchCommandThread() {
     }
 }
 
-void removeSpaces(std::string *cmd) {
-    std::istringstream iss(*cmd);
-    std::string word;
-    std::string out;
-    while (iss >> word) {
-        if (!out.empty()) {
-            out += ' ';
-        }
-        out += word;
-    }
-    *cmd = out;
-}
-
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
-    //! @todo(shibohan) Detect composed commands, use runner in this case
-    removeSpaces(&cmd);
-
+    GeneralUtility::removeSpaces(&cmd);
+    if (cmd.empty()) {
+        printModuleHelper();
+        return true;
+    }
     if (!splitModuleCommand(cmd)) {
-        ROS_WARN("Command Missing Module Name");
-        printFormatHelper();
-        return false;
+        ROS_WARN("[MainNode] Missing Module Name, Ignored --> Forwarded");
+        printModuleHelper();
+        return true;  // Forwarded, may still be accepted by other nodes
     }
     mGeneratedCMDQueue.clear();
     if (buildCommandQueue()) {
@@ -98,7 +97,7 @@ bool ConsoleInputManager::splitModuleCommand(std::string cmd) {
     std::string token;
     std::istringstream tokenStream(cmd);
 
-    while (std::getline(tokenStream, token, ConsoleDelimiter)) {
+    while (std::getline(tokenStream, token, CONSOLE_DELIMITER)) {
         GeneralUtility::toLowerCaseStr(&token);
         if (currentCommand_.first == "INVALID") {
             currentCommand_.first = token;
@@ -163,10 +162,17 @@ bool ConsoleInputManager::buildCommandQueue() {
     } else if (currentCommand_.first == "then") {
         ROS_WARN("Redundent THEN Detected - ignore");
         return true;
-    } else {
-        ROS_WARN("Unknown Module Name: %s", currentCommand_.first.c_str());
+    } else if (currentCommand_.first == HELP_ACCEPTED_MODULE_NAMES) {
         printModuleHelper();
-        return false;
+        return true;
+    } else if (currentCommand_.first == QUIT_ACCEPTED_MODULE_NAMES) {
+        ROS_WARN("::QUIT::");
+        oac_->masterSwitch(false);
+        *masterSwitch_ = false;
+        return true;
+    } else {
+        ROS_WARN("[MainNode] Unknown Module Name: %s. Ignored --> Forwarded", currentCommand_.first.c_str());
+        return true;  // Forwarded, may still be accepted by other nodes
     }
 }
 
@@ -425,6 +431,7 @@ bool ConsoleInputManager::buildRSCCommands() {
         } else if (cmdType == "range") {
             std::string cancel = currentCommand_.second.at(1);
             if (currentCommand_.second.size() == 3) {
+                ROS_WARN("::RSC Range Set::");
                 float max = std::stof(currentCommand_.second.at(1));
                 float min = std::stof(currentCommand_.second.at(2));
                 if (max < min || min < 0) {
@@ -433,6 +440,7 @@ bool ConsoleInputManager::buildRSCCommands() {
                 mpRSC->setRange(min, max);
                 mpRSC->setRangeSwitch(true);
             } else if (currentCommand_.second.size() == 2 && cancel == "cancel") {
+                ROS_WARN("::RSC Range Cancel::");
                 mpRSC->setRangeSwitch(false);
             } else {
                 ROS_WARN("Unknown Range Operation");
@@ -514,6 +522,7 @@ void ConsoleInputManager::printCNCHelper() {
     ROS_WARN("CNC Commands: [required] <optional>");
     ROS_WARN("    arm:                                  Arm the vehicle motor");
     ROS_WARN("    takeoff [altitude]:                   Takeoff");
+    ROS_WARN("    land:                                 Land at current location");
     ROS_WARN("    chmod [mode name]:                    Change flight mode");
     ROS_WARN("    rtl:                                  Return to land");
     ROS_WARN("    velocity [Speed]:                     Set max velocity");
@@ -565,14 +574,15 @@ void ConsoleInputManager::printFormatHelper() {
 }
 
 void ConsoleInputManager::printModuleHelper() {
-    ROS_WARN("Module Names:");
-    ROS_WARN("    CNC:    Command And Control Module");
-    ROS_WARN("    OAC:    Obstacle Avoidance Algorithm Controller");
-    ROS_WARN("    RSC:    Realsense Camera HS Interface");
-    ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
-    ROS_WARN("    DP:     DataPool Tools");
-    ROS_WARN("    !:      Quick Commands");
-    ROS_WARN("Give Queue Commands:");
+    ROS_WARN("Main Node Module Names:");
+    ROS_WARN("    CNC:            Command And Control Module");
+    ROS_WARN("    OAC:            Obstacle Avoidance Algorithm Controller");
+    ROS_WARN("    RSC:            Realsense Camera HS Interface");
+    ROS_WARN("    LIDAR:          Lidar Sensor HS Interface");
+    ROS_WARN("    DP:             DataPool Tools");
+    ROS_WARN("    !:              Quick Commands");
+    ROS_WARN("    [Package Name]: Installed Extra Packages");
+    ROS_WARN("Queue Commands:");
     ROS_WARN("    START [CMD] THEN [CMD] TEHN [CMD] ... END");
 }
 

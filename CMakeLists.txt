@@ -25,6 +25,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   cv_bridge
+  message_generation
 )
 
 find_package( OpenCV REQUIRED )
@@ -74,11 +75,10 @@ find_package( octomap REQUIRED )
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  CheckGetNewInput.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -88,10 +88,10 @@ find_package( octomap REQUIRED )
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -125,7 +125,7 @@ find_package( octomap REQUIRED )
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES droneoa_ros
-  CATKIN_DEPENDS nodelet mavros roscpp rospy std_msgs sensor_msgs cv_bridge
+  CATKIN_DEPENDS nodelet mavros roscpp rospy std_msgs sensor_msgs cv_bridge message_runtime
 #  DEPENDS system_lib
   DEPENDS OMPL
 )
@@ -179,6 +179,8 @@ add_library(droneoa_ros_libhwi
   src/HWI/ConsoleInputManager.cpp
 )
 
+add_dependencies(droneoa_ros_libhwi droneoa_ros_generate_messages_cpp)
+
 add_library(droneoa_ros_libgui
   src/GUI/Release/WebGUIServer.cpp
   src/GUI/Release/UE4SIMServer.cpp
@@ -188,6 +190,20 @@ add_library(droneoa_ros_libgui
   src/GUI/GUISubscriber.cpp
   src/GUI/GUISubject.cpp
 )
+
+add_library(droneoa_ros_libpm
+  src/PackageManager/PMCommandParser.cpp
+  src/Utils/GeneralUtils.cpp
+)
+
+add_dependencies(droneoa_ros_libpm droneoa_ros_generate_messages_cpp)
+
+add_library(droneoa_ros_libconsole
+  src/ConsoleService/ConsoleService.cpp
+  src/Utils/GeneralUtils.cpp
+)
+
+add_dependencies(droneoa_ros_libconsole droneoa_ros_generate_messages_cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -208,6 +224,14 @@ add_executable(droneoa_ros
   src/main.cpp
 )
 
+add_executable(droneoa_ros_package_manager
+  src/PackageManager/PackageManagerNode.cpp
+)
+
+add_executable(droneoa_ros_console_server
+  src/ConsoleService/ConsoleServiceNode.cpp
+)
+
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
@@ -224,6 +248,18 @@ target_link_libraries(droneoa_ros
   ${FCL_LIBRARIES}
   ${OMPL_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
+  readline
+)
+
+target_link_libraries(droneoa_ros_package_manager
+  droneoa_ros_libpm
+  ${catkin_LIBRARIES}
+  readline
+)
+
+target_link_libraries(droneoa_ros_console_server
+  droneoa_ros_libconsole
+  ${catkin_LIBRARIES}
   readline
 )
 
