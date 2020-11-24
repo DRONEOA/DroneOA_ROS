@@ -48,7 +48,7 @@ bool OMPLPlanner::setStartPos(LocalPoint pos) {
     mpProblem->clearStartStates();
     mpProblem->addStartState(start);
 #ifdef RRT_DEBUG
-    ROS_WARN("[RRT] Set Start Pos: %lf %lf %lf", pos.mX, pos.mY, pos.mZ);
+    ROS_DEBUG("[RRT] Set Start Pos: %lf %lf %lf", pos.mX, pos.mY, pos.mZ);
 #endif
     return true;
 }
@@ -60,7 +60,7 @@ bool OMPLPlanner::setTargetPos(LocalPoint pos) {
     mpProblem->clearGoal();
     mpProblem->setGoalState(goal);
 #ifdef RRT_DEBUG
-    ROS_WARN("[RRT] Set Goal Pos: %lf %lf %lf", pos.mX, pos.mY, pos.mZ);
+    ROS_DEBUG("[RRT] Set Goal Pos: %lf %lf %lf", pos.mX, pos.mY, pos.mZ);
 #endif
     setForcePlanFlag(true);
     return true;
@@ -133,7 +133,7 @@ OMPLPlanner::OMPLPlanner() : mSolutionExist(true), replan_flag(false), force_rep
 #if !defined(RRT_DEBUG) && !defined(RRT_DEBUG_PLANNER)
     ompl::msg::setLogLevel(ompl::msg::LOG_NONE);
 #endif
-    ROS_WARN("[RRT] Planner Initialized");
+    ROS_DEBUG("[RRT] Planner Initialized");
 
     // Init Octomap Watcher
     mpThreadWatchOctomap = new boost::thread(boost::bind(&OMPLPlanner::RRTMainThread, this));

@@ -26,7 +26,7 @@ namespace OAC {
 CMDParser::CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner) : mpCNC(cnc), cmdRunner_(runner) {}
 
 CMDParser::~CMDParser() {
-    ROS_INFO("Destroy CMDParser");
+    ROS_DEBUG("Destroy CMDParser");
 }
 
 /*

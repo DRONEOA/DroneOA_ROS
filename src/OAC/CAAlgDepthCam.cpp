@@ -74,7 +74,7 @@ bool CAAlgDepthCam::collect() {
     float safe = avgInRangeHelper(zCoords, 2*camThreshold_, 3*camThreshold_);
 
 #ifdef DEBUG_ALG_COLLISION_DEPTH
-    ROS_INFO("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f, avg=%f",
+    ROS_DEBUG("[CAAlgDepthCam] Avg Z Coords: danger(%f), neutral(%f), safe(%f), threshold=%f, avg=%f",
     danger, neutral, safe, camThreshold_, avgInRangeHelper(zCoords, 1, 100000));
 #endif
 
@@ -93,7 +93,7 @@ bool CAAlgDepthCam::collect() {
         camPossibility_ = 0.0f;
     }
 #ifdef DEBUG_ALG_COLLISION_DEPTH
-    ROS_INFO("[CAAlgDepthCam] Possibility: %f", camPossibility_);
+    ROS_DEBUG("[CAAlgDepthCam] Possibility: %f", camPossibility_);
 #endif
     return true;
 }

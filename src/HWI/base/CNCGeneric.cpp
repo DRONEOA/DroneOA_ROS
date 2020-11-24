@@ -60,7 +60,7 @@ CNCGeneric::~CNCGeneric() {
         mpThreadWatchLocalPosition->join();
         delete mpThreadWatchLocalPosition;
     }
-    ROS_INFO("Destroy CNCGeneric");
+    ROS_DEBUG("Destroy CNCGeneric");
 }
 
 /***************************************************************************
@@ -74,7 +74,7 @@ void CNCGeneric::initWatcherThread() {
     mpThreadWatchIMU = new boost::thread(boost::bind(&CNCGeneric::watchIMUThread, this));
     mpThreadWatchLocalPosition = new boost::thread(boost::bind(&CNCGeneric::watchLocalPositionThread, this));
     mSetpointLocalPub = mNodeHandle.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
-    ROS_INFO("[CNC] init threads done");
+    ROS_DEBUG("[CNC GENERIC] init threads done");
 }
 
 /***************************************************************************
@@ -86,11 +86,11 @@ bool CNCGeneric::setMode(std::string modeName) {
     srv_setMode.request.base_mode = 0;
     srv_setMode.request.custom_mode = modeName;
     if (cl.call(srv_setMode)) {
-        ROS_INFO("setmode send ok %d value:", srv_setMode.response.mode_sent);
+        ROS_DEBUG("[CNC GENERIC] setmode send ok %d value:", srv_setMode.response.mode_sent);
         sleep(1);
         return true;
     } else {
-        ROS_ERROR("Failed SetMode");
+        ROS_ERROR("[CNC GENERIC] Failed SetMode");
         return false;
     }
 }
@@ -101,22 +101,22 @@ bool CNCGeneric::armVehicle() {
     srv.request.value = true;
 
     if (isArmed()) {
-        ROS_WARN("Vehicle Already Armed");
+        ROS_WARN("[CNC GENERIC] Vehicle Already Armed");
         return true;
     }
 
     if (!isReady(getMode())) {
-        ROS_ERROR("NOT READY TO ARM UNDER MODE: %s", getMode().c_str());
+        ROS_ERROR("[CNC GENERIC] NOT READY TO ARM UNDER MODE: %s", getMode().c_str());
         return false;
     }
 
     if (arming_cl.call(srv)) {
-        ROS_INFO("ARM send ok %d", srv.response.success);
+        ROS_DEBUG("[CNC GENERIC] ARM send ok %d", srv.response.success);
         mHomeGPS = getCurrentGPSPoint();
         mIsHomeGPSSet = true;
         return true;
     } else {
-        ROS_ERROR("Failed arming or disarming");
+        ROS_ERROR("[CNC GENERIC] Failed arming or disarming");
         return false;
     }
 }
@@ -131,11 +131,11 @@ bool CNCGeneric::takeoff(float targetAltitude) {
     srv_takeoff.request.min_pitch = 0;
     srv_takeoff.request.yaw = 0;
     if (takeoff_cl.call(srv_takeoff)) {
-        ROS_INFO("srv_takeoff send ok %d", srv_takeoff.response.success);
+        ROS_DEBUG("[CNC GENERIC] srv_takeoff send ok %d", srv_takeoff.response.success);
         mTargetAltitude = targetAltitude;
         return true;
     } else {
-        ROS_ERROR("Failed Takeoff");
+        ROS_ERROR("[CNC GENERIC] Failed Takeoff");
         return false;
     }
 }
@@ -149,17 +149,17 @@ bool CNCGeneric::land(int32_t minAboutAltitude) {
     srv_land.request.min_pitch = 0;
     srv_land.request.yaw = 0;
     if (land_cl.call(srv_land)) {
-        ROS_INFO("srv_land send ok %d", srv_land.response.success);
+        ROS_DEBUG("[CNC GENERIC] srv_land send ok %d", srv_land.response.success);
         return true;
     } else {
-        ROS_ERROR("Failed Land");
+        ROS_ERROR("[CNC GENERIC] Failed Land");
         return false;
     }
 }
 
 bool CNCGeneric::setYaw(float targetYaw, bool isRelative, bool isFromOAC) {
     if (!isFromOAC && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
-        ROS_WARN("SetYaw is ignored from non-OAC requester to ensure snesor facing forward !");
+        ROS_WARN("[CNC GENERIC] SetYaw is ignored from non-OAC requester to ensure snesor facing forward !");
         return true;
     }
     ros::ServiceClient cmdLong_cl = mNodeHandle.serviceClient<mavros_msgs::CommandLong>("/mavros/cmd/command");
@@ -171,10 +171,10 @@ bool CNCGeneric::setYaw(float targetYaw, bool isRelative, bool isFromOAC) {
     srv_cmdLong.request.param3 = 1;  // Direction -1 ccw, 1 cw
     srv_cmdLong.request.param4 = isRelative;
     if (cmdLong_cl.call(srv_cmdLong)) {
-        ROS_INFO("setYaw send ok %d", srv_cmdLong.response.success);
+        ROS_DEBUG("[CNC GENERIC] setYaw send ok %d", srv_cmdLong.response.success);
         return true;
     } else {
-        ROS_ERROR("Failed set Yaw");
+        ROS_ERROR("[CNC GENERIC] Failed set Yaw");
         return false;
     }
 }
@@ -211,7 +211,7 @@ bool CNCGeneric::pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC)
             pushLocalMissionQueue(location);
             return true;
         }
-        ROS_WARN("Command Ignored Due to: Miss matched coordination system");
+        ROS_WARN("[CNC GENERIC] Command Ignored Due to: Miss matched coordination system");
         return false;
     }
     geometry_msgs::PoseStamped pose;
@@ -228,7 +228,7 @@ bool CNCGeneric::pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC)
     mSetpointLocalPub.publish(pose);
     mCurrentNEULocalTarget = location;
     msDP.setData(DP::DP_CURR_SETPOINT_ENU_TARGET, mCurrentNEULocalTarget);
-    ROS_WARN("Setpoint: %s", location.AsString().c_str());
+    ROS_INFO("[CNC GENERIC] Setpoint: %s", location.AsString().c_str());
     return true;
 }
 
@@ -333,7 +333,7 @@ void CNCGeneric::watchHomePosThread() {
         mNodeHandle.subscribe<mavros_msgs::HomePosition>("mavros/home_position/home", 1,
             boost::bind(&CNCGeneric::homePos_callback, this, _1));
 
-    ROS_WARN("Waiting For 3D Fix ...");
+    ROS_WARN("[CNC GENERIC] Waiting For 3D Fix ...");
     while (ros::ok()) {
         // Check is home set, set indicate we have a 2D+ GPS fix
         if (mIsHomeSet) {
@@ -344,10 +344,10 @@ void CNCGeneric::watchHomePosThread() {
         try {
             safetySetting = boost::any_cast<bool>(msDP.getData(DP::CONF_SAFETY_GPS_FIX));
         } catch(boost::bad_any_cast& e) {
-            ROS_WARN("GPS Fix Safety Setting Missing, Enabled by Default");
+            ROS_WARN("[CNC GENERIC] GPS Fix Safety Setting Missing, Enabled by Default");
         }
         if (!safetySetting) {
-            ROS_WARN("GPS Fix Safety Disabled");
+            ROS_WARN("[CNC GENERIC] GPS Fix Safety Disabled");
             break;
         }
         ros::spinOnce();
@@ -478,10 +478,10 @@ bool CNCGeneric::generalLongCommand(mavros_msgs::CommandLong commandMessage) {
     ros::ServiceClient cmdLong_cl = mNodeHandle.serviceClient<mavros_msgs::CommandLong>("/mavros/cmd/command");
     mavros_msgs::CommandLong srv_cmdLong = commandMessage;
     if (cmdLong_cl.call(srv_cmdLong)) {
-        ROS_INFO("srv_cmdLong send ok %d", srv_cmdLong.response.success);
+        ROS_DEBUG("[CNC GENERIC] srv_cmdLong send ok %d", srv_cmdLong.response.success);
         return true;
     } else {
-        ROS_ERROR("Failed set Yaw");
+        ROS_ERROR("[CNC GENERIC] Failed set Yaw");
         return false;
     }
 }

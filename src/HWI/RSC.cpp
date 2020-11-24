@@ -45,7 +45,7 @@ RSC::~RSC() {
         mpThreadWatchPointcloud->join();
         delete mpThreadWatchPointcloud;
     }
-    ROS_INFO("Destroy RSCInterface");
+    ROS_DEBUG("Destroy RSCInterface");
 }
 
 void RSC::initWatcherThread() {
@@ -55,7 +55,7 @@ void RSC::initWatcherThread() {
 #ifdef ENABLE_POINTCLOUD
     mpThreadWatchPointcloud = new boost::thread(boost::bind(&RSC::watchPointCloudThread, this));
 #endif
-    ROS_INFO("[RSC] init");
+    ROS_DEBUG("[RSC] init");
 }
 
 void RSC::changeDepthSource(std::string depthSource) {
@@ -83,7 +83,7 @@ void RSC::depthImg_callback(const sensor_msgs::ImageConstPtr& msg) {
     try {
       cv_ptr = cv_bridge::toCvCopy(mDepthImage, sensor_msgs::image_encodings::TYPE_32FC1);
     } catch (cv_bridge::Exception& e) {
-      ROS_ERROR("cv_bridge exception: %s", e.what());
+      ROS_ERROR("[RSC] cv_bridge exception: %s", e.what());
       return;
     }
 

@@ -38,7 +38,7 @@ void LidarYDLidar::initWatcherThread() {
     mCurrentLidarSource = LIDAR_SOURCE_UE4;
     mpThreadWatchLidar = new boost::thread(boost::bind(&LidarYDLidar::watchLidarThread, this));
     GUI::GUISubject::notifyGUIPopups();
-    ROS_INFO("[LIDAR YDLidar] init");
+    ROS_DEBUG("[LIDAR YDLidar] init");
 }
 
 }  // namespace Lidar
