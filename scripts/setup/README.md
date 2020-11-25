@@ -1,21 +1,11 @@
 # DroneOA Setup Script
 
 ## How to use the environment setup script
-
-**With full repo:**
 ```shell
-cd droneoa_ros/scripts/dev_setup
+cd droneoa_ros/scripts/setup
 chmod +x *
 source ./ENV_script.sh
 ```
-
-**Note:** with release script zip, simply
-```shell
-cd /release/dev_setup
-chmod +x *
-source ./ENV_script.sh
-```
-
 ### After The Installation [Important]
 Go to the generated ROS workspace: `<User Worspace Path>/<User ROS Workspace Name>`
 1. Try to **rebuild** the workspace: `catkin_make clean; catkin_make`
@@ -26,13 +16,13 @@ Go to the generated ROS workspace: `<User Worspace Path>/<User ROS Workspace Nam
     - Tab1: `sim_vehicle.py -v ArduCopter`
       - If command not found, run `. ~/.profile` to allow use command `sim_vehicle.py` anywhere.
     - Tab2:
-      - Navigate to droneoa_ros package path: `roscd droneoa_ros`
-        - If command not found, manually navigate to `<User Worspace Path>/<User ROS Workspace Name>/src/droneoa_ros`
+      - Navigate to droneoa_ros package path: `roscd dronsoa_ros`
+        - If command not found, manually navigate to `<User Worspace Path>/<User ROS Workspace Name>/src/dronsoa_ros`
       - Enter SITL launch dependencies folder: `cd launch/sitl`
       - Run `roslaunch ./step1SITL.launch`
     - Tab3:
-      - Navigate to droneoa_ros package path: `roscd droneoa_ros`
-        - If command not found, manually navigate to `<User Worspace Path>/<User ROS Workspace Name>/src/droneoa_ros`
+      - Navigate to droneoa_ros package path: `roscd dronsoa_ros`
+        - If command not found, manually navigate to `<User Worspace Path>/<User ROS Workspace Name>/src/dronsoa_ros`
       - Enter launch folder: `cd launch`
       - Run `roslaunch ./step2.launch`
 
