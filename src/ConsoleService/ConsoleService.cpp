@@ -41,7 +41,7 @@ void ConsoleService::input_callback(const std_msgs::String::ConstPtr& msg) {
 }
 
 bool ConsoleService::matchingModuleName(std::string inputModuleName, std::string desireModuleNames) {
-    ROS_DEBUG("+%s: inputModuleName: [%s] desireModuleNames: [%s]", __func__,
+    ROS_DEBUG("[Console Service] inputModuleName: [%s] desireModuleNames: [%s]",
             inputModuleName.c_str(), desireModuleNames.c_str());
     // Match any module name
     if (desireModuleNames == ANY_ACCEPTED_MODULE_NAMES) {
@@ -72,12 +72,13 @@ bool ConsoleService::handleGetInputRequest(droneoa_ros::CheckGetNewInput::Reques
         droneoa_ros::CheckGetNewInput::Response &res) {
     if (!mMsgExpired && matchingModuleName(mModuleName, req.module_name)) {
         res.msg = mNewInput;
-        ROS_DEBUG("Found match, response: [%s]", res.msg.c_str());
+        ROS_DEBUG("[Console Service] Found match, response: [%s]", res.msg.c_str());
         // Any matcher, help matcher and quit matcher won't make the input message expire
-        if (req.module_name != ANY_ACCEPTED_MODULE_NAMES &&
+        if (mModuleName != ANY_ACCEPTED_MODULE_NAMES &&
+            mModuleName != VERBOSE_ACCEPTED_MODULE_NAMES &&
                 res.msg != HELP_ACCEPTED_MODULE_NAMES &&
                 res.msg != QUIT_ACCEPTED_MODULE_NAMES) {
-            ROS_DEBUG("Mark As Expired");
+            ROS_DEBUG("[Console Service] Mark As Expired");
             mMsgExpired = true;
         }
         return true;
@@ -87,15 +88,10 @@ bool ConsoleService::handleGetInputRequest(droneoa_ros::CheckGetNewInput::Reques
 
 void ConsoleService::changeLoggerLevel(std::string input) {
     if (input == "verbose debug") {
-        if (!ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug)) {
-            ROS_ERROR("Something went wrong when set verbosity to DEBUG");
-        }
+        GeneralUtility::setVerbosityLevel(GeneralUtility::E_VERBOSITY::DEBUG);
     } else {
-        if (!ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info)) {
-            ROS_ERROR("Something went wrong when set verbosity to INFO");
-        }
+        GeneralUtility::setVerbosityLevel(GeneralUtility::E_VERBOSITY::INFO);
     }
-    ros::console::notifyLoggerLevelsChanged();
 }
 
 void ConsoleService::handleConsoleInput(std::string input) {
@@ -108,6 +104,11 @@ void ConsoleService::handleConsoleInput(std::string input) {
     // Change verbose command
     if (mModuleName == "verbose") {
         changeLoggerLevel(mNewInput);
+    }
+    // Print verbose help
+    if (mModuleName == "help") {
+        ROS_WARN("Change Log Verbosity:");
+        ROS_WARN("    verbose debug/info:     Default: INFO");
     }
     // Publish flag to indicate new input
     mMsgExpired = false;

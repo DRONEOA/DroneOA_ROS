@@ -85,20 +85,20 @@ void CNCArdupilot::WP_list_callback(const mavros_msgs::WaypointListConstPtr& msg
 
 bool CNCArdupilot::isReady(std::string modeName) {
     if (!isConnected()) {
-        ROS_ERROR("VEHICLE NOT CONNECTED !!!");
+        ROS_ERROR("[CNC Ardupilot] VEHICLE NOT CONNECTED !!!");
         return false;
     }
     if (modeName == FLT_MODE_GUIDED) {
         if (!mIsHomeSet) {
-            ROS_ERROR("No 3D Fix !!!");
+            ROS_ERROR("[CNC Ardupilot] No 3D Fix !!!");
             return false;
         }
         if (getMode() == FLT_MODE_GUIDED) {
-            ROS_INFO("Ready To Arm GUIDED :)");
+            ROS_INFO("[CNC Ardupilot] Ready To Arm GUIDED :)");
             return true;
         }
     }
-    ROS_ERROR("NOT READY TO ARM !!!");
+    ROS_ERROR("[CNC Ardupilot] NOT READY TO ARM !!!");
     return false;
 }
 
@@ -120,11 +120,11 @@ bool CNCArdupilot::pushWaypoint(float x_lat, float y_long, float z_alt, uint8_t 
     wp_push_srv.request.waypoints.push_back(wp);
     // Send WPs to Vehicle
     if (pushWP_cl.call(wp_push_srv)) {
-        ROS_INFO("Send waypoints ok: %d", wp_push_srv.response.success);
+        ROS_DEBUG("[CNC Ardupilot] Send waypoints ok: %d", wp_push_srv.response.success);
         mTargetAltitude = z_alt;
         return true;
     } else {
-        ROS_ERROR("Send waypoints FAILED.");
+        ROS_ERROR("[CNC Ardupilot] Send waypoints FAILED.");
         return false;
     }
 }
@@ -149,11 +149,11 @@ bool CNCArdupilot::pushWaypoints(const std::vector<GPSPoint> &wpList, uint8_t is
     }
     // Send WPs to Vehicle
     if (pushWP_cl.call(wp_push_srv)) {
-        ROS_INFO("Send waypoints ok: %d", wp_push_srv.response.success);
+        ROS_DEBUG("[CNC Ardupilot] Send waypoints ok: %d", wp_push_srv.response.success);
         mTargetAltitude = z_alt;
         return true;
     } else {
-        ROS_ERROR("Send waypoints FAILED.");
+        ROS_ERROR("[CNC Ardupilot] Send waypoints FAILED.");
         return false;
     }
 }
@@ -162,8 +162,7 @@ mavros_msgs::WaypointPull CNCArdupilot::pullWaypoints() {
     mavros_msgs::WaypointPull pulledWp;
     ros::ServiceClient pullWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointPush>("mavros/mission/pull");
     if (pullWP_cl.call(pulledWp) && pulledWp.response.success) {
-        ROS_INFO("%d", pulledWp.response.wp_received);
-        ROS_INFO("Waypoint pull success");
+        ROS_INFO("[CNC Ardupilot] Waypoint pull success: %d", pulledWp.response.wp_received);
     }
     return pulledWp;
 }
@@ -172,10 +171,10 @@ bool CNCArdupilot::clearFCUWaypoint() {
     ros::ServiceClient clearWP_cl = mNodeHandle.serviceClient<mavros_msgs::WaypointClear>("mavros/mission/clear");
     mavros_msgs::WaypointClear wp_clear_srv;
     if (clearWP_cl.call(wp_clear_srv)) {
-        ROS_INFO("Clear waypoints ok: %d", wp_clear_srv.response.success);
+        ROS_DEBUG("[CNC Ardupilot] Clear waypoints ok: %d", wp_clear_srv.response.success);
         return true;
     } else {
-        ROS_ERROR("Clear waypoints FAILED.");
+        ROS_ERROR("[CNC Ardupilot] Clear waypoints FAILED.");
         return false;
     }
 }
@@ -202,7 +201,7 @@ bool CNCArdupilot::gotoGlobal(float x_lat, float y_long, float z_alt, bool isFro
             pushLocalMissionQueue(GPSPoint(x_lat, y_long, z_alt));
             return true;
         }
-        ROS_WARN("GOTO Global Ignored Due to miss matched coordination system");
+        ROS_WARN("[CNC Ardupilot] GOTO Global Ignored Due to miss matched coordination system");
         return false;
     }
     if (!clearFCUWaypoint()) {
@@ -243,7 +242,7 @@ bool CNCArdupilot::gotoHeading(float heading, float distance, float z_alt, bool 
 bool CNCArdupilot::pushGlobalMission(const std::vector<GPSPoint> &wpList, bool isGlobal) {
     //! @todo Handle local
     if (!isGlobal) {
-        ROS_ERROR("Local Mission [Setpoint] is still under develpment.");
+        ROS_ERROR("[CNC Ardupilot] Local Mission [Setpoint] is still under develpment.");
         return false;
     }
     return pushWaypoints(wpList);
@@ -252,7 +251,7 @@ bool CNCArdupilot::pushGlobalMission(const std::vector<GPSPoint> &wpList, bool i
 // Move Mission
 void CNCArdupilot::moveMissionToLocalQueue() {
     clearLocalMissionQueue();
-    ROS_WARN("FCU Queue WPs Will Be Cleared For Safty Consideration !!!");
+    ROS_WARN("[CNC Ardupilot] FCU Queue WPs Will Be Cleared For Safty Consideration !!!");
     // for (auto waypoint : mWaypointList.waypoints) {
     //     pushLocalMissionQueue(GPSPoint(waypoint.x_lat, waypoint.y_long, waypoint.z_alt));
     // }

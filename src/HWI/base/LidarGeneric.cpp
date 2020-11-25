@@ -37,14 +37,14 @@ LidarGeneric::~LidarGeneric() {
         mpThreadWatchLidar->join();
         delete mpThreadWatchLidar;
     }
-    ROS_INFO("Destroy LidarGeneric");
+    ROS_DEBUG("Destroy LidarGeneric");
 }
 
 void LidarGeneric::initWatcherThread() {
     mCurrentLidarSource = LIDAR_SOURCE_UE4;
     mpThreadWatchLidar = new boost::thread(boost::bind(&LidarGeneric::watchLidarThread, this));
     GUI::GUISubject::notifyGUIPopups();
-    ROS_INFO("[LIDAR Generic] init");
+    ROS_DEBUG("[LIDAR Generic] init");
 }
 
 /* Callback */
@@ -110,7 +110,7 @@ sensor_msgs::LaserScan LidarGeneric::getRawDataMap() {
 
 std::map<float, degreeSector> LidarGeneric::getSectorDataMap() {
     if (mSectorDataMap.size() <= 0) {
-        // ROS_WARN("Incomplete Lidar Data Map !!!");
+        // ROS_WARN("[LIDAR Generic] Incomplete Lidar Data Map !!!");
         //! @todo should we try to regenerate OR populate with "safe" data set ?
     }
     return mSectorDataMap;
@@ -135,7 +135,7 @@ void LidarGeneric::generateDataMap() {
     uint32_t count = (mScannerData.angle_max - mScannerData.angle_min) / mScannerData.angle_increment;
     for (uint32_t i = 0; i < count; i++) {
         if (i >= mScannerData.ranges.size()) {
-            ROS_WARN("+LidarGeneric::generateDataMap: Missing Data, expect: %u actual: %zu",
+            ROS_WARN("[LIDAR Generic] generateDataMap: Missing Data, expect: %u actual: %zu",
                 count, mScannerData.ranges.size());
             break;
         }

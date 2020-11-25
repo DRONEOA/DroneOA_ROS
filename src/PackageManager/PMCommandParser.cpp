@@ -80,17 +80,7 @@ void CommandParser::watchCommandThread() {
 }
 
 bool CommandParser::parseInput(std::string input) {
-    std::vector<std::string> result;
-    result.clear();
-    std::string token;
-    std::istringstream tokenStream(input);
-
-    while (std::getline(tokenStream, token, CONSOLE_DELIMITER)) {
-        GeneralUtility::toLowerCaseStr(&token);
-        result.push_back(token);
-    }
-
-    return parseInput(result);
+    return parseInput(GeneralUtility::breakStringToTokens(input));
 }
 
 bool CommandParser::parseInput(std::vector<std::string> tokens) {
@@ -99,9 +89,17 @@ bool CommandParser::parseInput(std::vector<std::string> tokens) {
         printModuleNameHelp();
         return false;
     }
-    if (tokens[0] == "help") {
+    if (tokens[0] == HELP_ACCEPTED_MODULE_NAMES) {
         printModuleNameHelp();
         return true;
+    }
+    if (tokens[0] == VERBOSE_ACCEPTED_MODULE_NAMES) {
+        if (tokens.size() > 1) {
+            GeneralUtility::setVerbosityLevel(tokens[1]);
+            return true;
+        }
+        ROS_ERROR("[PM] New verbosity level unspecified");
+        return false;
     }
     if (tokens[0] != "pm") {
         ROS_WARN("[PM] Unknown Module Name, Ignored.");

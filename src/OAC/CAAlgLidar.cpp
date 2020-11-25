@@ -58,9 +58,9 @@ bool CAAlgLidar::collect() {
     }
     // Debug Prints
 #ifdef DEBUG_ALG_COLLISION_LIDAR
-    ROS_INFO("[CAAlgLidar] Collect:");
-    ROS_INFO("    CNC:   result: groundspeed=%f", gSpeed);
-    ROS_INFO("    Lidar: result: %f as range=%f threshold=%f", lidarPossibility_, closeSector.second, lidarThreshold_);
+    ROS_DEBUG("[CAAlgLidar] Collect:");
+    ROS_DEBUG("    CNC:   result: groundspeed=%f", gSpeed);
+    ROS_DEBUG("    Lidar: result: %f as range=%f threshold=%f", lidarPossibility_, closeSector.second, lidarThreshold_);
 #endif
     return true;
 }

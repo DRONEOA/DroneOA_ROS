@@ -112,10 +112,10 @@ std::string DataPool::getDataAsString(std::string name) {
                                 " z:" + std::to_string(geo_msg.z);
             return result;
         } else {
-            ROS_WARN("Unknown Data Type");
+            ROS_WARN("[DP] Unknown Data Type");
         }
     } catch(boost::bad_any_cast& e) {
-        ROS_ERROR("Convert any data to string failed");
+        ROS_ERROR("[DP] Convert any data to string failed");
     }
     return "ERROR";
 }
