@@ -36,6 +36,28 @@
 static const double GLOBAL_ROS_RATE = 20;
 
 /**
+ * @brief Console delimiter
+ */ 
+static const char CONSOLE_DELIMITER = ' ';
+
+/**
+ * @brief Package Manager & Console Service Topics
+ */
+static const char* INPUT_THROUGH_TOPIC_TOPIC_NAME = "droneoa/console_service_input";
+static const char* NEW_INPUT_FLAG_TOPIC_NAME = "droneoa/new_input_flag";
+static const char* INPUT_MSG_REQUEST_SERVICE_NAME = "get_input_from_console_service";
+
+/**
+ * @brief Console Service - Core Package Module Names
+ */
+static const char* ANY_ACCEPTED_MODULE_NAMES = "*";
+static const char* HELP_ACCEPTED_MODULE_NAMES = "help";
+static const char* QUIT_ACCEPTED_MODULE_NAMES = "quit";
+static const char* VERBOSE_ACCEPTED_MODULE_NAMES = "verbose";
+static const char* PACKAGE_MANAGER_ACCEPTED_MODULE_NAMES = "pm help verbose";
+static const char* MAIN_NODE_ACCEPTED_MODULE_NAMES = "cnc oac rsc lidar dp ! start cancel help quit verbose";
+
+/**
  * @brief List of FCU Type
  */
 static const char* FCU_PX4 = "PX4";

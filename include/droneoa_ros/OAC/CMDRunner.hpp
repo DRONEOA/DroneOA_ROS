@@ -23,6 +23,7 @@
 #include <boost/thread.hpp>
 #include <droneoa_ros/OAC/Command.hpp>
 #include <droneoa_ros/HWI/interface/CNCInterface.hpp>
+#include <droneoa_ros/Utils/DataPool.hpp>
 
 namespace OAC {
 
@@ -66,6 +67,7 @@ class CMDRunner {
     void runnerRoutine();
     boost::thread *runnerThread;
     CNC::CNCInterface *mpCNC;
+    DP::DataPool msDP;
 
     Command::CommandQueue theCMDQueue;
     RUNNER_STATE runnerState;

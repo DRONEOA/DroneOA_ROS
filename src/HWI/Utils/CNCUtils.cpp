@@ -71,7 +71,7 @@ std::pair<float, float> CNCUtility::getNorthEastFromPoints(GPSPoint point1, GPSP
 
 float CNCUtility::validAltitudeCMD(float targetAltitude) {
     if (targetAltitude > VEHICLE_MAX_ALTITUDE_RELATIVE) {
-        ROS_WARN("target altitude exceed max allowed altitude !");
+        ROS_WARN("[CNC Utility] target altitude exceed max allowed altitude !");
         return VEHICLE_MAX_ALTITUDE_RELATIVE;
     }
     return targetAltitude;
@@ -79,7 +79,7 @@ float CNCUtility::validAltitudeCMD(float targetAltitude) {
 
 float CNCUtility::validSpeedCMD(float targetSpeed) {
     if (targetSpeed > VEHICLE_MAX_SPEED_HORIZONTAL) {
-        ROS_WARN("target speed exceed max allowed speed !");
+        ROS_WARN("[CNC Utility] target speed exceed max allowed speed !");
         return VEHICLE_MAX_SPEED_HORIZONTAL;
     }
     return targetSpeed;

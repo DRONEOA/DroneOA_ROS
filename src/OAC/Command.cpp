@@ -61,7 +61,7 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
             case CMD_QUEUE_TYPES::CMD_TAKEOFF:
             {
                 if (!cnc->isArmed()) {
-                    ROS_WARN("VEHICLE NOT ARMED !!!");
+                    ROS_WARN("[CMD PARSER] VEHICLE NOT ARMED !!!");
                     return false;
                 }
                 float targetAltitude = std::stof(cmdline.second);

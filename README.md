@@ -85,8 +85,8 @@ Developers can choose either of the 2 strategies for integration that clearly di
 - see `.gitlab-ci.yml` for more dependencies
 
 ### API Wiki and How to Wiki:
-- Official **How to** [Wiki](http://droneoa.tuotuogzs.net/droneoa_gitbook) 
-- Official **Code API** [Wiki](http://droneoa.tuotuogzs.net/droneoa-api-wiki) 
+- Official [**How to** Wiki](http://droneoa.tuotuogzs.net/droneoa_gitbook) 
+- Official [**Code API** Wiki](http://droneoa.tuotuogzs.net/droneoa-api-wiki) 
 
 ## Credit
 DroneOA Group 2020 :palm_tree:

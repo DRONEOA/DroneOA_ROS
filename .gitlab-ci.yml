@@ -96,8 +96,8 @@ Release_Package:
   script:
     - cd ./src/droneoa_ros
     - mkdir ../../../release
-    - cp -R ./scripts/setup ../../../release/setup_dev
-    - cp -R ./scripts/deploy ../../../release/deploy
+    - cp -R ./scripts/dev_setup ../../../release/dev_setup
+    - cp -R ./scripts/deploy_setup ../../../release/deploy_setup
   artifacts:
     name: "$CI_COMMIT_BRANCH-release-scripts"
     paths:
@@ -107,4 +107,3 @@ Release_Package:
     - tags
     - latest-stable
     - latest-dev
-

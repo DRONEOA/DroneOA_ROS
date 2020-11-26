@@ -49,7 +49,7 @@ RSCPopup::~RSCPopup() {
     try {
         cv::destroyWindow(OPENCV_WINDOW_NAME);
     } catch(...) {
-        ROS_INFO("cv::destroyWindow warn");
+        ROS_DEBUG("[RSCPopup] cv::destroyWindow exception");
     }
     if (thread_pointcloud_viewer_) {
         delete thread_pointcloud_viewer_;
@@ -65,7 +65,7 @@ void RSCPopup::UpdateView(GUISubject *subject) {
 
 void RSCPopup::drawDebugOverlay() {
     if (cv::countNonZero(mDepthFrame) < 1) {
-        ROS_WARN("Empty Image Ignored");
+        ROS_DEBUG("[RSCPopup] Empty Image Ignored");
         return;
     }
 

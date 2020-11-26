@@ -17,6 +17,7 @@
  * Written by Bohan Shi <b34shi@edu.uwaterloo.ca>, Feb. 2020
  */
 
+#include <droneoa_ros/CheckGetNewInput.h>
 #include <sstream>
 #include <string>
 #include <droneoa_ros/HWI/ConsoleInputManager.hpp>
@@ -45,16 +46,25 @@ bool ConsoleInputManager::init(CNC::CNCInterface* cnc, Depth::RSC *rsc, OAC::OAC
 
 void ConsoleInputManager::command_callback(const std_msgs::String::ConstPtr& msg) {
     std_msgs::String inputCMD = *msg;
-    if (!parseAndExecuteConsole(inputCMD.data)) {
-        ROS_ERROR("ERROR in incoming command via input_command topic");
+    ros::ServiceClient client = mNodeHandle.serviceClient<droneoa_ros::CheckGetNewInput>(
+            INPUT_MSG_REQUEST_SERVICE_NAME);
+    droneoa_ros::CheckGetNewInput srv;
+    srv.request.module_name = MAIN_NODE_ACCEPTED_MODULE_NAMES;
+    if (client.call(srv)) {
+        ROS_DEBUG("[MainNode] Input MATCH: %s", srv.response.msg.c_str());
+        if (!parseAndExecuteConsole(srv.response.msg)) {
+            ROS_WARN("[MainNode] Command from console service: %s. Ignored", srv.response.msg.c_str());
+        }
+    } else {
+        ROS_DEBUG("[MainNode] New input: No match or Expired");
     }
 }
 
 void ConsoleInputManager::watchCommandThread() {
     auto rate = ros::Rate(OAC_REFRESH_FREQ);
     auto node = boost::make_shared<ros::NodeHandle>();
-    auto gpsFix_sub =
-        node->subscribe<std_msgs::String>("droneoa/input_command", 1,
+    auto cmd_sub =
+        node->subscribe<std_msgs::String>(NEW_INPUT_FLAG_TOPIC_NAME, 1,
             boost::bind(&ConsoleInputManager::command_callback, this, _1));
 
     while (ros::ok()) {
@@ -63,27 +73,16 @@ void ConsoleInputManager::watchCommandThread() {
     }
 }
 
-void removeSpaces(std::string *cmd) {
-    std::istringstream iss(*cmd);
-    std::string word;
-    std::string out;
-    while (iss >> word) {
-        if (!out.empty()) {
-            out += ' ';
-        }
-        out += word;
-    }
-    *cmd = out;
-}
-
 bool ConsoleInputManager::parseAndExecuteConsole(std::string cmd) {
-    //! @todo(shibohan) Detect composed commands, use runner in this case
-    removeSpaces(&cmd);
-
+    GeneralUtility::removeSpaces(&cmd);
+    if (cmd.empty()) {
+        printModuleHelper();
+        return true;
+    }
     if (!splitModuleCommand(cmd)) {
-        ROS_WARN("Command Missing Module Name");
-        printFormatHelper();
-        return false;
+        ROS_WARN("[MainNode] Missing Module Name");
+        printModuleHelper();
+        return true;  // Forwarded, may still be accepted by other nodes
     }
     mGeneratedCMDQueue.clear();
     if (buildCommandQueue()) {
@@ -98,7 +97,7 @@ bool ConsoleInputManager::splitModuleCommand(std::string cmd) {
     std::string token;
     std::istringstream tokenStream(cmd);
 
-    while (std::getline(tokenStream, token, ConsoleDelimiter)) {
+    while (std::getline(tokenStream, token, CONSOLE_DELIMITER)) {
         GeneralUtility::toLowerCaseStr(&token);
         if (currentCommand_.first == "INVALID") {
             currentCommand_.first = token;
@@ -120,13 +119,13 @@ bool ConsoleInputManager::buildCommandQueue() {
         return buildOACCommands();
     } else if (currentCommand_.first == "rsc") {
         if (!ENABLE_RSC) {
-            ROS_WARN("This module [RSC] is not enabled !!!");
+            ROS_WARN("[MainNode] RSC is not enabled !!!");
             return false;
         }
         return buildRSCCommands();
     } else if (currentCommand_.first == "lidar") {
         if (!ENABLE_LIDAR) {
-            ROS_WARN("This module [LIDAR] is not enabled !!!");
+            ROS_WARN("[MainNode] LIDAR is not enabled !!!");
             return false;
         }
         return buildLIDARCommands();
@@ -145,7 +144,7 @@ bool ConsoleInputManager::buildCommandQueue() {
             return true;
         }
         mIsBuildingQueue = false;
-        ROS_ERROR("Delay is only valid in command queue: delay [time in ms]");
+        ROS_ERROR("[MainNode] Delay is only valid in command queue: delay [time in ms]");
         return false;
     } else if (currentCommand_.first == "until") {
         if (mIsBuildingQueue && currentCommand_.second.size() > 0) {
@@ -158,22 +157,36 @@ bool ConsoleInputManager::buildCommandQueue() {
             return true;
         }
         mIsBuildingQueue = false;
-        ROS_ERROR("Until is only valid in command queue: until [mode]");
+        ROS_ERROR("[MainNode] Until is only valid in command queue: until [mode]");
         return false;
     } else if (currentCommand_.first == "then") {
-        ROS_WARN("Redundent THEN Detected - ignore");
+        ROS_WARN("[MainNode] Redundent THEN Detected - ignore");
         return true;
-    } else {
-        ROS_WARN("Unknown Module Name: %s", currentCommand_.first.c_str());
+    } else if (currentCommand_.first == HELP_ACCEPTED_MODULE_NAMES) {
         printModuleHelper();
+        return true;
+    } else if (currentCommand_.first == QUIT_ACCEPTED_MODULE_NAMES) {
+        ROS_INFO("::QUIT::");
+        oac_->masterSwitch(false);
+        *masterSwitch_ = false;
+        return true;
+    } else if (currentCommand_.first == VERBOSE_ACCEPTED_MODULE_NAMES) {
+        if (currentCommand_.second.size() > 0) {
+            GeneralUtility::setVerbosityLevel(currentCommand_.second[0]);
+            return true;
+        }
+        ROS_ERROR("[PM] New verbosity level unspecified");
         return false;
+    } else {
+        ROS_WARN("[MainNode] Unknown Module Name: %s", currentCommand_.first.c_str());
+        return true;  // Forwarded, may still be accepted by other nodes
     }
 }
 
 bool ConsoleInputManager::buildQueueCommands() {
     std::vector<std::string> inputCmd = currentCommand_.second;
     if (inputCmd.size() == 0) {
-        ROS_WARN("Empty Command Queue");
+        ROS_WARN("[MainNode] Empty Command Queue");
         printQueueHelper();
         return false;
     }
@@ -205,7 +218,7 @@ bool ConsoleInputManager::buildQueueCommands() {
         currentCommand_.second.push_back(entry);
     }
     mIsBuildingQueue = false;
-    ROS_WARN("QUEUE BUILD DONE");
+    ROS_INFO("[MainNode] QUEUE BUILD DONE");
     return true;
 }
 
@@ -213,39 +226,39 @@ bool ConsoleInputManager::buildCNCCommands() {
     try {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "arm") {
-            ROS_WARN("::ARM::");
+            ROS_INFO("::ARM::");
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_ARM, FLT_MODE_GUIDED});
         } else if (cmdType == "takeoff") {
-            ROS_WARN("::TAKEOFF::");
+            ROS_INFO("::TAKEOFF::");
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_TAKEOFF, currentCommand_.second.at(1)});
         } else if (cmdType == "chmod") {
             std::string currentMode = mpCNC->getMode();
             std::string newMode = currentCommand_.second.at(1);
             if (!mpCNC->checkFModeExist(newMode)) {
-                ROS_WARN("Flight Mode Does Not Exist !!!");
+                ROS_ERROR("::ChangeMode:: Flight Mode Does Not Exist !!!");
                 return false;
             }
             GeneralUtility::toUpperCaseStr(&newMode);
-            ROS_WARN("::ChangeMode %s -> %s::", currentMode.c_str(), newMode.c_str());
+            ROS_INFO("::ChangeMode %s -> %s::", currentMode.c_str(), newMode.c_str());
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_CHMOD, currentCommand_.second.at(1)});
         } else if (cmdType == "land") {
-            ROS_WARN("::LAND::");
+            ROS_INFO("::LAND::");
             // @todo accept Cancel altitude
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_LAND, ""});
         } else if (cmdType == "rtl") {
-            ROS_WARN("::RTL::");
+            ROS_INFO("::RTL::");
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_RTL});
         } else if (cmdType == "velocity") {
             float vel = std::stof(currentCommand_.second.at(1));
-            ROS_WARN("::SET MAX VELOCITY -> %f::", vel);
+            ROS_INFO("::SET MAX VELOCITY -> %f::", vel);
             if (vel <= 0.0) {
-                ROS_WARN("Invalid Speed Setting");
+                ROS_ERROR("::SET MAX VELOCITY:: Invalid Speed Setting");
                 return false;
             }
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_MAX_VELOCITY, std::to_string(vel)});
         } else if (cmdType == "yaw") {
             float yawAngle = std::stof(currentCommand_.second.at(1));
-            ROS_WARN("::SET YAW -> %f::", yawAngle);
+            ROS_INFO("::SET YAW -> %f::", yawAngle);
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, std::to_string(yawAngle)});
             if (currentCommand_.second.size() >= 3) {
                 float dist = std::stof(currentCommand_.second.at(2));
@@ -255,7 +268,7 @@ bool ConsoleInputManager::buildCNCCommands() {
                     alt = std::stof(currentCommand_.second.at(3));
                     dataStr = dataStr + " " + std::to_string(alt);
                 }
-                ROS_WARN("::GOTO YAW -> yaw:%f dist:%f alt:%f::", yawAngle, dist, alt);
+                ROS_INFO("::GOTO YAW -> yaw:%f dist:%f alt:%f::", yawAngle, dist, alt);
                 mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_HEADING, dataStr});
             }
         } else if (cmdType == "climb") {
@@ -263,14 +276,14 @@ bool ConsoleInputManager::buildCNCCommands() {
             if (deltaAlt < 0.0f) {
                 throw 1;
             }
-            ROS_WARN("::CLIMB -> -%f::", deltaAlt);
+            ROS_INFO("::CLIMB -> -%f::", deltaAlt);
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_CLIMB, std::to_string(deltaAlt)});
         } else if (cmdType == "descent") {
             float deltaAlt = std::stof(currentCommand_.second.at(1));
             if (deltaAlt < 0.0f) {
                 throw 1;
             }
-            ROS_WARN("::DECENT -> %f::", deltaAlt);
+            ROS_INFO("::DECENT -> %f::", deltaAlt);
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_DESCEND, std::to_string(deltaAlt)});
         } else if (cmdType == "info") {
             GPSPoint tmpGPSPoint = mpCNC->getCurrentGPSPoint();
@@ -293,15 +306,15 @@ bool ConsoleInputManager::buildCNCCommands() {
             ROS_INFO("[HUD] throttle: %f", mpCNC->getHUDData().throttle);
             ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else if (cmdType == "quit") {
-            ROS_WARN("::QUIT::");
+            ROS_INFO("::QUIT::");
             oac_->masterSwitch(false);
             *masterSwitch_ = false;
         } else {
-            ROS_WARN("Unknown CNC command: %s", cmdType.c_str());
+            ROS_ERROR("[MainNode] Unknown CNC command: %s", cmdType.c_str());
             printCNCHelper();
         }
     } catch (...) {
-        ROS_WARN("ERROR happened while processing CNC command");
+        ROS_ERROR("[MainNode] ERROR happened while processing CNC command");
         printCNCHelper();
     }
     return true;
@@ -311,21 +324,21 @@ bool ConsoleInputManager::buildOACCommands() {
     try {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "on") {
-            ROS_WARN("::OAC->ON::");
+            ROS_INFO("::OAC->ON::");
             oac_->masterSwitch(true);
         } else if (cmdType == "off") {
-            ROS_WARN("::OAC->OFF::");
+            ROS_INFO("::OAC->OFF::");
             oac_->masterSwitch(false);
         } else if (cmdType == "info") {
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
             ROS_INFO("[OAC] status: %s", oac_->getStatus().c_str());
             ROS_INFO(">>>>>>>>>> INFO END <<<<<<<<<<");
         } else {
-            ROS_WARN("Unknown OAC command");
+            ROS_ERROR("[MainNode] Unknown OAC command");
             printOACHelper();
         }
     } catch (...) {
-        ROS_WARN("ERROR happened while processing OAC command");
+        ROS_ERROR("[MainNode] ERROR happened while processing OAC command");
         printOACHelper();
     }
     return true;
@@ -336,7 +349,7 @@ bool ConsoleInputManager::buildQuickCommands() {
     try {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "w") {
-            ROS_WARN("::GO NORTH::");
+            ROS_INFO("::GO NORTH::");
             float dist = std::stof(currentCommand_.second.at(1));
             float alt = mpCNC->getRelativeAltitude();
             std::string dataStr = std::to_string(dist) + " 0";
@@ -347,7 +360,7 @@ bool ConsoleInputManager::buildQuickCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "0"});
         } else if (cmdType == "s") {
-            ROS_WARN("::GO SOUTH::");
+            ROS_INFO("::GO SOUTH::");
             float dist = std::stof(currentCommand_.second.at(1));
             float alt = mpCNC->getRelativeAltitude();
             std::string dataStr = std::to_string(-dist) + " 0";
@@ -358,7 +371,7 @@ bool ConsoleInputManager::buildQuickCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "180"});
         } else if (cmdType == "a") {
-            ROS_WARN("::GO WEST::");
+            ROS_INFO("::GO WEST::");
             float dist = std::stof(currentCommand_.second.at(1));
             float alt = mpCNC->getRelativeAltitude();
             std::string dataStr = "0 " + std::to_string(-dist);
@@ -369,7 +382,7 @@ bool ConsoleInputManager::buildQuickCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW,  "270"});
         } else if (cmdType == "d") {
-            ROS_WARN("::GO EAST::");
+            ROS_INFO("::GO EAST::");
             float dist = std::stof(currentCommand_.second.at(1));
             float alt = mpCNC->getRelativeAltitude();
             std::string dataStr = "0 " + std::to_string(dist);
@@ -380,15 +393,15 @@ bool ConsoleInputManager::buildQuickCommands() {
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_GOTO_RELATIVE, dataStr});
             mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_SET_YAW, "90"});
         } else if (cmdType == "t") {
-            ROS_WARN("::CUSTOM TEST CMD::");
+            ROS_INFO("::CUSTOM TEST CMD::");
             /* ! @node Add your custom command here, trigger with "! t" command */
             mpCNC->pushLocalENUWaypoint(LocalPoint(0, 0, 3));
         } else {
-            ROS_WARN("Unknown Quick command");
+            ROS_ERROR("[MainNode] Unknown Quick command");
             printQuickHelper();
         }
     } catch (...) {
-        ROS_WARN("ERROR happened while processing Quick command");
+        ROS_ERROR("[MainNode] ERROR happened while processing Quick command");
         printQuickHelper();
     }
     return true;
@@ -405,26 +418,27 @@ bool ConsoleInputManager::buildRSCCommands() {
             if (currentCommand_.second.size() >= 2) {
                 std::string srcName = currentCommand_.second.at(1);
                 if (srcName == "rsc") {
-                    ROS_WARN("::RSC SRC -> RSC::");
+                    ROS_INFO("::RSC SRC -> RSC::");
                     mpRSC->changeDepthSource(DEPTH_SOURCE_RSC);
                     mpRSC->changePC2Source(PC_SOURCE_RSC);
                 } else if (srcName == "ue4") {
-                    ROS_WARN("::RSC SRC -> UE4::");
+                    ROS_INFO("::RSC SRC -> UE4::");
                     mpRSC->changeDepthSource(DEPTH_SOURCE_UE4);
                     mpRSC->changePC2Source(PC_SOURCE_UE4);
                 } else {
-                    ROS_WARN("Unknown New Source Name");
+                    ROS_WARN("::RSC SRC:: Unknown New Source Name");
                     ROS_WARN("    rsc:      use real realsense camera data");
                     ROS_WARN("    ue4:      use simulated data from UE4 SIM");
                 }
             } else {
-                ROS_WARN("Unknown New Source Name");
+                ROS_WARN("::RSC SRC:: Unknown New Source Name");
                 ROS_WARN("    rsc:      use real realsense camera data");
                 ROS_WARN("    ue4:      use simulated data from UE4 SIM");
             }
         } else if (cmdType == "range") {
             std::string cancel = currentCommand_.second.at(1);
             if (currentCommand_.second.size() == 3) {
+                ROS_INFO("::RSC Range Set::");
                 float max = std::stof(currentCommand_.second.at(1));
                 float min = std::stof(currentCommand_.second.at(2));
                 if (max < min || min < 0) {
@@ -433,18 +447,19 @@ bool ConsoleInputManager::buildRSCCommands() {
                 mpRSC->setRange(min, max);
                 mpRSC->setRangeSwitch(true);
             } else if (currentCommand_.second.size() == 2 && cancel == "cancel") {
+                ROS_INFO("::RSC Range Cancel::");
                 mpRSC->setRangeSwitch(false);
             } else {
-                ROS_WARN("Unknown Range Operation");
+                ROS_WARN("::RSC Range:: Unknown Range Operation");
                 ROS_WARN("    [max(mm)] [min(mm)]       Set range");
                 ROS_WARN("    cancel                    Cancel range");
             }
         } else {
-            ROS_WARN("Unknown RSC command");
+            ROS_ERROR("[MainNode] Unknown RSC command");
             printRSCHelper();
         }
     } catch (...) {
-        ROS_WARN("ERROR happened while processing RSC command");
+        ROS_ERROR("[MainNode] ERROR happened while processing RSC command");
         printRSCHelper();
     }
     return true;
@@ -461,27 +476,27 @@ bool ConsoleInputManager::buildLIDARCommands() {
             if (currentCommand_.second.size() >= 2) {
                 std::string srcName = currentCommand_.second.at(1);
                 if (srcName == "ydlidar") {
-                    ROS_WARN("::LIDAR SRC -> YDLIDAR::");
+                    ROS_INFO("::LIDAR SRC -> YDLIDAR::");
                     mpLidar->changeLidarSource(LIDAR_SOURCE_YDLIDAR);
                 } else if (srcName == "ue4") {
-                    ROS_WARN("::LIDAR SRC -> UE4::");
+                    ROS_INFO("::LIDAR SRC -> UE4::");
                     mpLidar->changeLidarSource(LIDAR_SOURCE_UE4);
                 } else {
-                    ROS_WARN("Unknown New Source Name");
+                    ROS_WARN("::LIDAR SRC:: Unknown New Source Name");
                     ROS_WARN("    ydlidar:  use real YDLidar data");
                     ROS_WARN("    ue4:      use simulated data from UE4 SIM");
                 }
             } else {
-                ROS_WARN("Missing New Source Name");
+                ROS_WARN("::LIDAR SRC:: Missing New Source Name");
                 ROS_WARN("    ydlidar:  use real YDLidar data");
                 ROS_WARN("    ue4:      use simulated data from UE4 SIM");
             }
         } else {
-            ROS_WARN("Unknown LIDAR command");
+            ROS_ERROR("[MainNode] Unknown LIDAR command");
             printLIDARHelper();
         }
     } catch (...) {
-        ROS_WARN("ERROR happened while processing LIDAR command");
+        ROS_ERROR("[MainNode] ERROR happened while processing LIDAR command");
         printLIDARHelper();
     }
     return true;
@@ -498,13 +513,13 @@ bool ConsoleInputManager::buildDPCommands() {
                 msDP.printAllEntryWithData();
                 return true;
             }
-            ROS_WARN("[DP] Data at: %s = %s", srcName.c_str(), msDP.getDataAsString(srcName).c_str());
+            ROS_INFO("[DP] Data at: %s = %s", srcName.c_str(), msDP.getDataAsString(srcName).c_str());
         } else {
-            ROS_WARN("Unknown DataPool command");
+            ROS_ERROR("[MainNode] Unknown DataPool command");
             printDPHelper();
         }
     } catch (...) {
-        ROS_WARN("ERROR happened while processing DataPool command");
+        ROS_ERROR("[MainNode] ERROR happened while processing DataPool command");
         printDPHelper();
     }
     return true;
@@ -514,6 +529,7 @@ void ConsoleInputManager::printCNCHelper() {
     ROS_WARN("CNC Commands: [required] <optional>");
     ROS_WARN("    arm:                                  Arm the vehicle motor");
     ROS_WARN("    takeoff [altitude]:                   Takeoff");
+    ROS_WARN("    land:                                 Land at current location");
     ROS_WARN("    chmod [mode name]:                    Change flight mode");
     ROS_WARN("    rtl:                                  Return to land");
     ROS_WARN("    velocity [Speed]:                     Set max velocity");
@@ -565,14 +581,15 @@ void ConsoleInputManager::printFormatHelper() {
 }
 
 void ConsoleInputManager::printModuleHelper() {
-    ROS_WARN("Module Names:");
-    ROS_WARN("    CNC:    Command And Control Module");
-    ROS_WARN("    OAC:    Obstacle Avoidance Algorithm Controller");
-    ROS_WARN("    RSC:    Realsense Camera HS Interface");
-    ROS_WARN("    LIDAR:  Lidar Sensor HS Interface");
-    ROS_WARN("    DP:     DataPool Tools");
-    ROS_WARN("    !:      Quick Commands");
-    ROS_WARN("Give Queue Commands:");
+    ROS_WARN("Main Node Module Names:");
+    ROS_WARN("    CNC:            Command And Control Module");
+    ROS_WARN("    OAC:            Obstacle Avoidance Algorithm Controller");
+    ROS_WARN("    RSC:            Realsense Camera HS Interface");
+    ROS_WARN("    LIDAR:          Lidar Sensor HS Interface");
+    ROS_WARN("    DP:             DataPool Tools");
+    ROS_WARN("    !:              Quick Commands");
+    ROS_WARN("    [Package Name]: Installed Extra Packages");
+    ROS_WARN("Queue Commands:");
     ROS_WARN("    START [CMD] THEN [CMD] TEHN [CMD] ... END");
 }
 

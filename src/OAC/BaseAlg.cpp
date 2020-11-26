@@ -32,7 +32,7 @@ BaseAlg::BaseAlg(CNC::CNCInterface *cnc) {
 }
 
 BaseAlg::~BaseAlg() {
-    ROS_INFO("Destroy BaseAlg");
+    ROS_DEBUG("Destroy BaseAlg");
 }
 
 Command::CommandQueue BaseAlg::getCommandQueue() {

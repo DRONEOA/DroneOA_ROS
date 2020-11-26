@@ -78,6 +78,39 @@ class GeneralUtility {
      * @param input string, used for output
      */
     static void toUpperCaseStr(std::string* input);
+
+    /**
+     * @brief Remove extra spaces in the string
+     * @param cmd string, used for output
+     */ 
+    static void removeSpaces(std::string *cmd);
+
+    /**
+     * @brief Enum of verbosity level that can be switched between
+     */
+    enum E_VERBOSITY {
+        DEBUG,
+        INFO
+    };
+
+    /**
+     * @brief Set the Verbosity Level of the package
+     * @param verbosity verbosity level enum
+     */
+    static void setVerbosityLevel(E_VERBOSITY verbosity);
+
+    /**
+     * @brief Set the Verbosity Level of the package
+     * @param verbosity verbosity level string
+     */
+    static void setVerbosityLevel(std::string verbosity);
+
+    /**
+     * @brief Break up string into vector of tokens separated by CONSOLE_DELIMITER
+     * @param input string, raw input
+     * @return std::vector<std::string>, tokens
+     */
+    static std::vector<std::string> breakStringToTokens(std::string input);
 };
 
 #endif  // UTILS_GENERALUTILS_HPP_  // NOLINT

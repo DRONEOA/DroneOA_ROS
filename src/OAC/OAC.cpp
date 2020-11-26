@@ -22,8 +22,6 @@
 
 namespace OAC {
 
-int ACTIVE_OAC_LEVEL = 0;
-
 OAController::OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Depth::RSC *rsc,
         CMDRunner *runner, ros::Rate r) {
     mpTheRunner = runner;
@@ -45,9 +43,9 @@ OAController::~OAController() {
     if (mpOACMasterThread) {
         mpOACMasterThread->join();
         delete mpOACMasterThread;
-        ROS_WARN("[OAC] MASTER THREAD ENDED");
+        ROS_DEBUG("[OAC] MASTER THREAD ENDED");
     }
-    ROS_INFO("Destroy OAController");
+    ROS_DEBUG("Destroy OAController");
 }
 
 // Init OA Controller (for restart)
@@ -77,8 +75,7 @@ void OAController::init(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, Dept
         // Add RRT for stage 3, Obstacle Avoidance (Global Path Planning)
         if (ENABLE_OCTOMAP) mAlgorithmInstances[SYS_Algs::ALG_RRT] = new OAAlgRRT(mpCNC);
     }
-    //! @todo create new alg instance here
-    ROS_INFO("[OAC] init");
+    ROS_DEBUG("[OAC] init");
 }
 
 std::string OAController::getStatus() {
@@ -92,13 +89,13 @@ std::string OAController::getStatus() {
 void OAController::masterSwitch(bool isOn) {
     mIsOn = isOn;
     if (mIsOn) {
-        ACTIVE_OAC_LEVEL = OAC_STAGE_SETTING;
+        msDP.setData(DP::DP_ACTIVE_OAC_LEVEL, OAC_STAGE_SETTING);
         mpCNC->moveMissionToLocalQueue();
         mpCNC->clearFCUWaypoint();
         ROS_WARN("[OAC] MASTER RESUMED");
         return;
     }
-    ACTIVE_OAC_LEVEL = 0;
+    msDP.setData(DP::DP_ACTIVE_OAC_LEVEL, int32_t(0));
     mpCNC->clearLocalMissionQueue();
     mpCNC->clearFCUWaypoint();
     ROS_WARN("[OAC] MASTER PAUSED");
@@ -153,14 +150,14 @@ void OAController::masterThread() {
 bool OAController::evaluate() {
     // Entry state: SYS_IDLE
 #ifdef DEBUG_OAC
-    ROS_INFO("========== CYCLE ==========");
+    ROS_DEBUG("========== CYCLE ==========");
 #endif
     // Populate Selected Algorithm List
     mSelectedAlgorithm = selectAlgorithm();
     // Call each algorithm instances to collect data and evaluate
     for (SYS_Algs tmp : mSelectedAlgorithm) {
     #ifdef DEBUG_OAC
-        ROS_INFO("[OAC] Evaluate %s", SYS_Algs_STR[tmp]);
+        ROS_DEBUG("[OAC] Evaluate %s", SYS_Algs_STR[tmp]);
     #endif
         if (!mAlgorithmInstances[tmp]->collect()) {
             // Remove from selected if collect with error
@@ -177,7 +174,7 @@ bool OAController::plan() {
     // Call each algorithm to plan for next action(s)
     for (SYS_Algs tmp : mSelectedAlgorithm) {
     #ifdef DEBUG_OAC
-        ROS_INFO("[OAC] PLAN NODE: %s", SYS_Algs_STR[tmp]);
+        ROS_DEBUG("[OAC] PLAN NODE: %s", SYS_Algs_STR[tmp]);
     #endif
         if (!mAlgorithmInstances[tmp]->plan()) {
             popAlgorithmFromSelected(tmp);
@@ -187,11 +184,11 @@ bool OAController::plan() {
         mAlgDATAmap[tmp] = (mAlgorithmInstances[tmp])->getDataQueue();
     #ifdef DEBUG_OAC
         for (auto cmdline : mAlgCMDmap[tmp]) {
-            ROS_INFO("            CMD: %s with %s",
+            ROS_DEBUG("            CMD: %s with %s",
                     Command::CMD_QUEUE_TYPES_NAME[cmdline.first], cmdline.second.c_str());
         }
         for (auto dataline : mAlgDATAmap[tmp]) {
-            ROS_INFO("            DATA: %s with %s",
+            ROS_DEBUG("            DATA: %s with %s",
                     Command::DATA_QUEUE_TYPES_NAME[dataline.first], dataline.second.c_str());
         }
     #endif
@@ -204,7 +201,7 @@ bool OAController::execute() {
     // Select the determine/voting function based on configuration
     selectDetermineFunction();
 #ifdef DEBUG_OAC
-    ROS_INFO("[OAC] Execute Det: %d", selectedDetermineFun_);
+    ROS_DEBUG("[OAC] Execute Det: %d", selectedDetermineFun_);
 #endif
     switch (selectedDetermineFun_) {
         case SYS_SelectedDetermineFun::DET_STAGE1:
@@ -327,7 +324,7 @@ bool OAController::popAlgorithmFromSelected(SYS_Algs algIndex) {
     auto it = std::find(mSelectedAlgorithm.begin(), mSelectedAlgorithm.end(), algIndex);
     if (it != mSelectedAlgorithm.end()) {
         mSelectedAlgorithm.erase(it);
-        ROS_WARN("%s Is Removed From Selected Algorithms", SYS_Algs_STR[algIndex]);
+        ROS_WARN("[OAC] %s Is Removed From Selected Algorithms", SYS_Algs_STR[algIndex]);
         return true;
     }
     return false;
@@ -348,7 +345,7 @@ std::vector<SYS_Algs> OAController::selectAlgorithm() {
             mSelectedAlgorithm.push_back(SYS_Algs::ALG_RRT);
         }
     } else {
-        ROS_ERROR("Invalid OAC Stage Setting !!!");
+        ROS_ERROR("[OAC] Invalid OAC Stage Setting !!!");
     }
     return mSelectedAlgorithm;
 }

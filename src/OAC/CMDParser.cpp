@@ -26,7 +26,7 @@ namespace OAC {
 CMDParser::CMDParser(CNC::CNCInterface *cnc, CMDRunner *runner) : mpCNC(cnc), cmdRunner_(runner) {}
 
 CMDParser::~CMDParser() {
-    ROS_INFO("Destroy CMDParser");
+    ROS_DEBUG("Destroy CMDParser");
 }
 
 /*
@@ -60,7 +60,7 @@ bool CMDParser::parseCMDQueue(const Command::CommandQueue& cmdqueue, bool isFrom
             }
         }
     } else {
-        if (!isFromOAC && ACTIVE_OAC_LEVEL > 1) {
+        if (!isFromOAC && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
             ROS_ERROR("This Command Queue Is NOT Supported When Obstacle Avoidance Is ON !!!");
             return false;
         }

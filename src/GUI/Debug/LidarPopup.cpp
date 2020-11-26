@@ -37,7 +37,7 @@ LidarPopup::LidarPopup(std::string windowName, Lidar::LidarGeneric* lidar, CNC::
 
 LidarPopup::~LidarPopup() {
     cv::destroyWindow(OPENCV_WINDOW_NAME);
-    ROS_INFO("Destroy LidarPopup");
+    ROS_DEBUG("Destroy LidarPopup");
 }
 
 void LidarPopup::UpdateView(GUISubject *subject) {

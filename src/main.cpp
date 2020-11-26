@@ -44,7 +44,7 @@ void sysSignalhandler(int signum) {
 
 int main(int argc, char **argv) {
     // Setup ROS
-    ros::init(argc, argv, "droneoa");
+    ros::init(argc, argv, "droneoa", ros::init_options::NoSigintHandler);
     ros::NodeHandle node;
     ros::Rate rate(GLOBAL_ROS_RATE);
 
@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
      * Sub Modules (Composited)
      */
     CNC::CNCArdupilot cnc(node, rate);
+    cnc.initWatcherThread();
     Lidar::LidarYDLidar lidar(node, rate);
     Depth::RSC rsc(node, rate);
     OAC::CMDRunner runner(&cnc);
@@ -83,29 +84,15 @@ int main(int argc, char **argv) {
     #endif
 
     /***************************************************************************
-     * Console IO (With memory)
+     * Console IO
      */
-    char *commandIn;
     bool masterSW = true;
     IO::ConsoleInputManager consoleInputManager(&masterSW);
-    consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &runner);  // @todo Or seperate runner ?
-    while ((commandIn = readline("")) != nullptr) {
-        if (*commandIn) {
-            add_history(commandIn);
-            std::string sCommandIn(commandIn);
-            consoleInputManager.parseAndExecuteConsole(sCommandIn);
-        }
-        free(commandIn);
-        if (!masterSW) {  // Quit Signal
-            ros::shutdown();
-            break;
-        }
-    }
+    consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &runner);
 
-    //! @todo Do we need this
-    while (node.ok()) {
-      ros::spinOnce();
-      rate.sleep();
+    while (node.ok() && masterSW) {
+        ros::spinOnce();
+        rate.sleep();
     }
 
     return 0;

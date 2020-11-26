@@ -35,7 +35,7 @@ CNCPopup::CNCPopup(std::string windowName, CNC::CNCGeneric* cnc) : GUISubscriber
 
 CNCPopup::~CNCPopup() {
     cv::destroyWindow(OPENCV_WINDOW_NAME);
-    ROS_INFO("Destroy CNCPopup");
+    ROS_DEBUG("Destroy CNCPopup");
 }
 
 void CNCPopup::drawText(cv::Mat *targetImg, cv::Point origin, std::string text, double font_scale, int32_t thickness,

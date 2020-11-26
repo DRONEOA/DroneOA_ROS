@@ -114,7 +114,8 @@ void CMDRunner::runnerRoutine() {
             // Handle Delay
             try {
                 mInternalTimmer = std::stoi(theCMDQueue.front().second);
-                ROS_WARN("[CMDRunner] Timer Start With: %u", mInternalTimmer);
+                ROS_INFO("[CMDRunner] > %s", Command::CMD_QUEUE_TYPES_NAME[theCMDQueue.front().first]);
+                ROS_INFO("[CMDRunner] Timer Start With: %u", mInternalTimmer);
                 theCMDQueue.erase(theCMDQueue.begin());
             } catch(...) {
                 ROS_ERROR("[CMDRunner] Delay Time Data Invalid");
@@ -134,6 +135,7 @@ void CMDRunner::runnerRoutine() {
                         Command::CMD_QUEUE_TYPES::CMD_CHMOD, FLT_MODE_BRAKE), true);
                 continue;
             }
+            ROS_INFO("[CMDRunner] > %s", Command::CMD_QUEUE_TYPES_NAME[theCMDQueue.front().first]);
             theCMDQueue.erase(theCMDQueue.begin());
         }
     }
@@ -163,23 +165,23 @@ bool CMDRunner::handleUntilCommand() {
             // Until Arrive At Waypoint
             CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
             if (!advCNC) {
-                ROS_ERROR("This FCU does not support arrwp command !!!");
+                ROS_ERROR("[CMDRunner] This FCU does not support arrwp command !!!");
                 throw 1;
             }
             //! @note Seems there is a bug in mavros. Which causing Reach message not send with SITL
             // advCNC->registForReachEvent(std::bind(&CMDRunner::reachWaypointCallback, this));
             mWaypointListSize = advCNC->getWaypointList().waypoints.size();
             mWaitUntilMode = UNTIL_MODE::ARRWP;
-            ROS_WARN("[CMDRunner] Until Arrive At Waypoint. Current Num WP: %u", mWaypointListSize);
+            ROS_INFO("[CMDRunner] > Until Arrive At Waypoint. Current Num WP: %u", mWaypointListSize);
         } else if (dataTokens.at(0) == "clrwp") {
             // Until Clear All Waypoints
             CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
             if (!advCNC) {
-                ROS_ERROR("This FCU does not support arrwp command !!!");
+                ROS_ERROR("[CMDRunner] This FCU does not support arrwp command !!!");
                 throw 1;
             }
             mWaitUntilMode = UNTIL_MODE::CLRWP;
-            ROS_WARN("[CMDRunner] Until Clear All Waypoints");
+            ROS_INFO("[CMDRunner] > Until Clear All Waypoints");
         } else if (dataTokens.at(0) == "alt") {
             if (dataTokens.size() >= 3) {
                 if (dataTokens.at(1) == "eq") {
@@ -193,12 +195,12 @@ bool CMDRunner::handleUntilCommand() {
                 }
             }
             mUntilAlt = std::stof(dataTokens.at(2));
-            ROS_WARN("[CMDRunner] Until Altitude %s: %f", dataTokens.at(1).c_str(), mUntilAlt);
+            ROS_INFO("[CMDRunner] > Until Altitude %s: %f", dataTokens.at(1).c_str(), mUntilAlt);
         } else {
             // Invalid mode data
             throw 1;
         }
-        ROS_WARN("[CMDRunner] Until Start with timeout limit: %u", RUNNER_TIMEOUT_LIMIT);
+        ROS_INFO("[CMDRunner] Until Start with timeout limit: %u", RUNNER_TIMEOUT_LIMIT);
         mInternalTimmer = RUNNER_TIMEOUT_LIMIT;
         theCMDQueue.erase(theCMDQueue.begin());
     } catch(...) {
@@ -217,7 +219,7 @@ bool CMDRunner::recheckUntilCommand() {
             ROS_ERROR("This FCU does not support arrwp command !!!");
             return false;
         }
-        if (OAC_USE_SETPOINT_ENU) {
+        if (OAC_USE_SETPOINT_ENU && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
             if (mpCNC->getLocalPosition() == mpCNC->getCurrentLocalENUTarget()) {
                 resetTimer();
             }
@@ -232,10 +234,10 @@ bool CMDRunner::recheckUntilCommand() {
         // Recheck whether wp list size changed for until command
         CNC::CNCArdupilot* advCNC = dynamic_cast<CNC::CNCArdupilot*>(mpCNC);
         if (!advCNC) {
-            ROS_ERROR("This FCU does not support arrwp command !!!");
+            ROS_ERROR("[CMDRunner] This FCU does not support arrwp command !!!");
             return false;
         }
-        if (OAC_USE_SETPOINT_ENU) {
+        if (OAC_USE_SETPOINT_ENU && msDP.getDataAsInt(DP::DP_ACTIVE_OAC_LEVEL) > 1) {
             //! @note Since we only hold one setpoint goal at the moment, so arrive means clear all.
             //! @todo consider supporting local NEU waypoint queue ?
             if (mpCNC->getLocalPosition() == mpCNC->getCurrentLocalENUTarget()) {
@@ -272,7 +274,7 @@ bool CMDRunner::recheckUntilCommand() {
 
 // Callbasks
 void CMDRunner::reachWaypointCallback() {
-    ROS_WARN("[CMDRunner] Reached A Waypoint");
+    ROS_INFO("[CMDRunner] Reached A Waypoint");
     //! @note Seems there is a bug in mavros. Which causing Reach message not send with SITL
     // mReachWaypoint = true;
 }
@@ -283,7 +285,7 @@ CMDRunner::~CMDRunner() {
         runnerThread->join();
         delete runnerThread;
     }
-    ROS_INFO("Destroy CMDRunner");
+    ROS_DEBUG("Destroy CMDRunner");
 }
 
 }  // namespace OAC
