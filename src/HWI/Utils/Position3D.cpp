@@ -44,3 +44,11 @@ std::string Position3D::AsString() const {
                 std::to_string(mY) + " z: " + std::to_string(mZ);
         return result;
 }
+
+geometry_msgs::Vector3 Position3D::getGeoVec3() {
+    geometry_msgs::Vector3 result;
+    result.x = mX;
+    result.y = mY;
+    result.z = mZ;
+    return result;
+}

@@ -20,8 +20,8 @@
 #ifndef HWI_POSITION3D_HPP_  // NOLINT
 #define HWI_POSITION3D_HPP_  // NOLINT
 
+#include <geometry_msgs/Vector3.h>
 #include <string>
-
 /**
  * @brief Reprsentation of any 3D point
  */
@@ -39,6 +39,7 @@ struct Position3D {
      */
     virtual bool operator==(const Position3D& other) const;
     virtual float getDistanceTo(const Position3D &other) const;
+    virtual geometry_msgs::Vector3 getGeoVec3();
     double mX;
     double mY;
     double mZ;

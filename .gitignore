@@ -1,5 +1,6 @@
 src/pyflwor/*
 report/*
+build/*
 .vscode/*
 launch/unittest_result.txt
 launch/sitl/step1log.txt

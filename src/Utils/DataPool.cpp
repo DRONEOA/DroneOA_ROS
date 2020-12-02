@@ -30,23 +30,10 @@ namespace DP {
 std::mutex DataPool::mContainerMutex;
 std::map<std::string, boost::any> DataPool::mDataPoolContainer;
 std::vector<DataPoolSubscriber*> DataPool::mSubscriberList;
-bool DataPool::isInitialized = false;
 
-DataPool::DataPool() {
-    if (!isInitialized) {
-        setDefaultConfig();
-        isInitialized = true;
-    }
-}
+DataPool::DataPool() {}
 
-DataPool::~DataPool() {
-    mDataPoolContainer.clear();
-}
-
-void DataPool::setDefaultConfig() {
-    setData(CONF_SAFETY_GPS_FIX, true);
-    setData(DP_ACTIVE_OAC_LEVEL, int32_t(0));
-}
+DataPool::~DataPool() {}
 
 void DataPool::notifyAll(ENTRY_TYPES type, std::string entryName) {
     for (auto sub : mSubscriberList) {

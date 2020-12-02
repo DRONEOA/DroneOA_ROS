@@ -54,17 +54,13 @@ bool can_cast_to(const boost::any& a) {
  *          4. Important flags that developers may need
  */
 class DataPool {
+ protected:
     static std::mutex mContainerMutex;
     static std::map<std::string, boost::any> mDataPoolContainer;
     static std::vector<DataPoolSubscriber*> mSubscriberList;
-    static bool isInitialized;
     void notifyAll(ENTRY_TYPES type, std::string entryName);
 
  public:
-    /**
-     * @brief Set configs with Default configuration set
-     */
-    void setDefaultConfig();
     /**
      * @brief Get the Data object at desired entry
      * @param name name of the data entry
@@ -109,7 +105,7 @@ class DataPool {
      */
     void printAllEntryWithData();  // Debug
     DataPool();
-    ~DataPool();
+    virtual ~DataPool();
 };
 
 }  // namespace DP

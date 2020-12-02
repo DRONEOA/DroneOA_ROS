@@ -34,6 +34,7 @@
 #include <droneoa_ros/GUI/Debug/RSCPopup.hpp>
 #include <droneoa_ros/GUI/Debug/CNCPopup.hpp>
 #include <droneoa_ros/GUI/Release/WebGUIServer.hpp>
+#include <droneoa_ros/Utils/DataPoolServer.hpp>
 
 // Terminate program on signal
 void sysSignalhandler(int signum) {
@@ -54,6 +55,7 @@ int main(int argc, char **argv) {
     /***************************************************************************
      * Sub Modules (Composited)
      */
+    DP::DataPoolServer mDP;
     CNC::CNCArdupilot cnc(node, rate);
     cnc.initWatcherThread();
     Lidar::LidarYDLidar lidar(node, rate);
