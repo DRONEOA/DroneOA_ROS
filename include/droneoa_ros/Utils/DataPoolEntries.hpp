@@ -20,7 +20,12 @@
 #ifndef UTILS_DATAPOOL_ENTRIES_  // NOLINT
 #define UTILS_DATAPOOL_ENTRIES_  // NOLINT
 
+#include <geometry_msgs/Vector3.h>
+#include <geometry_msgs/Quaternion.h>
+
 #include <string>
+#include <map>
+#include <typeindex>
 
 namespace DP {
 
@@ -30,10 +35,9 @@ namespace DP {
 enum SUPPORT_TYPES {
     TYPE_BOOL,
     TYPE_STRING,
-    TYPE_UINT8,
-    TYPE_INT16,
-    TYPE_FLOAT,
-    TYPE_POSITION3D,  // GPS & Local
+    TYPE_INT32,
+    TYPE_UINT32,
+    TYPE_FLOAT32,
     TYPE_GEO_MSGS_QUAT,
     TYPE_GEO_MSGS_VEC3
 };
@@ -80,13 +84,13 @@ constexpr char DP_ORIENTATION_QUAT[] = "OrientationQuaternion";  /**< @brief Typ
 constexpr char DP_ORIENTATION_RPY[] = "OrientationRollPitchYaw";  /**< @brief Type: geometry_msgs::Vector3 */
 
 // Location
-constexpr char DP_GPS_LOC[] = "GPSLocal";  /**< @brief Type: GPSPoint */
+constexpr char DP_GPS_LOC[] = "GPSLocal";  /**< @brief Type: geometry_msgs::Vector3 */
 
-constexpr char DP_GPS_HOME[] = "GPSHome";  /**< @brief Type: GPSPoint */
+constexpr char DP_GPS_HOME[] = "GPSHome";  /**< @brief Type: geometry_msgs::Vector3 */
 
-constexpr char DP_LOCAL_LOC[] = "LocalLocation";  /**< @brief Type: LocalPoint */
+constexpr char DP_LOCAL_LOC[] = "LocalLocation";  /**< @brief Type: geometry_msgs::Vector3 */
 
-constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @brief Type: LocalPoint */
+constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @brief Type: geometry_msgs::Vector3 */
 
 // OAC
 constexpr char DP_ACTIVE_OAC_LEVEL[] = "ActiveOACLevel";  /**< @brief Type: int32_t */
@@ -98,6 +102,35 @@ constexpr char DP_ACTIVE_OAC_LEVEL[] = "ActiveOACLevel";  /**< @brief Type: int3
  * @brief Whether to check GPS fix before initialize
  */
 constexpr char CONF_SAFETY_GPS_FIX[] = "GPSFixSafetyCheck";  /**< @brief Type: bool */
+
+/*******************************************************************************
+ * Type Mapping
+ */
+static std::map<std::string, std::type_index> DP_TYPE_MAP = {
+    //! @note Data Entries Start
+    {DP_IS_ARMED, typeid(bool)},  // NOLINT
+    {DP_IS_CONNECTED, typeid(bool)},  // NOLINT
+    {DP_IS_GUIDED, typeid(bool)},  // NOLINT
+    {DP_FLIGHT_MOD, typeid(std::string)},  // NOLINT
+    {DP_SYS_STATUS, typeid(uint32_t)},  // NOLINT
+    {DP_RELATIVE_ALTITUDE, typeid(float)},  // NOLINT
+    {DP_HUD_ALTITUDE, typeid(float)},  // NOLINT
+    {DP_BATTERY_VOLTAGE, typeid(float)},  // NOLINT
+    {DP_HEADING, typeid(float)},  // NOLINT
+    {DP_AIR_SPEED, typeid(float)},  // NOLINT
+    {DP_GROUND_SPEED, typeid(float)},  // NOLINT
+    {DP_CLIMB_Rate, typeid(float)},  // NOLINT
+    {DP_THROTTLE, typeid(float)},  // NOLINT
+    {DP_ORIENTATION_QUAT, typeid(geometry_msgs::Quaternion)},  // NOLINT
+    {DP_ORIENTATION_RPY, typeid(geometry_msgs::Vector3)},  // NOLINT
+    {DP_GPS_LOC, typeid(geometry_msgs::Vector3)},  // NOLINT
+    {DP_GPS_HOME, typeid(geometry_msgs::Vector3)},  // NOLINT
+    {DP_LOCAL_LOC, typeid(geometry_msgs::Vector3)},  // NOLINT
+    {DP_CURR_SETPOINT_ENU_TARGET, typeid(geometry_msgs::Vector3)},  // NOLINT
+    {DP_ACTIVE_OAC_LEVEL, typeid(int32_t)},  // NOLINT
+    //! @note Config Entries Start
+    {CONF_SAFETY_GPS_FIX, typeid(bool)}  // NOLINT
+};
 
 }  // namespace DP
 

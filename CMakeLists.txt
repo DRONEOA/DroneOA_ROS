@@ -68,16 +68,19 @@ find_package( octomap REQUIRED )
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  DataPoolPair.msg
+  DataPoolSync.msg
+)
 
 ## Generate services in the 'srv' folder
 add_service_files(
   FILES
   CheckGetNewInput.srv
+  GetDPDataAsString.srv
+  GetDPData.srv
+  SetDPData.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -91,6 +94,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  sensor_msgs
 )
 
 ################################################
@@ -149,8 +153,17 @@ include_directories(include
 add_library(droneoa_ros_libutils
   src/Utils/GeneralUtils.cpp
   src/Utils/DataPool.cpp
+  src/Utils/DataPoolClient.cpp
+  src/Utils/DataPoolServer.cpp
   src/Utils/DataPoolSubscriber.cpp
+  src/HWI/Utils/CNCUtils.cpp
+  src/HWI/Utils/GPSPoint.cpp
+  src/HWI/Utils/LocalPoint.cpp
+  src/HWI/Utils/Position3D.cpp
+  src/HWI/Utils/LidarUtils.cpp
 )
+
+add_dependencies(droneoa_ros_libutils droneoa_ros_generate_messages_cpp)
 
 add_library(droneoa_ros_liboac
   src/OAC/BaseAlg.cpp
@@ -165,17 +178,14 @@ add_library(droneoa_ros_liboac
   src/OAC/OMPLPlanner.cpp
 )
 
+add_dependencies(droneoa_ros_liboac droneoa_ros_generate_messages_cpp)
+
 add_library(droneoa_ros_libhwi
   src/HWI/base/CNCGeneric.cpp
   src/HWI/base/LidarGeneric.cpp
   src/HWI/CNCArdupilot.cpp
   src/HWI/LidarYDLidar.cpp
   src/HWI/RSC.cpp
-  src/HWI/Utils/CNCUtils.cpp
-  src/HWI/Utils/GPSPoint.cpp
-  src/HWI/Utils/LocalPoint.cpp
-  src/HWI/Utils/Position3D.cpp
-  src/HWI/Utils/LidarUtils.cpp
   src/HWI/ConsoleInputManager.cpp
 )
 
@@ -190,6 +200,8 @@ add_library(droneoa_ros_libgui
   src/GUI/GUISubscriber.cpp
   src/GUI/GUISubject.cpp
 )
+
+add_dependencies(droneoa_ros_libgui droneoa_ros_generate_messages_cpp)
 
 add_library(droneoa_ros_libpm
   src/PackageManager/PMCommandParser.cpp

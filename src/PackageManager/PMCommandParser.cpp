@@ -40,6 +40,7 @@ std::string PackageRecord::toString() {
 }
 
 CommandParser::CommandParser() {
+    isSkipVerify = false;
     DRONEOA_PATH = ros::package::getPath("droneoa_ros");
     readListFromFile();
     thread_watch_command_ = new boost::thread(boost::bind(&CommandParser::watchCommandThread, this));
@@ -114,6 +115,11 @@ bool CommandParser::parseInput(std::vector<std::string> tokens) {
     // Check Command Type
     std::string cmdType = tokens[0];
     tokens.erase(tokens.begin());
+    auto skipVerifyKeywordIt = std::find(tokens.begin(), tokens.end(), SKIP_VERIFY_KEYWORD);
+    if (skipVerifyKeywordIt != tokens.end()) {
+        isSkipVerify = true;
+        tokens.erase(skipVerifyKeywordIt);
+    }
     if (cmdType == "install") {
         install(tokens);
     } else if (cmdType == "update") {
@@ -130,6 +136,7 @@ bool CommandParser::parseInput(std::vector<std::string> tokens) {
         ROS_WARN("Unknown PM Command !!!");
         printHelp();
     }
+    isSkipVerify = false;
     return true;
 }
 
@@ -188,6 +195,11 @@ void CommandParser::update(std::vector<std::string> tokens) {
         ROS_ERROR("[PM][UPDATE] Missing Package Name !!!");
         return;
     }
+    // Check if package name exist
+    if (!isSkipVerify && mPackageList.find(tokens[0]) == mPackageList.end()) {
+        ROS_ERROR("[PM][UPDATE] Package Name [%s] Not Exist !!!", tokens[0].c_str());
+        return;
+    }
     // Update latest by pull
     std::string scriptName = "update.sh";
     std::vector<std::string> paras{tokens[0]};
@@ -218,7 +230,7 @@ void CommandParser::uninstall(std::vector<std::string> tokens) {
         return;
     }
     // Check if package name exist
-    if (mPackageList.find(tokens[0]) == mPackageList.end()) {
+    if (!isSkipVerify && mPackageList.find(tokens[0]) == mPackageList.end()) {
         ROS_ERROR("[PM][UNINSTALL] Package Name [%s] Not Exist !!!", tokens[0].c_str());
         return;
     }
@@ -271,7 +283,7 @@ bool CommandParser::launch(std::vector<std::string> tokens) {
     std::string cmd;
     if (tokens.size() > 0 && tokens[0] != "main") {
         // Check if package name exist
-        if (mPackageList.find(tokens[0]) == mPackageList.end()) {
+        if (!isSkipVerify && mPackageList.find(tokens[0]) == mPackageList.end()) {
             ROS_ERROR("[PM][LAUNCH] Package Name [%s] Not Exist !!!", tokens[0].c_str());
             return false;
         }
@@ -312,6 +324,11 @@ void CommandParser::shutdown(std::vector<std::string> tokens) {
         nodeName = "droneoa_ros";
         cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/kill.sh " + nodeName;
     } else {
+        // Check if package name exist
+        if (!isSkipVerify && mPackageList.find(tokens[0]) == mPackageList.end()) {
+            ROS_ERROR("[PM][SHUTDOWN] Package Name [%s] Not Exist !!!", tokens[0].c_str());
+            return;
+        }
         cmd = "bash " + DRONEOA_PATH + "/scripts/PackageManager/shutdownOtherNode.sh " + nodeName;
     }
     int ret = system(cmd.c_str());

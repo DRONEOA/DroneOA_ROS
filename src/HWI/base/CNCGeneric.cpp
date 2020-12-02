@@ -227,7 +227,7 @@ bool CNCGeneric::pushLocalENUWaypoint(const LocalPoint location, bool isFromOAC)
     pose.pose.orientation = tf::createQuaternionMsgFromYaw(heading + M_PI/2);
     mSetpointLocalPub.publish(pose);
     mCurrentNEULocalTarget = location;
-    msDP.setData(DP::DP_CURR_SETPOINT_ENU_TARGET, mCurrentNEULocalTarget);
+    msDP.setData(DP::DP_CURR_SETPOINT_ENU_TARGET, mCurrentNEULocalTarget.getGeoVec3());
     ROS_INFO("[CNC GENERIC] Setpoint: %s", location.AsString().c_str());
     return true;
 }
@@ -241,20 +241,20 @@ void CNCGeneric::state_callback(const mavros_msgs::State::ConstPtr& msg) {
     msDP.setData(DP::DP_IS_ARMED, isArmed());
     msDP.setData(DP::DP_FLIGHT_MOD, getMode());
     msDP.setData(DP::DP_IS_CONNECTED, isConnected());
-    msDP.setData(DP::DP_SYS_STATUS, getSysStatus());
+    msDP.setData(DP::DP_SYS_STATUS, static_cast<uint32_t>(getSysStatus()));
     msDP.setData(DP::DP_IS_GUIDED, static_cast<bool>(mCurrentState.guided));
     GUI::GUISubject::notifyGUIPopups();
 }
 /* GPS Fix */
 void CNCGeneric::gpsFix_callback(const sensor_msgs::NavSatFixConstPtr& msg) {
     mCurrentGpsFix = *msg;
-    msDP.setData(DP::DP_GPS_LOC, getCurrentGPSPoint());
+    msDP.setData(DP::DP_GPS_LOC, getCurrentGPSPoint().getGeoVec3());
     GUI::GUISubject::notifyGUIPopups();
 }
 
 void CNCGeneric::LocalPosition_callback(const geometry_msgs::PoseStampedConstPtr& msg) {
     mLocalPosition = *msg;
-    msDP.setData(DP::DP_LOCAL_LOC, getLocalPosition());
+    msDP.setData(DP::DP_LOCAL_LOC, getLocalPosition().getGeoVec3());
     GUI::GUISubject::notifyGUIPopups();
 }
 
@@ -262,7 +262,7 @@ void CNCGeneric::LocalPosition_callback(const geometry_msgs::PoseStampedConstPtr
 void CNCGeneric::homePos_callback(const mavros_msgs::HomePositionConstPtr& msg) {
     mIsHomeSet = true;
     mCurrentHomePos = *msg;
-    msDP.setData(DP::DP_GPS_HOME, getHomeGPSPoint());
+    msDP.setData(DP::DP_GPS_HOME, getHomeGPSPoint().getGeoVec3());
     GUI::GUISubject::notifyGUIPopups();
 }
 /* Altitude */

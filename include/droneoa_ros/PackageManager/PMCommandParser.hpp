@@ -48,6 +48,7 @@ class CommandParser {
     ros::NodeHandle mNodeHandle;
     std::string DRONEOA_PATH;
     std::map<std::string, PackageRecord> mPackageList;
+    bool isSkipVerify;
     void install(std::vector<std::string> tokens);
     void update(std::vector<std::string> tokens);
     void uninstall(std::vector<std::string> tokens);

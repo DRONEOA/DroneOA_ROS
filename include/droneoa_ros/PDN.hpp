@@ -43,6 +43,7 @@ static const char CONSOLE_DELIMITER = ' ';
 /**
  * @brief Package Manager & Console Service Topics
  */
+static const char* SKIP_VERIFY_KEYWORD = "--no-verify";
 static const char* INPUT_THROUGH_TOPIC_TOPIC_NAME = "droneoa/console_service_input";
 static const char* NEW_INPUT_FLAG_TOPIC_NAME = "droneoa/new_input_flag";
 static const char* INPUT_MSG_REQUEST_SERVICE_NAME = "get_input_from_console_service";
@@ -56,6 +57,19 @@ static const char* QUIT_ACCEPTED_MODULE_NAMES = "quit";
 static const char* VERBOSE_ACCEPTED_MODULE_NAMES = "verbose";
 static const char* PACKAGE_MANAGER_ACCEPTED_MODULE_NAMES = "pm help verbose";
 static const char* MAIN_NODE_ACCEPTED_MODULE_NAMES = "cnc oac rsc lidar dp ! start cancel help quit verbose";
+
+/**
+ * @brief DataPool Service Name
+ */
+static const char* DP_GET_STR_SERVICE_NAME = "get_str_dp_data";
+static const char* DP_GET_SERVICE_NAME = "get_dp_data";
+static const char* DP_SET_SERVICE_NAME = "set_dp_data";
+
+/**
+ * @brief DataPool Sync Feature
+ */
+static const char* DP_SYNC_TOPIC_NAME = "dp_sync_public";
+static const double DP_SYNC_RATE = 1;
 
 /**
  * @brief List of FCU Type
