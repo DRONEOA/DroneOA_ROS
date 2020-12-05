@@ -66,44 +66,44 @@ class DataPool {
      * @param name name of the data entry
      * @return boost::any data (Note: you can only cast data to it's original type)
      */
-    boost::any getData(std::string name);
+    virtual boost::any getData(std::string name);
     /**
      * @brief Get the Data As String object, auto conversion
      * @param name name of the data entry
      * @return std::string 
      */
-    std::string getDataAsString(std::string name);
+    virtual std::string getDataAsString(std::string name);
     /**
      * @brief Get the Data As INT
      * @param name name of the data entry
      * @return int
      */
-    int getDataAsInt(std::string name);
+    virtual int getDataAsInt(std::string name);
     /**
      * @brief Set the Data object at desired entry. Subscribers of DATA type will be notified.
      * @param name name of the data entry
      * @param data original data in the DP will be updated if exist
      */
-    void setData(std::string name, boost::any data);
+    virtual void setData(std::string name, boost::any data);
     /**
      * @brief Set the Config object at desired entry. Subscribers of CONFIG type will be notified.
      * @param name name of the data entry
      * @param data original data in the DP will be updated if exist
      */
-    void setConfig(std::string name, boost::any data);
+    virtual void setConfig(std::string name, boost::any data);
     /**
      * @brief Register a subscriber for DATA/CONFIG/ALL
      * @param subscriber 
      */
-    void registerEvents(DataPoolSubscriber* subscriber);
+    virtual void registerEvents(DataPoolSubscriber* subscriber);
     /**
      * @brief Print the list of existing entries
      */
-    void printAllEntry();
+    virtual void printAllEntry();
     /**
      * @brief Print the list of existing entries and current data (Debug only)
      */
-    void printAllEntryWithData();  // Debug
+    virtual void printAllEntryWithData();  // Debug
     DataPool();
     virtual ~DataPool();
 };
