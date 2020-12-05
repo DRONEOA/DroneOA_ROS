@@ -35,6 +35,7 @@
 #include <droneoa_ros/GUI/Debug/CNCPopup.hpp>
 #include <droneoa_ros/GUI/Release/WebGUIServer.hpp>
 #include <droneoa_ros/Utils/DataPoolServer.hpp>
+#include <droneoa_ros/Utils/ConfChangedListener.hpp>
 
 // Terminate program on signal
 void sysSignalhandler(int signum) {
@@ -91,6 +92,8 @@ int main(int argc, char **argv) {
     bool masterSW = true;
     IO::ConsoleInputManager consoleInputManager(&masterSW);
     consoleInputManager.init(&cnc, &rsc, &oac, &lidar, &runner);
+
+    ConfChangedListener confChangedListener("/Config.json");
 
     while (node.ok() && masterSW) {
         ros::spinOnce();
