@@ -104,7 +104,7 @@ constexpr char DP_ACTIVE_OAC_LEVEL[] = "ActiveOACLevel";  /**< @brief Type: int3
 constexpr char CONF_SAFETY_GPS_FIX[] = "GPSFixSafetyCheck";  /**< @brief Type: bool */
 
 /*******************************************************************************
- * Type Mapping
+ * Type Mapping For DataPool Data Entries
  */
 static std::map<std::string, std::type_index> DP_TYPE_MAP = {
     //! @note Data Entries Start
@@ -128,6 +128,12 @@ static std::map<std::string, std::type_index> DP_TYPE_MAP = {
     {DP_LOCAL_LOC, typeid(geometry_msgs::Vector3)},  // NOLINT
     {DP_CURR_SETPOINT_ENU_TARGET, typeid(geometry_msgs::Vector3)},  // NOLINT
     {DP_ACTIVE_OAC_LEVEL, typeid(int32_t)},  // NOLINT
+};
+
+/*******************************************************************************
+ * Type Mapping For DataPool Config Entries
+ */
+static std::map<std::string, std::type_index> CONF_TYPE_MAP = {
     //! @note Config Entries Start
     {CONF_SAFETY_GPS_FIX, typeid(bool)}  // NOLINT
 };
