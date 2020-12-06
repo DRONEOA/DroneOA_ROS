@@ -23,8 +23,8 @@
 namespace OAC {
 
 class Gap {
-private:
-    // TODO: change how center angle is calculated, currently using FGM-basic
+ private:
+    // TODO(yxu): change how center angle is calculated, currently using FGM-basic
     double angle_l;  // Angle for the left side of the gap in degrees
     double angle_r;  // Angle for the right side of the gap in degrees
 
@@ -32,13 +32,13 @@ private:
 
     double size;  // Size of gap in degrees
 
-public:
-    Gap(double angle_l, double angle_r, double distance, double size) : 
-        angle_l(angle_l), angle_r(angle_r), distance(distance), size(size) {};
+ public:
+    Gap(double angle_l, double angle_r, double distance, double size) :
+        angle_l(angle_l), angle_r(angle_r), distance(distance), size(size) {}
 
     double getSize() const {
         return size;
-    };
+    }
 
     double getGapCenter() const {
         return (angle_l + angle_r) / 2;
@@ -46,26 +46,26 @@ public:
 };
 
 class gapComparator {
-    public:
-        int operator()(const Gap &g1, const Gap &g2)
-        {
-            return g1.getSize() < g2.getSize();
-        }
+ public:
+    int operator()(const Gap &g1, const Gap &g2) {
+        return g1.getSize() < g2.getSize();
+    }
 };
 
 class Gap_array{
-private:
+ private:
     std::priority_queue<Gap, std::vector<Gap>, gapComparator> gaps;
 
-public:
-    const double UNOBSTRUCTED_DISTANCE = 5.0f; // defines what the algorithm considers "gap"
+ public:
+    const double UNOBSTRUCTED_DISTANCE = 5.0f;  // defines what the algorithm considers "gap"
 
     // Assuming lidar data is 180 degrees. 0 degree start from left side.
-    Gap_array(std::vector<double> lidar_data) {
+    explicit Gap_array(std::vector<double> lidar_data) {
         int gap_size = 0;
         double distance_sum = 0;
         for (unsigned i = 0; i < lidar_data.size(); i++) {
-            if (lidar_data.at(i) > UNOBSTRUCTED_DISTANCE) {   // Treating void spaces with more than 5m of unobstructed distance as gap
+            // Treating void spaces with more than 5m of unobstructed distance as gap
+            if (lidar_data.at(i) > UNOBSTRUCTED_DISTANCE) {
                 gap_size++;
                 distance_sum += lidar_data.at(i);
             } else if (gap_size > 0) {
