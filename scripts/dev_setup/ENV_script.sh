@@ -321,33 +321,103 @@ fi
 echo "ROSDIST: $ROSDIST"
 
 # Build Workspace
+START=$(date +%s%N)
 construct_workspace
+CST_CK=$?
+if [ "$CST_CK" -eq 0 ]; then CST_STS="SUCCESS"; else CST_STS="FAIL"; fi
+END=$(date +%s%N)
+CST_TIME=$(($END-$START))
+
 echo "ROOT_WS_PATH $ROOT_WS_PATH"
 echo "ROS_WS_NAME $ROS_WS_NAME"
 ws_confirmation # DEBUG
 
 # Install ROS
+START=$(date +%s%N)
 install_ros
+ISTROS_CK=$?
+if [ "$ISTROS_CK" -eq 0 ]; then ISTROS_STS="SUCCESS"; else ISTROS_STS="FAIL"; fi
+END=$(date +%s%N)
+ISTROS_TIME=$(($END-$START))
+
+START=$(date +%s%N)
 install_ros_tools
+ISTROSTOOLS_CK=$?
+if [ "$ISTROSTOOLS_CK" -eq 0 ]; then ISTROSTOOLS_STS="SUCCESS"; else ISTROSTOOLS="FAIL"; fi
+END=$(date +%s%N)
+ISTROSTOOLS_TIME=$(($END-$START))
+
 source_ros
+
+START=$(date +%s%N)
 install_ros_dependencies
+ISTROSDEP_CK=$?
+if [ "$ISTROSDEP_CK" -eq 0 ]; then ISTROSDEP_STS="SUCCESS"; else ISTROSDEP_STS="FAIL"; fi
+END=$(date +%s%N)
+ISTROSDEP_TIME=$(($END-$START))
 
 # Install Realsense
+START=$(date +%s%N)
 install_realsense
+REAL_CK=$?
+if [ "$REAL_CK" -eq 0 ]; then REAL_STS="SUCCESS"; else REAL_STS="FAIL"; fi
+END=$(date +%s%N)
+REAL_TIME=$(($END-$START))
 
 # Install Geographiclib
+START=$(date +%s%N)
 install_geographiclib
+GEO_CK=$?
+if [ "$GEO_CK" -eq 0 ]; then GEO_STS="SUCCESS"; else GEO_STS="FAIL"; fi
+END=$(date +%s%N)
+GEO_TIME=$(($END-$START))
 
 # Install OMPL
+START=$(date +%s%N)
 install_ompl
+OMPL_CK=$?
+if [ "$OMPL_CK" -eq 0 ]; then OMPL_STS="SUCCESS"; else OMPL_STS="FAIL"; fi
+END=$(date +%s%N)
+OMPL_TIME=$(($END-$START))
 
 # Build ROS Workspace Attempt
+START=$(date +%s%N)
 clone_repos
+CLONE_CK=$?
+if [ "$CLONE_CK" -eq 0 ]; then CLONE_STS="SUCCESS"; else CLONE_STS="FAIL"; fi
+END=$(date +%s%N)
+CLONE_TIME=$(($END-$START))
+
+START=$(date +%s%N)
 build_ros_ws
+BUILDROS_CK=$?
+if [ "$BUILDROS_CK" -eq 0 ]; then BUILDROS_STS="SUCCESS"; else BUILDROS_STS="FAIL"; fi
+END=$(date +%s%N)
+BUILDROS_TIME=$(($END-$START))
+
 source_ros_ws
 
 # Prepare Ardupilot SITL
+START=$(date +%s%N)
 build_ardupilot
-
+BUILDAP_CK=$?
+if [ "$BUILDAP_CK" -eq 0 ]; then BUILDAP_STS="SUCCESS"; else BUILDAP_STS="FAIL"; fi
+END=$(date +%s%N)
+BUILDAP_TIME=$(($END-$START))
 # Return to where we start
 cd $START_ABS_PATH
+
+printf "+-SUMMARY----------------------+-----------+--------------+\n"
+printf "|%-30s|%-11s|%-10s|\n" "FUNCTION_NAME" "STATUS" "TOTAL_TIME(ms)"
+printf "+------------------------------+-----------+--------------+\n"
+printf "|%-29s |%-10s |%-13.3f |\n" "construct_workspace" $CST_STS $(echo "scale=3;$CST_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "install_ros" $ISTROS_STS $(echo "scale=3;$ISTROS_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "install_ros_tools" $ISTROSTOOLS_STS $(echo "scale=3;$ISTROSTOOLS_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "install_ros_dependencies" $ISTROSDEP_STS $(echo "scale=3;$ISTROSDEP_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "install_realsense" $REAL_STS $(echo "scale=3;$REAL_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "install_geographiclib" $GEO_STS $(echo "scale=3;$GEO_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "install_ompl" $OMPL_STS $(echo "scale=3;$OMPL_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "clone_repos" $CLONE_STS $(echo "scale=3;$CLONE_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "build_ros_ws" $BUILDROS_STS $(echo "scale=3;$BUILDROS_TIME/1000000000"|bc) 
+printf "|%-29s |%-10s |%-13.3f |\n" "build_ardupilot" $BUILDAP_STS $(echo "scale=3;$BUILDAP_TIME/1000000000"|bc) 
+printf "+------------------------------+-----------+--------------+\n"
