@@ -300,10 +300,11 @@ function build_ardupilot()
 	pip install MAVProxy==$MAVPROXY_VERSION
 	## Setup SITL
 	./waf configure --board sitl
+	./waf copter
 	. ~/.profile || true
-	## Attemp build and launch a Copter SITL instance
-	cd ArduCopter
-	sim_vehicle.py -w
+	# ## Attemp to launch a Copter SITL instance
+	# cd ArduCopter
+	# sim_vehicle.py -w
 	cd $START_ABS_PATH
 )}
 
@@ -327,28 +328,29 @@ CST_CK=$?
 if [ "$CST_CK" -eq 0 ]; then CST_STS="SUCCESS"; else CST_STS="FAIL"; fi
 END=$(date +%s%N)
 CST_TIME=$(($END-$START))
-
+# Confirm File Structure
 echo "ROOT_WS_PATH $ROOT_WS_PATH"
 echo "ROS_WS_NAME $ROS_WS_NAME"
 ws_confirmation # DEBUG
 
 # Install ROS
+## ROS main package
 START=$(date +%s%N)
 install_ros
 ISTROS_CK=$?
 if [ "$ISTROS_CK" -eq 0 ]; then ISTROS_STS="SUCCESS"; else ISTROS_STS="FAIL"; fi
 END=$(date +%s%N)
 ISTROS_TIME=$(($END-$START))
-
+## Useful ROS tools
 START=$(date +%s%N)
 install_ros_tools
 ISTROSTOOLS_CK=$?
 if [ "$ISTROSTOOLS_CK" -eq 0 ]; then ISTROSTOOLS_STS="SUCCESS"; else ISTROSTOOLS="FAIL"; fi
 END=$(date +%s%N)
 ISTROSTOOLS_TIME=$(($END-$START))
-
+## Source ROS installation
 source_ros
-
+## Install ROS Dependencies
 START=$(date +%s%N)
 install_ros_dependencies
 ISTROSDEP_CK=$?
@@ -381,20 +383,21 @@ END=$(date +%s%N)
 OMPL_TIME=$(($END-$START))
 
 # Build ROS Workspace Attempt
+## Clone required repos
 START=$(date +%s%N)
 clone_repos
 CLONE_CK=$?
 if [ "$CLONE_CK" -eq 0 ]; then CLONE_STS="SUCCESS"; else CLONE_STS="FAIL"; fi
 END=$(date +%s%N)
 CLONE_TIME=$(($END-$START))
-
+## Build ROS workspace
 START=$(date +%s%N)
 build_ros_ws
 BUILDROS_CK=$?
 if [ "$BUILDROS_CK" -eq 0 ]; then BUILDROS_STS="SUCCESS"; else BUILDROS_STS="FAIL"; fi
 END=$(date +%s%N)
 BUILDROS_TIME=$(($END-$START))
-
+## Source Workspace
 source_ros_ws
 
 # Prepare Ardupilot SITL
@@ -404,6 +407,9 @@ BUILDAP_CK=$?
 if [ "$BUILDAP_CK" -eq 0 ]; then BUILDAP_STS="SUCCESS"; else BUILDAP_STS="FAIL"; fi
 END=$(date +%s%N)
 BUILDAP_TIME=$(($END-$START))
+# This will make sim_vehicle works across terminal
+. ~/.profile || true
+
 # Return to where we start
 cd $START_ABS_PATH
 
