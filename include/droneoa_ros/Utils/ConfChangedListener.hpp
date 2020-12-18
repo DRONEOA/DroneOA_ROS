@@ -23,13 +23,13 @@
 #include <string>
 #include <boost/thread.hpp>
 #include <droneoa_ros/Utils/DataPool.hpp>
-#include <droneoa_ros/Utils/JsonReader.hpp>
+#include <droneoa_ros/Utils/JsonUtils.hpp>
 
 class ConfChangedListener {
     void watchConfFileThread();
     DP::DataPool dataPool;
     boost::thread* thread_watch_command_ = nullptr;
-    JsonReader* jsonReader;
+    JsonUtils* jsonUtils;
 
  public:
     explicit ConfChangedListener(std::string filePath);

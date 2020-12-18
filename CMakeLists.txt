@@ -164,7 +164,7 @@ add_library(droneoa_ros_libutils
   src/HWI/Utils/LocalPoint.cpp
   src/HWI/Utils/Position3D.cpp
   src/HWI/Utils/LidarUtils.cpp
-  src/Utils/JsonReader.cpp
+  src/Utils/JsonUtils.cpp
   src/Utils/ConfChangedListener.cpp
 )
 

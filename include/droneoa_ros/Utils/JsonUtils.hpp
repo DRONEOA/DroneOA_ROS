@@ -17,8 +17,8 @@
  * Written by Clair Hu <clair.hu.1@uwaterloo.ca>, Dec 2020
  */
 
-#ifndef UTILS_JSON_READER_  // NOLINT
-#define UTILS_JSON_READER_  // NOLINT
+#ifndef UTILS_JSON_UTILS_  // NOLINT
+#define UTILS_JSON_UTILS_  // NOLINT
 
 #include <json/value.h>
 #include <jsoncpp/json/json.h>
@@ -29,14 +29,16 @@
 #include <iostream>
 #include <exception>
 
-class JsonReader {
+class JsonUtils {
+    std::string mFilePath;
     std::vector<std::string> mParamNames;
     std::unordered_map<std::string, std::string> mParams;
 
  public:
-    explicit JsonReader(std::string filePath);
-    virtual ~JsonReader();
-    const std::unordered_map<std::string, std::string> getParams();
+    explicit JsonUtils(std::string filePath);
+    virtual ~JsonUtils();
+    std::unordered_map<std::string, std::string> readJsonToMap();
+    bool writeMapToJson(std::unordered_map<std::string, std::string> map);
 };
 
 #endif  // NOLINT

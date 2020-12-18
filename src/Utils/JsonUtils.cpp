@@ -17,14 +17,21 @@
  * Written by Clair Hu <clair.hu.1@uwaterloo.ca>, Dec 2020
  */
 
-#include <droneoa_ros/Utils/JsonReader.hpp>
+#include <droneoa_ros/Utils/JsonUtils.hpp>
 #include <ros/ros.h>
 
-JsonReader::JsonReader(std::string filePath) {
+JsonUtils::JsonUtils(std::string filePath) {
+    mFilePath = filePath;
+}
+
+JsonUtils::~JsonUtils() {
+}
+
+std::unordered_map<std::string, std::string> JsonUtils::readJsonToMap() {
     Json::Value config;
     std::ifstream ifs;
     try {
-        ifs = std::ifstream(filePath);
+        ifs = std::ifstream(mFilePath);
         ifs >> config;
     } catch (std::exception e) {
         ROS_WARN("%s", e.what());
@@ -34,11 +41,28 @@ JsonReader::JsonReader(std::string filePath) {
         mParams[parameter] = config[parameter].asString();
     }
     ifs.close();
-}
-
-JsonReader::~JsonReader() {
-}
-
-const std::unordered_map<std::string, std::string> JsonReader::getParams() {
+    
     return mParams;
+}
+
+bool JsonUtils::writeMapToJson(std::unordered_map<std::string, std::string> map) {
+    std::ofstream json;
+    json.open(mFilePath);
+
+    try {
+        Json::Value value;
+        for (auto param : map) {
+            value[param.first] = Json::Value(param.second);
+        }
+
+        Json::StyledWriter styledWriter;
+        json << styledWriter.write(value);
+
+    } catch (std::exception e) {
+        ROS_WARN("%s", e.what());
+    }
+
+    json.close();
+
+    return true;
 }

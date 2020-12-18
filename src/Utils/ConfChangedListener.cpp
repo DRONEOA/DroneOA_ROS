@@ -20,16 +20,16 @@
 #include <droneoa_ros/Utils/ConfChangedListener.hpp>
 #include <ros/ros.h>
 #include <fstream>
-#include <droneoa_ros/Utils/JsonReader.hpp>
+#include <droneoa_ros/Utils/JsonUtils.hpp>
 
 ConfChangedListener::ConfChangedListener(std::string filePath) {
     thread_watch_command_ = new boost::thread(boost::bind(&ConfChangedListener::watchConfFileThread, this));
-    jsonReader = new JsonReader(filePath);
+    jsonUtils = new JsonUtils(filePath);
 }
 
 ConfChangedListener::~ConfChangedListener() {
-    if (jsonReader) {
-        delete(jsonReader);
+    if (jsonUtils) {
+        delete(jsonUtils);
     }
     if (thread_watch_command_) {
         delete(thread_watch_command_);
@@ -38,8 +38,9 @@ ConfChangedListener::~ConfChangedListener() {
 
 void ConfChangedListener::conf_callback() {
     ROS_INFO("watch conf file thread while loop");
-    for (auto param : jsonReader->getParams()) {
+    for (auto param : jsonUtils->readJsonToMap()) {
         dataPool.setConfig(param.first, param.second);
+        std::cout << param.first << ": " << param.second << std::endl;
     }
 }
 
