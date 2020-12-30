@@ -20,8 +20,11 @@ roslaunch step1.launch
 ```
 ### Launch Main Nodes
 ```shell
-roslaunch step2.launch
+roslaunch StartCore.launch
 ```
+This will launch `console service` and `package manager`, more instructions will be displayed in the terminal launch message
+
+For example: use `pm launch main` to launch the main drone control node
 
 Note: If you are performing a test flight, you may want to open above nodes in 2 seperate ssh session
 
@@ -65,8 +68,11 @@ cd <workspace>/src/droneoa_ros/launch
 ```
 Launch the node in separate terminal to allow dedicated console input:
 ```shell
-roslaunch step2.launch
+roslaunch StartCore.launch
 ```
+This will launch `console service` and `package manager`, more instructions will be displayed in the terminal launch message
+
+For example: use `pm launch main` to launch the main drone control node
 
 ## FAQs
 
