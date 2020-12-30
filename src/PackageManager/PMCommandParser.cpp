@@ -223,7 +223,6 @@ void CommandParser::update(std::vector<std::string> tokens) {
 }
 
 void CommandParser::uninstall(std::vector<std::string> tokens) {
-    //! @todo what if the node is running
     // Check arguments complete
     if (tokens.size() < 1) {
         ROS_ERROR("[PM][UNINSTALL] Missing Package Name !!!");
@@ -234,6 +233,8 @@ void CommandParser::uninstall(std::vector<std::string> tokens) {
         ROS_ERROR("[PM][UNINSTALL] Package Name [%s] Not Exist !!!", tokens[0].c_str());
         return;
     }
+    // Shutdown the app if running
+    runPMScripts("shutdownOtherNode.sh", {tokens[0]});
     // Uninstall by deleting
     if (runPMScripts("uninstall.sh", {tokens[0]}) != 0) {
         ROS_ERROR("[PM][UNINSTALL] Uninstall deletion failed !!!");
