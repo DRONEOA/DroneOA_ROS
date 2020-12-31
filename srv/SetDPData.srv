@@ -1,4 +1,6 @@
+# Required Entries
 string entry_name
+# Data
 bool data_bool
 string data_str
 uint32 data_uint32

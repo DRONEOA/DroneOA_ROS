@@ -291,7 +291,7 @@ void CNCGeneric::Mag_callback(const sensor_msgs::MagneticFieldConstPtr& msg) {
 
 void CNCGeneric::HUD_callback(const mavros_msgs::VFR_HUDConstPtr& msg) {
     mCurrentHudData = *msg;
-    msDP.setData(DP::DP_HEADING, mCurrentHudData.heading);
+    msDP.setData(DP::DP_HEADING, static_cast<float>(mCurrentHudData.heading));
     msDP.setData(DP::DP_AIR_SPEED, mCurrentHudData.airspeed);
     msDP.setData(DP::DP_GROUND_SPEED, mCurrentHudData.groundspeed);
     msDP.setData(DP::DP_HUD_ALTITUDE, mCurrentHudData.altitude);

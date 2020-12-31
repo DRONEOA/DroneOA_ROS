@@ -1,0 +1,23 @@
+# Supported Types SUPPORT_TYPES
+uint8 TYPE_BOOL	        = 0
+uint8 TYPE_STRING       = 1
+uint8 TYPE_INT32        = 2
+uint8 TYPE_UINT32       = 3
+uint8 TYPE_FLOAT3       = 4
+uint8 TYPE_GEO_QUAT     = 5
+uint8 TYPE_GEO_VEC3     = 6
+
+# Required Entries
+string entry_name
+uint8 type_name  # SUPPORT_TYPES
+bool is_config  # True if it's a configuration
+# Data
+bool data_bool
+string data_str
+uint32 data_uint32
+int32 data_int32
+float32 data_float
+geometry_msgs/Quaternion data_quat
+geometry_msgs/Vector3 data_vec3
+---
+bool success

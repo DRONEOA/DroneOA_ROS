@@ -64,6 +64,7 @@ static const char* MAIN_NODE_ACCEPTED_MODULE_NAMES = "cnc oac rsc lidar dp ! sta
 static const char* DP_GET_STR_SERVICE_NAME = "get_str_dp_data";
 static const char* DP_GET_SERVICE_NAME = "get_dp_data";
 static const char* DP_SET_SERVICE_NAME = "set_dp_data";
+static const char* DP_ADD_SERVICE_NAME = "add_dp_entry";
 
 /**
  * @brief DataPool Sync Feature

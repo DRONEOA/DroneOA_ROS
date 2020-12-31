@@ -59,6 +59,7 @@ class DataPool {
     static std::map<std::string, boost::any> mDataPoolContainer;
     static std::vector<DataPoolSubscriber*> mSubscriberList;
     void notifyAll(ENTRY_TYPES type, std::string entryName);
+    virtual bool checkDataChanged(boost::any oldData, boost::any newData);
 
  public:
     /**
@@ -91,6 +92,14 @@ class DataPool {
      * @param data original data in the DP will be updated if exist
      */
     virtual void setConfig(std::string name, boost::any data);
+    /**
+     * @brief Add a new writable entry to local datapool
+     * @param name name of the datapool
+     * @param initialData default data with type information
+     * @param isConfig is this a configuration entry
+     * @return bool whether success
+     */
+    virtual bool addEntryLocal(std::string name, boost::any initialData, bool isConfig = false);
     /**
      * @brief Register a subscriber for DATA/CONFIG/ALL
      * @param subscriber 

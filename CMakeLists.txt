@@ -81,6 +81,7 @@ add_service_files(
   GetDPDataAsString.srv
   GetDPData.srv
   SetDPData.srv
+  AddDPData.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -153,6 +154,7 @@ include_directories(include
 add_library(droneoa_ros_libutils
   src/Utils/GeneralUtils.cpp
   src/Utils/DataPool.cpp
+  src/Utils/DataPoolEntries.cpp
   src/Utils/DataPoolClient.cpp
   src/Utils/DataPoolServer.cpp
   src/Utils/DataPoolSubscriber.cpp
