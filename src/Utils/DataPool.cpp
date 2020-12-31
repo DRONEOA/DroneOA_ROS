@@ -18,8 +18,11 @@
  */
 
 #include <droneoa_ros/Utils/DataPool.hpp>
+
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Vector3.h>
+#include <typeindex>
+
 #include <droneoa_ros/Utils/DataPoolSubscriber.hpp>
 #include <droneoa_ros/HWI/Utils/LocalPoint.hpp>
 #include <droneoa_ros/HWI/Utils/GPSPoint.hpp>
@@ -137,16 +140,83 @@ int DataPool::getDataAsInt(std::string name) {
     return 0;
 }
 
+bool DataPool::checkDataChanged(boost::any oldData, boost::any newData) {
+    try {
+        if (can_cast_to<bool>(oldData) && can_cast_to<bool>(newData)) {
+            return boost::any_cast<bool>(oldData) != boost::any_cast<bool>(newData);
+        } else if (can_cast_to<std::string>(oldData) && can_cast_to<std::string>(newData)) {
+            return boost::any_cast<std::string>(oldData) != boost::any_cast<std::string>(newData);
+        } else if (can_cast_to<int32_t>(oldData) && can_cast_to<int32_t>(newData)) {
+            return boost::any_cast<int32_t>(oldData) != boost::any_cast<int32_t>(newData);
+        } else if (can_cast_to<uint32_t>(oldData) && can_cast_to<uint32_t>(newData)) {
+            return boost::any_cast<uint32_t>(oldData) != boost::any_cast<uint32_t>(newData);
+        } else if (can_cast_to<float>(oldData) && can_cast_to<float>(newData)) {
+            return boost::any_cast<float>(oldData) != boost::any_cast<float>(newData);
+        } else if (can_cast_to<geometry_msgs::Quaternion>(oldData) &&
+                can_cast_to<geometry_msgs::Quaternion>(newData)) {
+            return boost::any_cast<geometry_msgs::Quaternion>(oldData) !=
+                    boost::any_cast<geometry_msgs::Quaternion>(newData);;
+        } else if (can_cast_to<geometry_msgs::Vector3>(oldData) &&
+                can_cast_to<geometry_msgs::Vector3>(newData)) {
+            return boost::any_cast<geometry_msgs::Vector3>(oldData) !=
+                    boost::any_cast<geometry_msgs::Vector3>(newData);;
+        } else {
+            ROS_DEBUG("[DP] Compare any data failed");
+            return false;
+        }
+    } catch(boost::bad_any_cast& e) {
+        ROS_DEBUG("[DP] Compare any data failed");
+        return false;
+    }
+}
+
 void DataPool::setData(std::string name, boost::any data) {
     std::lock_guard<std::mutex> l(mContainerMutex);
-    mDataPoolContainer[name] = data;
-    notifyAll(ENTRY_TYPES::DATA, name);
+    if ( mDataPoolContainer.find(name) == mDataPoolContainer.end() ) {
+        // Not exist before
+        mDataPoolContainer[name] = data;
+        notifyAll(ENTRY_TYPES::DATA, name);
+    } else {
+        boost::any oldData = mDataPoolContainer[name];
+        mDataPoolContainer[name] = data;
+        if (checkDataChanged(oldData, mDataPoolContainer[name])) {
+            notifyAll(ENTRY_TYPES::DATA, name);
+        }
+    }
 }
 
 void DataPool::setConfig(std::string name, boost::any data) {
     std::lock_guard<std::mutex> l(mContainerMutex);
-    mDataPoolContainer[name] = data;
-    notifyAll(ENTRY_TYPES::CONFIG, name);
+    if ( mDataPoolContainer.find(name) == mDataPoolContainer.end() ) {
+        // Not exist before
+        mDataPoolContainer[name] = data;
+        notifyAll(ENTRY_TYPES::CONFIG, name);
+    } else {
+        boost::any oldData = mDataPoolContainer[name];
+        mDataPoolContainer[name] = data;
+        if (checkDataChanged(oldData, mDataPoolContainer[name])) {
+            notifyAll(ENTRY_TYPES::CONFIG, name);
+        }
+    }
+}
+
+bool DataPool::addEntryLocal(std::string name, boost::any initialData, bool isConfig) {
+    // Verify entry not already exist
+    if (isConfig) {
+        if ( CONF_TYPE_MAP.find(name) != CONF_TYPE_MAP.end() ) {
+            ROS_ERROR("[DP] Entry Already Exist");
+            return false;
+        }
+        CONF_TYPE_MAP.insert({name, initialData.type()});
+    } else {
+        if ( DP_TYPE_MAP.find(name) != DP_TYPE_MAP.end() ) {
+            ROS_ERROR("[DP] Entry Already Exist");
+            return false;
+        }
+        DP_TYPE_MAP.insert({name, initialData.type()});
+    }
+    setData(name, initialData);
+    return true;
 }
 
 void DataPool::registerEvents(DataPoolSubscriber* subscriber) {

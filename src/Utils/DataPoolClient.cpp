@@ -25,27 +25,66 @@ namespace DP {
 void DataPoolClient::updateDPWithSyncMsg(const droneoa_ros::DataPoolSync::ConstPtr& msg) {
     for (droneoa_ros::DataPoolPair line : (*msg).data_pairs) {
         // Find entry in type map
+        bool isConfig = false;
+        std::type_index requiredType = typeid(bool);
         if ( DP_TYPE_MAP.find(line.entry_name) != DP_TYPE_MAP.end() ) {
-            std::type_index requiredType = DP_TYPE_MAP.at(line.entry_name);
-            if (requiredType == typeid(bool)) {
-                setData(line.entry_name, line.data_bool);
-            } else if (requiredType == typeid(std::string)) {
-                setData(line.entry_name, line.data_str);
-            } else if (requiredType == typeid(int32_t)) {
-                setData(line.entry_name, line.data_int32);
-            } else if (requiredType == typeid(uint32_t)) {
-                setData(line.entry_name, line.data_uint32);
-            } else if (requiredType == typeid(float)) {
-                setData(line.entry_name, line.data_float);
-            } else if (requiredType == typeid(geometry_msgs::Vector3)) {
-                setData(line.entry_name, line.data_vec3);
-            } else if (requiredType == typeid(geometry_msgs::Quaternion)) {
-                setData(line.entry_name, line.data_quat);
-            } else {
+            isConfig = false;
+            requiredType = DP_TYPE_MAP.at(line.entry_name);
+        } else if ( CONF_TYPE_MAP.find(line.entry_name) != CONF_TYPE_MAP.end() ) {
+            isConfig = true;
+            requiredType = CONF_TYPE_MAP.at(line.entry_name);
+        } else {
+            // Customized Entry will trigger a lot of this warning message
+            //! @todo better logging solution?
+            // ROS_WARN("[DP Client] Missing mapping for: %s. Ignored.", line.entry_name.c_str());
+            continue;
+        }
+        // Type checking & Update Value
+        if (requiredType == typeid(bool)) {
+            if (isConfig) {
+                setConfig(line.entry_name, line.data_bool);
                 continue;
             }
+            setData(line.entry_name, line.data_bool);
+        } else if (requiredType == typeid(std::string)) {
+            if (isConfig) {
+                setConfig(line.entry_name, line.data_str);
+                continue;
+            }
+            setData(line.entry_name, line.data_str);
+        } else if (requiredType == typeid(int32_t)) {
+            if (isConfig) {
+                setConfig(line.entry_name, line.data_int32);
+                continue;
+            }
+            setData(line.entry_name, line.data_int32);
+        } else if (requiredType == typeid(uint32_t)) {
+            if (isConfig) {
+                setConfig(line.entry_name, line.data_uint32);
+                continue;
+            }
+            setData(line.entry_name, line.data_uint32);
+        } else if (requiredType == typeid(float)) {
+            if (isConfig) {
+                setConfig(line.entry_name, line.data_float);
+                continue;
+            }
+            setData(line.entry_name, line.data_float);
+        } else if (requiredType == typeid(geometry_msgs::Vector3)) {
+            if (isConfig) {
+                setConfig(line.entry_name, line.data_vec3);
+                continue;
+            }
+            setData(line.entry_name, line.data_vec3);
+        } else if (requiredType == typeid(geometry_msgs::Quaternion)) {
+            if (isConfig) {
+                setConfig(line.entry_name, line.data_quat);
+                continue;
+            }
+            setData(line.entry_name, line.data_quat);
+        } else {
+            ROS_WARN("[DP Client] Miss match type for: %s. Ignored.", line.entry_name.c_str());
         }
-        ROS_DEBUG("[DP Client] Missing mapping for: %s. Ignored.", line.entry_name.c_str());
     }
 }
 

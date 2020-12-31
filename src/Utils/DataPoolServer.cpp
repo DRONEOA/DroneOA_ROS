@@ -28,6 +28,8 @@ DataPoolServer::DataPoolServer() {
         &DataPoolServer::handleGetDataRequest, this);
     mSetService = mNodeHandle.advertiseService(DP_SET_SERVICE_NAME,
         &DataPoolServer::handleSetDataRequest, this);
+    mAddService = mNodeHandle.advertiseService(DP_ADD_SERVICE_NAME,
+        &DataPoolServer::handleAddDPEntryRequest, this);
     mGetStrService = mNodeHandle.advertiseService(DP_GET_STR_SERVICE_NAME,
         &DataPoolServer::handleGetStrDataRequest, this);
     thread_publish_sync_data_ = new boost::thread(boost::bind(&DataPoolServer::publishSyncDataThread, this));
@@ -112,6 +114,55 @@ bool DataPoolServer::handleSetDataRequest(droneoa_ros::SetDPData::Request  &req,
     }
     ROS_ERROR("[DataPool Server] Set Data Operation Aborted: type mapping not exist");
     return false;
+}
+
+bool DataPoolServer::handleAddDPEntryRequest(droneoa_ros::AddDPData::Request  &req,
+        droneoa_ros::AddDPData::Response &res) {
+    ROS_INFO("[DataPool Server] Add New DP Entry Request");
+    std::string targetEntryName = req.entry_name;
+    bool isConfig = req.is_config;
+    res.success = false;
+    // Verify entry not already exist
+    if (isConfig) {
+        if ( CONF_TYPE_MAP.find(targetEntryName) != CONF_TYPE_MAP.end() ) {
+            ROS_ERROR("[DataPool Server] Config Entry Already Exist");
+            return false;
+        }
+    } else {
+        if ( DP_TYPE_MAP.find(targetEntryName) != DP_TYPE_MAP.end() ) {
+            ROS_ERROR("[DataPool Server] Data Entry Already Exist");
+            return false;
+        }
+    }
+    // Adding entry if specified type exist
+    uint8_t typeName = req.type_name;
+    switch (typeName) {
+        case 0:
+            addEntryLocal(targetEntryName, static_cast<bool>(req.data_bool), isConfig);
+            break;
+        case 1:
+            addEntryLocal(targetEntryName, static_cast<std::string>(req.data_str), isConfig);
+            break;
+        case 2:
+            addEntryLocal(targetEntryName, static_cast<uint32_t>(req.data_uint32), isConfig);
+            break;
+        case 3:
+            addEntryLocal(targetEntryName, static_cast<int32_t>(req.data_int32), isConfig);
+            break;
+        case 4:
+            addEntryLocal(targetEntryName, static_cast<float>(req.data_float), isConfig);
+            break;
+        case 5:
+            addEntryLocal(targetEntryName, static_cast<geometry_msgs::Quaternion>(req.data_quat), isConfig);
+            break;
+        case 6:
+            addEntryLocal(targetEntryName, static_cast<geometry_msgs::Vector3>(req.data_vec3), isConfig);
+            break;
+        default:
+            ROS_ERROR("[DataPool Server] Unknown Entry Data Type");
+            return false;
+    }
+    return true;
 }
 
 droneoa_ros::DataPoolSync DataPoolServer::buildSyncData() {

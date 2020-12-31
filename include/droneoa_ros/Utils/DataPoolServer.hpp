@@ -23,6 +23,7 @@
 #include <ros/ros.h>
 #include <droneoa_ros/GetDPData.h>
 #include <droneoa_ros/SetDPData.h>
+#include <droneoa_ros/AddDPData.h>
 #include <droneoa_ros/GetDPDataAsString.h>
 #include <droneoa_ros/DataPoolPair.h>
 #include <droneoa_ros/DataPoolSync.h>
@@ -67,12 +68,15 @@ class DataPoolServer : public DataPool {
     ros::ServiceServer mGetService;
     ros::ServiceServer mGetStrService;
     ros::ServiceServer mSetService;
+    ros::ServiceServer mAddService;
     bool handleGetDataRequest(droneoa_ros::GetDPData::Request  &req,  // NOLINT
             droneoa_ros::GetDPData::Response &res);  // NOLINT
     bool handleGetStrDataRequest(droneoa_ros::GetDPDataAsString::Request  &req,  // NOLINT
             droneoa_ros::GetDPDataAsString::Response &res);  // NOLINT
     bool handleSetDataRequest(droneoa_ros::SetDPData::Request  &req,  // NOLINT
             droneoa_ros::SetDPData::Response &res);  // NOLINT
+    bool handleAddDPEntryRequest(droneoa_ros::AddDPData::Request  &req,  // NOLINT
+            droneoa_ros::AddDPData::Response &res);  // NOLINT
 
  public:
     DataPoolServer();
