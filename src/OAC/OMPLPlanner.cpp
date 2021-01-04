@@ -247,7 +247,7 @@ bool OMPLPlanner::plan() {
 #ifdef RRT_DEBUG_PLANNER
     std::cout << "START SOLVING" << std::endl;
 #endif
-    ompl::base::PlannerStatus solved = plan->solve(1);
+    ompl::base::PlannerStatus solved = plan->solve(2);
 #ifdef RRT_DEBUG_PLANNER
     std::cout << "END SOLVING" << std::endl;
 #endif

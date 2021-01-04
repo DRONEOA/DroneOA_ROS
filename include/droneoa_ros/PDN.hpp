@@ -180,7 +180,7 @@ static const float UE4_SITL_SCALE = 1000.0f;
 
 // RRT
 // #define RRT_ENABLE_SMOOTHER
-static const double RRT_MAX_PLANNING_DISTANCE = 10.0f;  /**< @brief RRT search space boundary; Horizontal; unit: m */
+static const double RRT_MAX_PLANNING_DISTANCE = 20.0f;  /**< @brief RRT search space boundary; Horizontal; unit: m */
 static const double RRT_MAX_PLANNING_HEIGHT = VEHICLE_MAX_ALTITUDE_RELATIVE;
 static const double RRT_MIN_PLANNING_HEIGHT = 0.0f;
 /**
