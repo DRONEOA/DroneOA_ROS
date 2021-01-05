@@ -23,6 +23,7 @@
 
 #include <droneoa_ros/OAC/Command.hpp>
 #include <droneoa_ros/Utils/GeneralUtils.hpp>
+#include <droneoa_ros/Utils/DataPool.hpp>
 #include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
 #include <droneoa_ros/HWI/CNCArdupilot.hpp>
 
@@ -179,8 +180,16 @@ bool parseCMD(CNC::CNCInterface *cnc, const CommandLine& cmdline, bool isFromOAC
                 return cnc->pushGlobalMission(wps, true);
             }
             case CMD_QUEUE_TYPES::CMD_CANCEL_QUEUE:
+            {
                 ROS_WARN("[CMD PARSER] Currect CMD Queue Execution Canceled");
                 return true;
+            }
+            case CMD_QUEUE_TYPES::CMD_OAC_SWITCH:
+            {
+                DP::DataPool sDP;
+                sDP.setData(DP::DP_OAC_SWITCH, (0 != std::stoi(cmdline.second)));
+                return true;
+            }
             default:
                 throw 1;
         }

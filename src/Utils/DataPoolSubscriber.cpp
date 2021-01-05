@@ -36,6 +36,6 @@ ENTRY_TYPES DataPoolSubscriber::getTypeToSubscribe() {
     return mTypeToSubscribe;
 }
 
-void DataPoolSubscriber::onDataPoolUpdate(std::string entryName) {}
+void DataPoolSubscriber::onDataPoolUpdate(std::string entryName, boost::any data) {}
 
 }  // namespace DP

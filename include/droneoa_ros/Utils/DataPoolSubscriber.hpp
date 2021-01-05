@@ -21,6 +21,7 @@
 #define DATAPOOL_SUBSCRIBER_  // NOLINT
 
 #include <string>
+#include <boost/any.hpp>
 #include <droneoa_ros/Utils/DataPoolEntries.hpp>
 
 namespace DP {
@@ -44,8 +45,9 @@ class DataPoolSubscriber {
     /**
      * @brief Event OnDataPoolUpdate; Default behavior is do nothing
      * @param entryName updated entry name
+     * @param data updated data
      */
-    virtual void onDataPoolUpdate(std::string entryName);
+    virtual void onDataPoolUpdate(std::string entryName, boost::any data);
 };
 
 }  // namespace DP

@@ -35,6 +35,7 @@
 #include <droneoa_ros/OAC/OAAlgRRT.hpp>
 #include <droneoa_ros/OAC/CMDParser.hpp>
 #include <droneoa_ros/Utils/DataPool.hpp>
+#include <droneoa_ros/Utils/DataPoolSubscriber.hpp>
 #include <droneoa_ros/PDN.hpp>
 
 namespace OAC {
@@ -102,7 +103,7 @@ enum SYS_SelectedDetermineFun {
     DET_INVALID
 };
 
-class OAController {
+class OAController : public DP::DataPoolSubscriber {
     CMDParser *mpParserExecuter = nullptr;
     CMDRunner *mpTheRunner = nullptr;
     DP::DataPool msDP;
@@ -133,6 +134,12 @@ class OAController {
      * @return a string of the status
      */
     std::string getStatus();
+    /**
+     * @brief Handle DataPool Changes
+     * @param entryName updated entry name
+     * @param data updated data
+     */
+    void onDataPoolUpdate(std::string entryName, boost::any data) override;
 
  private:
     bool evaluate();  // Collect and Evaluate data from sensors
