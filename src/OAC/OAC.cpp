@@ -27,6 +27,8 @@ OAController::OAController(CNC::CNCInterface *cnc, Lidar::LidarGeneric *lidar, D
     mpTheRunner = runner;
     mR = r;
     init(cnc, lidar, rsc);
+    setTypeToSubscribe(DP::ENTRY_TYPES::DATA);
+    msDP.registerEvents(this);
 
     mpOACMasterThread = new boost::thread(boost::bind(&OAController::masterThread, this));
 }
@@ -83,6 +85,13 @@ std::string OAController::getStatus() {
         return "PAUSED";
     }
     return SYS_STATE_NAME[mCurrState];
+}
+
+void OAController::onDataPoolUpdate(std::string entryName, boost::any data) {
+    if (entryName == DP::DP_OAC_SWITCH) {
+        // Handle OAC switch event
+        masterSwitch(boost::any_cast<bool>(data));
+    }
 }
 
 // Switch on/off the tick event

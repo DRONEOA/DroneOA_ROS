@@ -325,10 +325,10 @@ bool ConsoleInputManager::buildOACCommands() {
         std::string cmdType = currentCommand_.second.at(0);
         if (cmdType == "on") {
             ROS_INFO("::OAC->ON::");
-            oac_->masterSwitch(true);
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_OAC_SWITCH, "1"});
         } else if (cmdType == "off") {
             ROS_INFO("::OAC->OFF::");
-            oac_->masterSwitch(false);
+            mGeneratedCMDQueue.push_back({Command::CMD_QUEUE_TYPES::CMD_OAC_SWITCH, "0"});
         } else if (cmdType == "info") {
             ROS_INFO(">>>>>>>>>> INFO START <<<<<<<<<<");
             ROS_INFO("[OAC] status: %s", oac_->getStatus().c_str());
@@ -598,7 +598,7 @@ void ConsoleInputManager::printQueueHelper() {
     ROS_WARN("Usage: START [CMD] THEN [CMD] TEHN [CMD] ... END");
     ROS_WARN("Supported Commands [CMD]:");
     ROS_WARN("    CNC:    all expect: quit");
-    ROS_WARN("    OAC:    none WIP");
+    ROS_WARN("    OAC:    on/off switch");
     ROS_WARN("    RSC:    none WIP");
     ROS_WARN("    Lidar:  none WIP");
     ROS_WARN("    !:      all");

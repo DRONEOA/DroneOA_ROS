@@ -108,6 +108,8 @@ constexpr char DP_CURR_SETPOINT_ENU_TARGET[] = "CurrentSetpointTarget";  /**< @b
 // OAC
 constexpr char DP_ACTIVE_OAC_LEVEL[] = "ActiveOACLevel";  /**< @brief Type: int32_t */
 
+constexpr char DP_OAC_SWITCH[] = "OACSwitch";  /**< @brief Type: bool */
+
 /*******************************************************************************
  * Config Entries Definition
  */

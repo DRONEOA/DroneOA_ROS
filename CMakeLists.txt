@@ -180,7 +180,7 @@ add_library(droneoa_ros_liboac
   src/OAC/OMPLPlanner.cpp
 )
 
-add_dependencies(droneoa_ros_liboac droneoa_ros_generate_messages_cpp)
+add_dependencies(droneoa_ros_liboac droneoa_ros_generate_messages_cpp droneoa_ros_libutils)
 
 add_library(droneoa_ros_libhwi
   src/HWI/base/CNCGeneric.cpp
@@ -191,7 +191,7 @@ add_library(droneoa_ros_libhwi
   src/HWI/ConsoleInputManager.cpp
 )
 
-add_dependencies(droneoa_ros_libhwi droneoa_ros_generate_messages_cpp)
+add_dependencies(droneoa_ros_libhwi droneoa_ros_generate_messages_cpp droneoa_ros_libutils)
 
 add_library(droneoa_ros_libgui
   src/GUI/Release/WebGUIServer.cpp
@@ -203,7 +203,7 @@ add_library(droneoa_ros_libgui
   src/GUI/GUISubject.cpp
 )
 
-add_dependencies(droneoa_ros_libgui droneoa_ros_generate_messages_cpp)
+add_dependencies(droneoa_ros_libgui droneoa_ros_generate_messages_cpp droneoa_ros_libutils)
 
 add_library(droneoa_ros_libpm
   src/PackageManager/PMCommandParser.cpp
@@ -349,6 +349,9 @@ add_executable(droneoa_ros_commandtest
   test/command_unittest/command_tests.cpp
   test/command_unittest/test_suite.cpp
   src/OAC/Command.cpp
+  src/Utils/DataPool.cpp
+  src/Utils/DataPoolEntries.cpp
+  src/Utils/DataPoolSubscriber.cpp
   src/Utils/GeneralUtils.cpp
   src/HWI/Utils/GPSPoint.cpp
   src/HWI/Utils/LocalPoint.cpp
@@ -357,6 +360,8 @@ add_executable(droneoa_ros_commandtest
   src/GUI/GUISubscriber.cpp
   src/GUI/GUISubject.cpp
 )
+
+add_dependencies(droneoa_ros_commandtest droneoa_ros_generate_messages_cpp)
 
 target_link_libraries(droneoa_ros_commandtest
   ${catkin_LIBRARIES}

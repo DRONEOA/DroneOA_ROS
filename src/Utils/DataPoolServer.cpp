@@ -42,6 +42,7 @@ DataPoolServer::~DataPoolServer() {
 
 void DataPoolServer::setDefaultConfig() {
     setData(CONF_SAFETY_GPS_FIX, true);
+    setData(DP_OAC_SWITCH, false);
     setData(DP_ACTIVE_OAC_LEVEL, int32_t(0));
 }
 

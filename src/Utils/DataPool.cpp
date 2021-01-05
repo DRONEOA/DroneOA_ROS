@@ -45,7 +45,7 @@ void DataPool::notifyAll(ENTRY_TYPES type, std::string entryName) {
             continue;
         }
         if (subscriberType == ENTRY_TYPES::ALL || type == subscriberType) {
-            sub->onDataPoolUpdate(entryName);
+            sub->onDataPoolUpdate(entryName, mDataPoolContainer[entryName]);
         }
     }
 }
@@ -140,6 +140,34 @@ int DataPool::getDataAsInt(std::string name) {
     return 0;
 }
 
+bool DataPool::getDataAsBool(std::string name) {
+    boost::any targetData = getData(name);
+    if (targetData.empty()) {
+        //! @note Data does not exist yet
+        return false;
+    }
+    try {
+        if (can_cast_to<bool>(targetData)) {
+            return boost::any_cast<bool>(targetData);
+        } else if (can_cast_to<uint8_t>(targetData)) {
+            return static_cast<bool>(boost::any_cast<uint8_t>(targetData));
+        } else if (can_cast_to<int16_t>(targetData)) {
+            return static_cast<bool>(boost::any_cast<int16_t>(targetData));
+        } else if (can_cast_to<uint16_t>(targetData)) {
+            return static_cast<bool>(boost::any_cast<uint16_t>(targetData));
+        } else if (can_cast_to<int32_t>(targetData)) {
+            return static_cast<bool>(boost::any_cast<int32_t>(targetData));
+        } else if (can_cast_to<uint32_t>(targetData)) {
+            return static_cast<bool>(boost::any_cast<uint32_t>(targetData));
+        } else {
+            ROS_ERROR("Data type cannot convert to bool");
+        }
+    } catch(boost::bad_any_cast& e) {
+        ROS_ERROR("Fail to convert to bool");
+    }
+    return false;
+}
+
 bool DataPool::checkDataChanged(boost::any oldData, boost::any newData) {
     try {
         if (can_cast_to<bool>(oldData) && can_cast_to<bool>(newData)) {
@@ -171,33 +199,41 @@ bool DataPool::checkDataChanged(boost::any oldData, boost::any newData) {
 }
 
 void DataPool::setData(std::string name, boost::any data) {
-    std::lock_guard<std::mutex> l(mContainerMutex);
-    if ( mDataPoolContainer.find(name) == mDataPoolContainer.end() ) {
-        // Not exist before
-        mDataPoolContainer[name] = data;
-        notifyAll(ENTRY_TYPES::DATA, name);
-    } else {
-        boost::any oldData = mDataPoolContainer[name];
-        mDataPoolContainer[name] = data;
-        if (checkDataChanged(oldData, mDataPoolContainer[name])) {
-            notifyAll(ENTRY_TYPES::DATA, name);
+    bool doNotify = false;
+    {
+        std::lock_guard<std::mutex> l(mContainerMutex);
+        if ( mDataPoolContainer.find(name) == mDataPoolContainer.end() ) {
+            // Not exist before
+            mDataPoolContainer[name] = data;
+            doNotify = true;
+        } else {
+            boost::any oldData = mDataPoolContainer[name];
+            mDataPoolContainer[name] = data;
+            if (checkDataChanged(oldData, mDataPoolContainer[name])) {
+                doNotify = true;
+            }
         }
     }
+    if (doNotify) notifyAll(ENTRY_TYPES::DATA, name);
 }
 
 void DataPool::setConfig(std::string name, boost::any data) {
-    std::lock_guard<std::mutex> l(mContainerMutex);
-    if ( mDataPoolContainer.find(name) == mDataPoolContainer.end() ) {
-        // Not exist before
-        mDataPoolContainer[name] = data;
-        notifyAll(ENTRY_TYPES::CONFIG, name);
-    } else {
-        boost::any oldData = mDataPoolContainer[name];
-        mDataPoolContainer[name] = data;
-        if (checkDataChanged(oldData, mDataPoolContainer[name])) {
-            notifyAll(ENTRY_TYPES::CONFIG, name);
+    bool doNotify = false;
+    {
+        std::lock_guard<std::mutex> l(mContainerMutex);
+        if ( mDataPoolContainer.find(name) == mDataPoolContainer.end() ) {
+            // Not exist before
+            mDataPoolContainer[name] = data;
+            doNotify = true;
+        } else {
+            boost::any oldData = mDataPoolContainer[name];
+            mDataPoolContainer[name] = data;
+            if (checkDataChanged(oldData, mDataPoolContainer[name])) {
+                doNotify = true;
+            }
         }
     }
+    if (doNotify) notifyAll(ENTRY_TYPES::CONFIG, name);
 }
 
 bool DataPool::addEntryLocal(std::string name, boost::any initialData, bool isConfig) {
