@@ -41,9 +41,9 @@ DataPoolServer::~DataPoolServer() {
 }
 
 void DataPoolServer::setDefaultConfig() {
-    setData(CONF_SAFETY_GPS_FIX, true);
-    setData(DP_OAC_SWITCH, false);
-    setData(DP_ACTIVE_OAC_LEVEL, int32_t(0));
+    for (auto data : DP_DEFAULT_VALUE_MAP) {
+        setData(data.first, data.second);
+    }
 }
 
 bool DataPoolServer::handleGetStrDataRequest(droneoa_ros::GetDPDataAsString::Request  &req,

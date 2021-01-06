@@ -56,4 +56,13 @@ std::map<std::string, std::type_index> CONF_TYPE_MAP = {
     {CONF_SAFETY_GPS_FIX, typeid(bool)}  // NOLINT
 };
 
+/*******************************************************************************
+ * Default Value Setting For DataPool Entries
+ */
+std::map<std::string, boost::any> DP_DEFAULT_VALUE_MAP = {
+    {CONF_SAFETY_GPS_FIX, (bool)true},  // NOLINT
+    {DP_OAC_SWITCH, (bool)false},  // NOLINT
+    {DP_ACTIVE_OAC_LEVEL, int32_t(0)},  // NOLINT
+};
+
 }  // namespace DP
