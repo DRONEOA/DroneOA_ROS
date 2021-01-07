@@ -26,6 +26,7 @@
 #include <string>
 #include <map>
 #include <typeindex>
+#include <boost/any.hpp>
 
 namespace DP {
 
@@ -129,6 +130,12 @@ extern std::map<std::string, std::type_index> DP_TYPE_MAP;
  *     Detail see: Utils/DataPoolEntries.cpp
  */
 extern std::map<std::string, std::type_index> CONF_TYPE_MAP;
+
+/*******************************************************************************
+ * Default Value Setting For DataPool Entries
+ *     Detail see: Utils/DataPoolEntries.cpp
+ */
+extern std::map<std::string, boost::any> DP_DEFAULT_VALUE_MAP;
 
 }  // namespace DP
 
