@@ -36,16 +36,10 @@ ROS_WORKSPACE_PATH=$(pwd)
 
 echo "Config Path: $MAIN_PKT_PATH/scripts/tmux/$CONF_NAME"
 
-# Check and install catmux
-cd $ROS_WORKSPACE_PATH
-if [ ! -d "catmux" ]; then
-    sudo apt install tmux
-    git clone https://github.com/fmauch/catmux.git
-    cd ..
-    catkin_make
-else
-    echo "catmux already installed"
-fi
+#install catmux
+sudo apt install tmux
+pip3 install --user catmux
+pip3 install rospkg
 
 # Launch with catmux
-rosrun catmux create_session $MAIN_PKT_PATH/scripts/tmux/$CONF_NAME
+catmux_create_session $MAIN_PKT_PATH/scripts/tmux/$CONF_NAME
