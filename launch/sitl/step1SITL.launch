@@ -1,5 +1,5 @@
 <launch>
-    <include file="../components/apmSITL.launch" />
-    <include file="../components/rs_camera.launch" />
-    <include file="../components/lidar.launch" />
+    <include file="$(find droneoa_ros)/launch/components/apmSITL.launch" />
+    <include file="$(find droneoa_ros)/launch/components/rs_camera.launch" />
+    <include file="$(find droneoa_ros)/launch/components/lidar.launch" />
 </launch>

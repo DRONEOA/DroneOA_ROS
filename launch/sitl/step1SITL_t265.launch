@@ -1,8 +1,8 @@
 <launch>
-    <include file="../components/apmSITL.launch" />
-    <include file="../components/rs_camera_t265_d435.launch" />
-    <include file="../components/lidar.launch" />
-    <include file="../components/octomap_depth.launch">
+    <include file="$(find droneoa_ros)/launch/components/apmSITL.launch" />
+    <include file="$(find droneoa_ros)/launch/components/rs_camera_t265_d435.launch" />
+    <include file="$(find droneoa_ros)/launch/components/lidar.launch" />
+    <include file="$(find droneoa_ros)/launch/components/octomap_depth.launch">
         <arg name="octomap_frame_id" value="camera_odom_frame"/>
         <arg name="octomap_pc_src" value="/d435/depth/color/points"/>
     </include>
