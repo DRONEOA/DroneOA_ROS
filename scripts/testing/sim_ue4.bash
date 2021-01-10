@@ -6,6 +6,11 @@ killbg() {
 }
 trap killbg EXIT
 pids=()
+
+# ensure we are at the correct folder
+roscd droneoa_ros
+cd ./scripts/testing
+
 # sim_vehicle will be started by UE4 SIM
 echo ">>> Starting UDP ......"
 python ./simple_UDP.py & 
