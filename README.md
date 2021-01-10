@@ -2,6 +2,9 @@
 
 [![pipeline status](https://gitlab.tuotuogzs.com/droneoa/droneoa_ros/badges/master/pipeline.svg)](https://gitlab.tuotuogzs.com/droneoa/droneoa_ros/commits/master)
 
+## User Installation Guide & Developer Guide
+[Official Wiki](http://droneoa.tuotuogzs.net/droneoa_gitbook) 
+
 ## Introduction
 Drones are used in an unprecedented number of ways since the advent, with millions of people using it for agriculture, journalism, photography, courier services, etc. Seeing this opportunity, we propose to develop some solutions that make the development of drone applications easier (Including drone obstacle avoidance development) and make the drones safer at a lower altitude.
 
@@ -37,6 +40,10 @@ Developers can choose either of the 2 strategies for integration that clearly di
   - Write the new feature direct in the main node **OR** write a receiver/mock component in the main node and communicate with an external algorithm node via a private ROS topic. 
   - Only write core features directly into the main node with access to all functionalities (including insecure ones).
   - For example, a new obstacle avoidance algorithm OR a new hardware interface falls into this category.
+
+To make the addon/APP work with **package manager** (which is a module that manage installation, sompilation and execution of APPs and packages), please develop based on this [app-template](https://gitlab.tuotuogzs.com/droneoa/app-template)
+
+Before starting development your first addon, we will recommend you to checkout the [Wiki](http://droneoa.tuotuogzs.net/droneoa_gitbook) and [example APPs in the shared project](https://gitlab.tuotuogzs.com/groups/droneoa/-/shared).
 
 ### Hardware
 
