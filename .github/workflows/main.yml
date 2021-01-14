@@ -1,0 +1,269 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run.
+# Triggers the workflow on push or pull request events
+# Allows you to run this workflow manually from the Actions tab
+on: [push, pull_request, workflow_dispatch]  
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # A single job called "capplint"
+  capplint:
+    # The type of runner that the job will run on
+    runs-on: shibohan/droneoa:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run before script
+        run: |
+          apt update >/dev/null && apt install -y git >/dev/null
+          git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
+          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          pip install cpplint --quiet
+          cd ./src/droneoa_ros
+          cpplint --linelength=120 --recursive .
+          cd ..
+          cd ..
+
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: ccache/
+          
+  pylint:
+    # The type of runner that the job will run on
+    runs-on: shibohan/droneoa:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run before script
+        run: |
+          apt update >/dev/null && apt install -y git >/dev/null
+          git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
+          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          pip install pylint --quiet
+          cd ./src/droneoa_ros
+          find . -type f -name "*.py" | xargs pylint
+          cd ..
+          cd ..
+
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: ccache/
+
+  catkinlint:
+    # The type of runner that the job will run on
+    runs-on: shibohan/droneoa:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run before script
+        run: |
+          apt update >/dev/null && apt install -y git >/dev/null
+          git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
+          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          apt-get install python-catkin-lint -y
+          catkin_lint -W0 .
+
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: ccache/
+          
+  haros:
+     # The type of runner that the job will run on
+    runs-on: shibohan/droneoa:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run before script
+        run: |
+          apt update >/dev/null && apt install -y git >/dev/null
+          git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
+          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          apt-get install libmagic-dev -y
+          pip install haros
+          pip install python-magic
+          pip install ply nose
+          pip install -e git+https://github.com/timtadh/pyflwor.git#egg=pyflwor
+          pip install radon
+          apt-get install cppcheck -y
+          apt-get install cccc -y
+          apt-get install cloc -y
+          cd ./src/droneoa_ros
+          mkdir ../../../report
+          haros --config ./haros_config.yaml analyse -d ../../../report
+          cd ..
+          cd ..
+        
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.2
+        with:
+          name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-$CI_COMMIT_SHORT_SHA-static-report"
+          path: ./report/
+          retention-days: 1 week
+      
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: ccache/
+          
+  catkin_make:
+    runs-on: shibohan/droneoa:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run before script
+        run: |
+          apt update >/dev/null && apt install -y git >/dev/null
+          git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
+          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          sh ./src/droneoa_ros/scripts/ci/prescript.sh
+          catkin_make
+
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: ccache/    
+          
+  catkin_tools:
+    # The type of runner that the job will run on
+    runs-on: shibohan/droneoa:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run before script
+        run: |
+          apt update >/dev/null && apt install -y git >/dev/null
+          git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
+          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          sh ./src/droneoa_ros/scripts/ci/prescript.sh
+          catkin build --summarize --no-status --force-color
+
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: ccache/      
+          
+  unittest:
+    # The type of runner that the job will run on
+    runs-on: shibohan/droneoa:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run before script
+        run: |
+          apt update >/dev/null && apt install -y git >/dev/null
+          git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
+          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          sh ./src/droneoa_ros/scripts/ci/prescript.sh
+          catkin_make
+          source ./devel/setup.sh
+          # - roscore &
+          rosrun droneoa_ros droneoa_ros_utiltest || true
+          rosrun droneoa_ros droneoa_ros_commandtest || true
+          sh ./src/droneoa_ros/scripts/ci/checkUnittestResult.sh
+
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: ccache/
+          
+  Release_Package:
+    # The type of runner that the job will run on
+    runs-on: shibohan/droneoa:latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run before script
+        run: |
+          apt update >/dev/null && apt install -y git >/dev/null
+          git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
+          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          cd ./src/droneoa_ros
+          mkdir ../../../release
+          cp -R ./scripts/dev_setup ../../../release/dev_setup
+          cp -R ./scripts/deploy_setup ../../../release/deploy_setup
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.2
+        with:
+          name: "$CI_COMMIT_BRANCH-release-scripts"
+          path: ./release/
+          retention-days: 4 week
+
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          # A list of files, directories, and wildcard patterns to cache and restore
+          path: ccache/
+          
+          
+        
+          
