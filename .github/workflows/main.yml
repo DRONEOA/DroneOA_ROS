@@ -24,7 +24,7 @@ jobs:
         run: |
           apt update >/dev/null && apt install -y git >/dev/null
           git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+          . ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
@@ -55,7 +55,7 @@ jobs:
         run: |
           apt update >/dev/null && apt install -y git >/dev/null
           git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+          . ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
@@ -86,7 +86,7 @@ jobs:
         run: |
           apt update >/dev/null && apt install -y git >/dev/null
           git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+          . ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
@@ -114,7 +114,7 @@ jobs:
         run: |
           apt update >/dev/null && apt install -y git >/dev/null
           git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+          . ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
@@ -160,7 +160,7 @@ jobs:
         run: |
           apt update >/dev/null && apt install -y git >/dev/null
           git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+          . ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
@@ -188,7 +188,7 @@ jobs:
         run: |
           apt update >/dev/null && apt install -y git >/dev/null
           git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+          . ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
@@ -216,14 +216,14 @@ jobs:
         run: |
           apt update >/dev/null && apt install -y git >/dev/null
           git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+          . ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
         run: |
           sh ./src/droneoa_ros/scripts/ci/prescript.sh
           catkin_make
-          source ./devel/setup.sh
+          . ./devel/setup.sh
           # - roscore &
           rosrun droneoa_ros droneoa_ros_utiltest || true
           rosrun droneoa_ros droneoa_ros_commandtest || true
@@ -249,7 +249,7 @@ jobs:
         run: |
           apt update >/dev/null && apt install -y git >/dev/null
           git clone https://gitlab.com/VictorLamoine/ros_gitlab_ci.git
-          source ros_gitlab_ci/gitlab-ci.bash >/dev/null
+          . ros_gitlab_ci/gitlab-ci.bash >/dev/null
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
