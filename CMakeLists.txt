@@ -213,6 +213,7 @@ add_dependencies(droneoa_ros_libgui droneoa_ros_generate_messages_cpp droneoa_ro
 add_library(droneoa_ros_libpm
   src/PackageManager/PMCommandParser.cpp
   src/Utils/GeneralUtils.cpp
+  src/Utils/JsonUtils.cpp
 )
 
 add_dependencies(droneoa_ros_libpm droneoa_ros_generate_messages_cpp)
@@ -275,6 +276,7 @@ target_link_libraries(droneoa_ros_package_manager
   droneoa_ros_libpm
   ${catkin_LIBRARIES}
   readline
+  jsoncpp
 )
 
 target_link_libraries(droneoa_ros_console_server

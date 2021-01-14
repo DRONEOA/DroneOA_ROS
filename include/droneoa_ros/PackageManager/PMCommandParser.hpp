@@ -28,6 +28,7 @@
 #include <map>
 
 #include <boost/thread.hpp>
+#include <droneoa_ros/Utils/JsonUtils.hpp>
 
 namespace PM {
 
@@ -41,7 +42,8 @@ struct PackageRecord {
     bool startWithMainNode;
     PackageRecord();
     explicit PackageRecord(std::string name);
-    std::string toString();
+    std::string toString(bool forJSON = false);
+    static PackageRecord fromString(std::string data);
 };
 
 class CommandParser {
@@ -61,6 +63,7 @@ class CommandParser {
     void printModuleNameHelp();
     int runPMScripts(std::string scriptName, std::vector<std::string> tokens);
     // File Operation
+    JSON::JsonUtils mJSONUtil;
     bool writeListToFile();
     bool readListFromFile();
     // Handle new input from Console Service

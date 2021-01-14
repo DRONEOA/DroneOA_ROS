@@ -5,3 +5,4 @@ build/*
 launch/unittest_result.txt
 launch/sitl/step1log.txt
 scripts/setup/RRTInstallDownload
+PackageList.json

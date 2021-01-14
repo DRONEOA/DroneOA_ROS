@@ -30,18 +30,39 @@
 
 namespace PM {
 
-PackageRecord::PackageRecord() : name(""), startWithMainNode(false) {}
+PackageRecord::PackageRecord() : name(""), branch("default"), startWithMainNode(false) {}
 
-PackageRecord::PackageRecord(std::string pktName) : name(pktName), startWithMainNode(false) {}
+PackageRecord::PackageRecord(std::string pktName) : name(pktName), branch("default"), startWithMainNode(false) {}
 
-std::string PackageRecord::toString() {
-    std::string result = name + " [" + branch + "]";
+std::string PackageRecord::toString(bool forJSON) {
+    // Format for print: name [branch] StartWithMain: ?
+    std::string result = name + " [" + branch + "]" + " StartWithMain: " + (startWithMainNode ? "true" : "false");
+    if (forJSON) {
+        // Format for JSON: name branch startWithMainNode url
+        result = name + " " + branch + " " + (startWithMainNode ? '1' : '0') + " " + url;
+    }
     return result;
 }
 
-CommandParser::CommandParser() {
+PackageRecord PackageRecord::fromString(std::string data) {
+    PackageRecord result;
+    std::vector<std::string> tokens = GeneralUtility::breakStringToTokens(data);
+    try {
+        result.name = tokens.at(0);
+        result.branch = tokens.at(1);
+        result.startWithMainNode = (tokens.at(2) == "0") ? false : true;
+        result.url = tokens.at(3);
+    } catch (const std::out_of_range& e) {
+        ROS_ERROR("[PM] Package Record missing entries!");
+    }
+    return result;
+}
+
+CommandParser::CommandParser() : mJSONUtil("") {
     isSkipVerify = false;
     DRONEOA_PATH = ros::package::getPath("droneoa_ros");
+    std::string mPMListPath = ros::package::getPath("droneoa_ros") + "/PackageList.json";
+    mJSONUtil = JSON::JsonUtils(mPMListPath);
     readListFromFile();
     thread_watch_command_ = new boost::thread(boost::bind(&CommandParser::watchCommandThread, this));
 }
@@ -371,12 +392,21 @@ int CommandParser::runPMScripts(std::string scriptName, std::vector<std::string>
 }
 
 bool CommandParser::writeListToFile() {
-    //! @todo json utility
     //! @todo option to start main node automatically on init
+    std::unordered_map<std::string, std::string> data;
+    for (auto item : mPackageList) {
+        data[item.first] = item.second.toString(true);
+    }
+    return mJSONUtil.writeMapToJson(data);
 }
 
 bool CommandParser::readListFromFile() {
-    //! @todo json utility
+    std::unordered_map<std::string, std::string> data = mJSONUtil.readJsonToMap();
+    mPackageList.clear();
+    for (auto item : data) {
+        mPackageList[item.first] = PackageRecord::fromString(item.second);
+    }
+    return true;
 }
 
 
