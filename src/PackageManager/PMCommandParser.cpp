@@ -61,8 +61,7 @@ PackageRecord PackageRecord::fromString(std::string data) {
 CommandParser::CommandParser() : mJSONUtil("") {
     isSkipVerify = false;
     DRONEOA_PATH = ros::package::getPath("droneoa_ros");
-    std::string mPMListPath = ros::package::getPath("droneoa_ros") + "/PackageList.json";
-    mJSONUtil = JSON::JsonUtils(mPMListPath);
+    mJSONUtil = JSON::JsonUtils(ros::package::getPath("droneoa_ros") + "/PackageList.json");
     readListFromFile();
     thread_watch_command_ = new boost::thread(boost::bind(&CommandParser::watchCommandThread, this));
 }
