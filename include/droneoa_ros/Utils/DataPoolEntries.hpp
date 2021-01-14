@@ -118,6 +118,9 @@ constexpr char DP_OAC_SWITCH[] = "OACSwitch";  /**< @brief Type: bool */
  * @brief Whether to check GPS fix before initialize
  */
 constexpr char CONF_SAFETY_GPS_FIX[] = "GPSFixSafetyCheck";  /**< @brief Type: bool */
+constexpr char CONF_VEHICLE_MAX_SPEED_HORIZONTAL[] =
+    "VehicleMaxSpeedHorizontal";  /**< @brief Type: int32_t (Recommending maximum frequency to be 1Hz) */
+constexpr char CONF_CHECK_CHANGES_FREQUENCY[] = "ConfigCheckChangesFrequency";  /**< @brief Type: float */
 
 /*******************************************************************************
  * Type Mapping For DataPool Data Entries
