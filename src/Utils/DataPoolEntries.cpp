@@ -53,7 +53,9 @@ std::map<std::string, std::type_index> DP_TYPE_MAP = {
  */
 std::map<std::string, std::type_index> CONF_TYPE_MAP = {
     //! @note Config Entries Start
-    {CONF_SAFETY_GPS_FIX, typeid(bool)}  // NOLINT
+    {CONF_SAFETY_GPS_FIX, typeid(bool)},  // NOLINT
+    {CONF_VEHICLE_MAX_SPEED_HORIZONTAL, typeid(int32_t)},  // NOLINT
+    {CONF_CHECK_CHANGES_FREQUENCY, typeid(float)}  // NOLINT
 };
 
 /*******************************************************************************
@@ -62,7 +64,9 @@ std::map<std::string, std::type_index> CONF_TYPE_MAP = {
 std::map<std::string, boost::any> DP_DEFAULT_VALUE_MAP = {
     {CONF_SAFETY_GPS_FIX, (bool)true},  // NOLINT
     {DP_OAC_SWITCH, (bool)false},  // NOLINT
-    {DP_ACTIVE_OAC_LEVEL, int32_t(0)},  // NOLINT
+    {DP_ACTIVE_OAC_LEVEL, (int32_t)0},  // NOLINT
+    {CONF_VEHICLE_MAX_SPEED_HORIZONTAL, (int32_t)12},  // NOLINT
+    {CONF_CHECK_CHANGES_FREQUENCY, (float)0.1}  // NOLINT
 };
 
 }  // namespace DP

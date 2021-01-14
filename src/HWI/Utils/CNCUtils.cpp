@@ -22,6 +22,7 @@
 #include <ros/ros.h>
 #include <droneoa_ros/HWI/Utils/CNCUtils.hpp>
 #include <droneoa_ros/PDN.hpp>
+#include <droneoa_ros/Utils/DataPool.hpp>
 
 namespace CNC {
 
@@ -78,9 +79,12 @@ float CNCUtility::validAltitudeCMD(float targetAltitude) {
 }
 
 float CNCUtility::validSpeedCMD(float targetSpeed) {
-    if (targetSpeed > VEHICLE_MAX_SPEED_HORIZONTAL) {
-        ROS_WARN("[CNC Utility] target speed exceed max allowed speed !");
-        return VEHICLE_MAX_SPEED_HORIZONTAL;
+    DP::DataPool msDP;
+    int32_t vehicleMaxSpeedHorizontal = boost::any_cast<int32_t>(
+            msDP.getDataAsInt(DP::CONF_VEHICLE_MAX_SPEED_HORIZONTAL));
+    if (targetSpeed > vehicleMaxSpeedHorizontal) {
+        ROS_WARN("[CNC Utility] target speed exceed max allowed speed %d m/s!", vehicleMaxSpeedHorizontal);
+        return vehicleMaxSpeedHorizontal;
     }
     return targetSpeed;
 }

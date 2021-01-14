@@ -1,0 +1,5 @@
+{
+   "GPSFixSafetyCheck" : "true",
+   "VehicleMaxSpeedHorizontal" : 12,
+   "ConfigCheckChangesFrequency" : 0.1
+}

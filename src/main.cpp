@@ -20,6 +20,7 @@
 #include <ros/ros.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <ros/package.h>
 
 #include <cstdlib>
 #include <iomanip>
@@ -35,6 +36,7 @@
 #include <droneoa_ros/GUI/Debug/CNCPopup.hpp>
 #include <droneoa_ros/GUI/Release/WebGUIServer.hpp>
 #include <droneoa_ros/Utils/DataPoolServer.hpp>
+#include <droneoa_ros/Utils/ConfChangedListener.hpp>
 
 // Terminate program on signal
 void sysSignalhandler(int signum) {
@@ -56,6 +58,10 @@ int main(int argc, char **argv) {
      * Sub Modules (Composited)
      */
     DP::DataPoolServer mDP;
+    std::string mDroneRosConfPath = ros::package::getPath("droneoa_ros") + "/Config.json";
+    ROS_INFO("[MAIN] config file path: %s", mDroneRosConfPath.c_str());
+    CONF::ConfChangedListener confChangedListener(mDroneRosConfPath);
+
     CNC::CNCArdupilot cnc(node, rate);
     cnc.initWatcherThread();
     Lidar::LidarYDLidar lidar(node, rate);

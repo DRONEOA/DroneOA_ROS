@@ -33,6 +33,8 @@ find_package( PCL REQUIRED )
 find_package( ompl REQUIRED )
 find_package( fcl REQUIRED )
 find_package( octomap REQUIRED )
+find_package( PkgConfig REQUIRED )
+pkg_check_modules( JSONCPP jsoncpp )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -148,6 +150,7 @@ include_directories(include
   ${ompl_INCLUDE_DIRS}
   ${OCTOMAP_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
+  ${JSONCPP_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -163,6 +166,8 @@ add_library(droneoa_ros_libutils
   src/HWI/Utils/LocalPoint.cpp
   src/HWI/Utils/Position3D.cpp
   src/HWI/Utils/LidarUtils.cpp
+  src/Utils/JsonUtils.cpp
+  src/Utils/ConfChangedListener.cpp
 )
 
 add_dependencies(droneoa_ros_libutils droneoa_ros_generate_messages_cpp)
@@ -263,6 +268,7 @@ target_link_libraries(droneoa_ros
   ${OMPL_LIBRARIES}
   ${OCTOMAP_LIBRARIES}
   readline
+  jsoncpp
 )
 
 target_link_libraries(droneoa_ros_package_manager
@@ -339,6 +345,9 @@ add_executable(droneoa_ros_utiltest
   src/HWI/Utils/GPSPoint.cpp
   src/HWI/Utils/LocalPoint.cpp
   src/HWI/Utils/Position3D.cpp
+  src/Utils/DataPool.cpp
+  src/Utils/DataPoolEntries.cpp
+  src/Utils/DataPoolSubscriber.cpp
 )
 
 target_link_libraries(droneoa_ros_utiltest ${catkin_LIBRARIES} gtest)
