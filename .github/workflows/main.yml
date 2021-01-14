@@ -12,7 +12,8 @@ jobs:
   # A single job called "capplint"
   capplint:
     # The type of runner that the job will run on
-    runs-on: shibohan/droneoa:latest
+    runs-on: ubuntu-latest
+    container: shibohan/droneoa:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -42,7 +43,8 @@ jobs:
           
   pylint:
     # The type of runner that the job will run on
-    runs-on: shibohan/droneoa:latest
+    runs-on: ubuntu-latest
+    container: shibohan/droneoa:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -72,7 +74,8 @@ jobs:
 
   catkinlint:
     # The type of runner that the job will run on
-    runs-on: shibohan/droneoa:latest
+    runs-on: ubuntu-latest
+    container: shibohan/droneoa:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -99,7 +102,8 @@ jobs:
           
   haros:
      # The type of runner that the job will run on
-    runs-on: shibohan/droneoa:latest
+    runs-on: ubuntu-latest
+    container: shibohan/droneoa:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -144,7 +148,8 @@ jobs:
           path: ccache/
           
   catkin_make:
-    runs-on: shibohan/droneoa:latest
+    runs-on: ubuntu-latest
+    container: shibohan/droneoa:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -171,7 +176,8 @@ jobs:
           
   catkin_tools:
     # The type of runner that the job will run on
-    runs-on: shibohan/droneoa:latest
+    runs-on: ubuntu-latest
+    container: shibohan/droneoa:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -198,7 +204,8 @@ jobs:
           
   unittest:
     # The type of runner that the job will run on
-    runs-on: shibohan/droneoa:latest
+    runs-on: ubuntu-latest
+    container: shibohan/droneoa:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -230,7 +237,8 @@ jobs:
           
   Release_Package:
     # The type of runner that the job will run on
-    runs-on: shibohan/droneoa:latest
+    runs-on: ubuntu-latest
+    container: shibohan/droneoa:latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
